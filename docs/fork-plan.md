@@ -62,6 +62,10 @@ Nobody has ever demonstrated a zero-retail boot ([SuperHackers discussion #266](
 
 **Stage 3+ — Evolve.** Rebrand fully (name TBD — War Powers still fits), reskin the in-game UI (WND + control-bar art), better assets, more content, periodic upstream rebases, and — when wanted — multiplayer via WebRTC (GeneralsXWeb's transport work as the reference).
 
+## 3a. Progress log
+
+**2026-08-21 — Stages 0–1 substantially complete in one session.** Engine built natively (GeneralsX `warpowers` branch, Apple Silicon, DXVK→MoltenVK), and the **zero-retail boot was achieved**: the engine runs its main loop indefinitely on 100% original data — ~70 authored INI/WND files, 3 generated placeholder assets, zero EA bytes ([engine-notes.md](engine-notes.md) has the distilled requirements; `data/` holds the dataset; ASSETS.md tracks provenance). Engine patches so far (all small, marked, some upstreamable): `-file`/`-buildmapcache` exposed in release, transition-handler null-guard, temporary UI null-bail + debug traces. Corrections to §2: `-map`/`-noaudio`/`-nomusic`/`-novideo` are debug-only in release builds (we patched `-file` in instead), and one real music file is mandatory (engine quits silently without it). Next: author a minimal map + object roster and enter it via `-file`.
+
 ## 4. Risk register
 
 | Risk | Note / mitigation |

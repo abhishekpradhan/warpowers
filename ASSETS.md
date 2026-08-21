@@ -10,4 +10,7 @@ Every asset file that enters the project gets a row **when it is added, not late
 
 | Path | What | Source | Author | License | Added | Notes |
 |---|---|---|---|---|---|---|
-| _(none yet)_ | | | | | | |
+| data/Data/Audio/Tracks/wp_ambient_01.mp3 | 12s ambient tone loop (A2+E3 sine mix) | Original — generated via ffmpeg | War Powers project | CC BY-NC 4.0 (ours) | 2026-08-21 | Satisfies the engine's ≥1-music-file boot gate |
+| data/Art/Textures/wp_water.tga | 32×32 solid deep-teal water texture | Original — generated | War Powers project | CC BY-NC 4.0 (ours) | 2026-08-21 | Placeholder for WaterSet blocks |
+| data/Art/Textures/wp_sky.tga | 32×32 solid hazy-sky texture | Original — generated | War Powers project | CC BY-NC 4.0 (ours) | 2026-08-21 | Placeholder for WaterSet blocks |
+| data/Data/** + data/Window/** | ~70 INI/WND text files | Original — authored against engine's documented formats | War Powers project | GPL-compatible (engine-config; WND structure derived from GeneralsX's GPL ExtrasMenu.wnd example) | 2026-08-21 | The zero-retail boot dataset |

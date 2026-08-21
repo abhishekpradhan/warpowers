@@ -1,0 +1,15 @@
+# Engine lives in its own repo (clone of GeneralsX with upstream remotes)
+/engine/
+
+# OS noise
+.DS_Store
+
+# Build / tooling output
+node_modules/
+dist/
+build/
+*.log
+
+# Local game data experiments that must never be committed
+# (zero-retail rule: no EA-derived bytes enter this repo, ever)
+/gamedata-local/

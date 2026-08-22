@@ -107,3 +107,7 @@ User direction after the first browser match: the objective is a **polished, mod
 - **Railway** reserved for future server-side needs (multiplayer signaling/relay — the merged web branch already carries a WebRTC UDP transport expecting a lobby service).
 - **Modal** not needed for hosting; candidate for future asset-pipeline compute.
 - No deployment of any kind until the web shell is a designed product (branded loading, error states, no debug chrome) and the EA-trademark window title is gone from every surface.
+
+## D014 — Creative round: the trio, names, VO direction (2026-08-22)
+
+User-selected from proposals: factions **Meridian Command** (superpower), **Jackal Front** (guerrilla), **Iron Pact** (industrial horde — designed now, built third); build order Meridian + Jackal first for maximum per-match asymmetry. VO direction: **processed radio barks** (short recorded phrases through a fixed comms chain — any voice usable, personality lives in the writing). Full taste document: [creative.md](creative.md) — palettes with colorblind-aware trims, naming rules (no EA/C&C names, ever), slice rosters, art spec (300–800 tri units, shared palette-atlas texturing, HLod subobject hierarchy), audio identity. First general powers after the slice: Precision Strike vs Tunnel Ambush.

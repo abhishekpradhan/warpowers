@@ -17,3 +17,4 @@ Every asset file that enters the project gets a row **when it is added, not late
 | data/Art/Textures/wp_box.tga + 13 placeholder TGAs | Generated placeholder textures | Original — generated | War Powers project | CC BY-SA 4.0 (ours) | 2026-08-21 | Terrain/water/effects/test stages |
 | data/Data/** + data/Window/** | ~70 INI/WND text files | Original — authored against engine's documented formats | War Powers project | GPL-compatible (engine-config; WND structure derived from GeneralsX's GPL ExtrasMenu.wnd example) | 2026-08-21 | The zero-retail boot dataset |
 | data/Data/Generals.str | UI strings (hand-authored) | Original — authored | War Powers project | CC BY-SA 4.0 (ours) | 2026-08-22 | Boot Slice UI text |
+| data/Fonts/LiberationSans-Regular.ttf | Liberation Sans 2.1.5 | Third-party — Red Hat/liberationfonts | github.com/liberationfonts | SIL OFL 1.1 (license file alongside) | 2026-08-22 | Web build UI font (fontconfig stub target) |

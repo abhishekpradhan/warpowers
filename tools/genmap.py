@@ -12,7 +12,7 @@ import sys
 
 # ---------- geometry ----------
 BORDER = 10
-PLAY = 64
+PLAY = 160
 W = H = PLAY + 2 * BORDER          # 84 vertices per axis, border included
 N = W * H                          # 7056
 FSW = (W + 7) // 8                 # cliff-state bitfield bytes per row
@@ -150,15 +150,15 @@ def obj(x, y, angle, name, pairs):
     return chunk("Object", 3, payload)
 
 objects_payload = b"".join([
-    obj(160.0, 160.0, 0.0, "WP_CommandCenter",
+    obj(400.0, 400.0, 0.0, "WP_CommandCenter",
         [("originalOwner", D_ASCII, "teamPlayerA")]),
-    obj(480.0, 480.0, 3.14159265, "WP_CommandCenter",
+    obj(1200.0, 1200.0, 3.14159265, "WP_CommandCenter",
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(160.0, 210.0, 0.0, "*Waypoints/Waypoint",
+    obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
-    obj(480.0, 430.0, 0.0, "*Waypoints/Waypoint",
+    obj(1200.0, 1150.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 2), ("waypointName", D_ASCII, "Player_2_Start")]),
-    obj(160.0, 160.0, 0.0, "*Waypoints/Waypoint",
+    obj(400.0, 400.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 3), ("waypointName", D_ASCII, "InitialCameraPosition")]),
 ])
 

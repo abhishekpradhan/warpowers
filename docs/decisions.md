@@ -99,3 +99,11 @@ Names the signature mechanic (your general powers) and the era's satire (the War
 **This choice is only possible because of D001.** We are 100% from scratch — no forked code — so no license obligation flows in from the EA lineage. (Had we forked it, GPL v3 + EA §7 additional terms would apply to the whole project and MIT would be off the table.) Code is MIT for maximum contributor-friendliness; assets are CC BY-NC 4.0 so the game stays playable and moddable by anyone but not resellable. LICENSE files land with the first scaffold.
 **Repo visibility:** private until the M1 vertical slice, then public with something playable to show.
 **Standing guardrail either way:** zero EA/GPL-lineage code ever enters this repo — one copied file would relicense the project out from under us.
+
+## D013 — Product bar: polished modern experience; private until polished (2026-08-22)
+
+User direction after the first browser match: the objective is a **polished, modern product** — every aspect judged by that bar: in-game UX, the web shell around the canvas, loading experience, performance, and hosting. Explicitly: **nothing is shared until it is polished** — this supersedes any "rough but public" reading of Stage 2; the go-public gate is now product quality, not feature completeness. Hosting accounts available: **Vercel, Railway, Modal** (open to alternatives). Working posture:
+- **Vercel** is the presumptive game host: static bundle + global CDN + brotli, per-commit preview deployments, and **Deployment Protection** so private iteration can still happen against a real CDN before anything is shareable. Custom domain at launch (D006 trademark/domain task).
+- **Railway** reserved for future server-side needs (multiplayer signaling/relay — the merged web branch already carries a WebRTC UDP transport expecting a lobby service).
+- **Modal** not needed for hosting; candidate for future asset-pipeline compute.
+- No deployment of any kind until the web shell is a designed product (branded loading, error states, no debug chrome) and the EA-trademark window title is gone from every surface.

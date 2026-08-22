@@ -1,6 +1,3 @@
-# Engine lives in its own repo (clone of GeneralsX with upstream remotes)
-/engine/
-
 # OS noise
 .DS_Store
 

@@ -1,7 +1,8 @@
 # War Powers — Brainstorm v0.1
 
+> ⚠️ **HISTORICAL DOCUMENT (greenfield era).** This was the v0.1 vision when the plan was a from-scratch TypeScript game. The project then pivoted to a **GPL engine fork** ([fork-plan.md](fork-plan.md), decisions D001-outcome/D009) — so this doc's §6 strategy, §7 stack, and all MIT/CC-BY-NC licensing statements are **superseded**. Still current and load-bearing: **§3 nostalgia checklist, §4 modern-experience goals, §5 landscape survey** — those define what we're building toward regardless of engine.
+>
 > A browser RTS that feels like 2003's *Command & Conquer: Generals / Zero Hour*, built like it's 2026.
-> This is a strawman for discussion — argue with everything. Last updated 2026-08-21.
 
 ---
 

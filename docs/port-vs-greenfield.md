@@ -1,5 +1,7 @@
 # Fork vs Greenfield — D001 Trade Study
 
+> ⚠️ **DECISION RECORD — outcome differs from §6's recommendation.** After this study, the user redirected toward a lighter project starting from the "ZH free in a browser" experience; the **fork path won** (see [fork-plan.md](fork-plan.md) and decisions.md D001-outcome). Licensing statements here predate D009 (uniform copyleft). Kept as the reasoning record.
+
 Triggered 2026-08-21 by a fair challenge: "no forking/copying EA code could be a very expensive decision." The v0.1 brainstorm dismissed the fork path too quickly. This is the honest re-examination, based on newly verified facts.
 
 ---

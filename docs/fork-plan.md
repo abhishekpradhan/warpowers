@@ -78,7 +78,7 @@ Nobody has ever demonstrated a zero-retail boot ([SuperHackers discussion #266](
 | Map authoring: Worldbuilder is Windows-only | SuperHackers weekly releases include it; run via CrossOver/VM, or author maps on a Windows box once |
 | Base is a solo, six-weeks-quiet, AI-assisted repo | We fork to own it; small patch set keeps upstream rebases feasible |
 | Retail copy needed for Stage 0 dev/reference | ~$5–20 (ZH / Ultimate Collection on Steam or EA App) — dev-machine only, never shipped |
-| License becomes GPL v3 + EA §7 terms | Fine for a free web game; our replacement assets stay ours (CC BY-NC) — revises D007 if confirmed |
+| License becomes GPL v3 + EA §7 terms | Confirmed and embraced (D009): uniform copyleft — GPL code, CC BY-SA assets |
 | Chrome 149–150 V8 GC crash documented by the base | Likely fixed in current Chrome; verify in Stage 0 |
 
 ## 5. Effect on earlier decisions (if this plan is confirmed)
@@ -88,5 +88,5 @@ Nobody has ever demonstrated a zero-retail boot ([SuperHackers discussion #266](
 - **D002** (SP skirmish first) — unchanged, and now nearly free.
 - **D003** (low-poly art) — unchanged; applies to our replacement W3D assets.
 - **D004** (fictional tone), **D006** (name) — unchanged.
-- **D007** — code side becomes GPL v3 + EA terms (forced); assets remain CC BY-NC; private-until-presentable still fine (GPL obligates source *when we distribute* — a private repo with a public game build means we publish source at that point; simplest is public repo from Stage 2).
+- **D007** — code side becomes GPL v3 + EA terms (forced); assets: CC BY-SA 4.0 as of **D009** (uniform copyleft; D009 also retired the "no GPL code copying" guardrail — ecosystem GPL code may be lifted with provenance). Private-until-presentable still fine (GPL obligates source *when we distribute* — repos go public when the first public build ships in Stage 2).
 - **New — D008: desktop-only.** No mobile/touch scope.

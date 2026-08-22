@@ -21,6 +21,14 @@ User-initiated license review confirmed: the project's engineering complexity co
 - **Guardrail update:** the greenfield-era rule "never copy EA/GPL-lineage code" is obsolete — the project *is* a GPL fork now, so GPL ecosystem code (TheSuperHackers, GeneralsX, other ports' engine layers) may be freely copied/adapted with commit-level provenance. **Concrete unlock for Stage 2:** GeneralsXWeb's audio fix and Generals-Web's HTTP-Range VFS can be lifted as code rather than reimplemented.
 - **Rules that remain (unchanged and load-bearing):** (1) no EA asset/data bytes ever ship — that's EA's redistribution right, not our license; (2) no EA trademarks in branding (§7 terms); (3) every asset gets a provenance ledger row.
 
+## D010 — Repo topology: engine backed up + submoduled; two repos stay (2026-08-21)
+
+User-initiated review of "not a fork / engine outside the repo." Findings and changes:
+- **Engine patches had no remote backup** (laptop-only) — fixed: full history refetched (~79MB pack), pushed to private **`warpowers-engine`** (standalone private repo, not a GitHub-button fork, since those are always public; visibility flips at Stage 2).
+- **`engine/` is now a git submodule of the workspace** — the workspace commit pins the exact engine SHA, so data ↔ engine-patch versions are always consistent, and `git clone --recursive` fetches the whole project. This delivers "engine in the repo" without sacrificing the thing two-repo protects: clean upstream rebasing onto GeneralsX/TheSuperHackers via real git remotes (the reason a vendored monorepo/subtree stays rejected — that's what made Generals-Web's upstream story painful).
+- Upstreamable generic fixes (Vulkan-env build bug, transition null-guard, shroud fallback, deploy same-inode SIGKILL) can be cherry-picked to a clean public fork for PRs before Stage 2 without revealing the project — optional, user's call.
+- Doc sweep same day: brainstorm.md and port-vs-greenfield.md banner-marked as historical/superseded records; D007 annotated; fork-plan and README licensing/status/layout statements refreshed.
+
 ## D002 — Single-player skirmish first (2026-08-21)
 
 First playable target is 1v1 vs scripted AI. Multiplayer lands in M3.
@@ -64,6 +72,8 @@ Names the signature mechanic (your general powers) and the era's satire (the War
 **Before public branding (M1):** formal trademark search + domain grab (warpowers.gg or similar).
 
 ## D007 — License: MIT code + CC BY-NC 4.0 assets; repo private until M1 (2026-08-21)
+
+> **Superseded in two steps:** the fork decision (D001 outcome) forced code to GPL v3 + EA §7 terms, and **D009** moved assets to **CC BY-SA 4.0**. "Private until playable" survives (now phrased as "private until Stage 2"). Original entry kept below for the record.
 
 **This choice is only possible because of D001.** We are 100% from scratch — no forked code — so no license obligation flows in from the EA lineage. (Had we forked it, GPL v3 + EA §7 additional terms would apply to the whole project and MIT would be off the table.) Code is MIT for maximum contributor-friendliness; assets are CC BY-NC 4.0 so the game stays playable and moddable by anyone but not resellable. LICENSE files land with the first scaffold.
 **Repo visibility:** private until the M1 vertical slice, then public with something playable to show.

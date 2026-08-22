@@ -65,16 +65,51 @@ def chunk(label, version, payload):
     return struct.pack("<IHi", toc.id(label), version, len(payload)) + payload
 
 # ---------- HeightMapData v4 ----------
+# Gentle dunes from layered sines; base zones flattened with a smooth falloff
+# so structures sit level and pathing stays trivial there.
+import math
+
+BASES = [(400.0, 400.0), (1200.0, 1200.0)]   # world coords
+FLAT_R, FLAT_FADE = 190.0, 130.0             # flat radius, blend band
+
+def dune_height(wx, wy):
+    d = (math.sin(wx * 0.0071 + 1.3) + math.sin(wy * 0.0063 + 4.1)
+         + 0.6 * math.sin((wx + wy) * 0.0047 + 2.2)
+         + 0.5 * math.sin((wx * 0.9 - wy) * 0.0102 + 0.7))
+    h = HEIGHT_BYTE + d * 2.2                # ~±5.7 height bytes = ±3.6 world z
+    near = min(((wx - bx) ** 2 + (wy - by) ** 2) ** 0.5 for bx, by in BASES)
+    if near < FLAT_R:
+        return float(HEIGHT_BYTE)
+    if near < FLAT_R + FLAT_FADE:
+        t = (near - FLAT_R) / FLAT_FADE
+        t = t * t * (3 - 2 * t)
+        return HEIGHT_BYTE + (h - HEIGHT_BYTE) * t
+    return h
+
+height_bytes = bytearray()
+for cy in range(H):
+    for cx in range(W):
+        wx, wy = (cx - BORDER) * 10.0, (cy - BORDER) * 10.0  # MAP_XY_FACTOR
+        height_bytes.append(max(0, min(255, int(round(dune_height(wx, wy))))))
 height_payload = struct.pack("<iiii", W, H, BORDER, 1)      # width,height,border,numBoundaries
-height_payload += struct.pack("<ii", PLAY, PLAY)            # boundary[0] -> world extent 640x640
-height_payload += struct.pack("<i", N) + bytes([HEIGHT_BYTE]) * N
+height_payload += struct.pack("<ii", PLAY, PLAY)            # boundary[0]
+height_payload += struct.pack("<i", N) + bytes(height_bytes)
 
 # ---------- BlendTileData v8 ----------
+# WPGround is a 4x4 grid of 64px tiles (16 variants); each 2x2 cell block
+# shows one full tile, chosen by a position hash to break repetition.
+NUM_TILES, TILE_GRID_W = 16, 4
+
+def tile_pick(bx, by):
+    h = (bx * 73856093) ^ (by * 19349663)
+    h = (h ^ (h >> 13)) * 0x5BD1E995 & 0xFFFFFFFF
+    return (h >> 8) % NUM_TILES
+
 tile_ndx = bytearray()
 for y in range(H):
     for x in range(W):
-        # single texture class, firstTile 0: ndx = (tile<<2) + 2*(y&1) + (x&1)
-        tile_ndx += struct.pack("<h", 2 * (y & 1) + (x & 1))
+        tile = tile_pick(x // 2, y // 2)
+        tile_ndx += struct.pack("<h", (tile << 2) + 2 * (y & 1) + (x & 1))
 zeros16 = struct.pack("<h", 0) * N
 blend_payload = struct.pack("<i", N)
 blend_payload += bytes(tile_ndx)          # tileNdxes
@@ -82,8 +117,8 @@ blend_payload += zeros16                  # blendTileNdxes
 blend_payload += zeros16                  # extraBlendTileNdxes
 blend_payload += zeros16                  # cliffInfoNdxes
 blend_payload += bytes(H * FSW)           # cellCliffState
-blend_payload += struct.pack("<iiii", 1, 1, 1, 1)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
-blend_payload += struct.pack("<iiii", 0, 1, 1, 0) + ascii_s("WPGround")  # first,num,width,legacyGDF,name
+blend_payload += struct.pack("<iiii", NUM_TILES, 1, 1, 1)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
+blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s("WPGround")  # first,num,width,legacyGDF,name
 blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
 
 # ---------- WorldInfo v1 ----------
@@ -166,9 +201,24 @@ objects_payload = b"".join([
 ])
 
 # ---------- GlobalLighting v3 ----------
-light = struct.pack("<9f", 0.3, 0.3, 0.3, 0.7, 0.7, 0.7, -0.5, 0.5, -0.75)
+# Warm desert key + faint cool fill. Slot order per TOD:
+# TL[0], TOL[0], TOL[1], TOL[2], TL[1], TL[2] (terrain / object lights).
+def L(amb, dif, d):
+    return struct.pack("<9f", *amb, *dif, *d)
+
+SUN = (-0.55, 0.40, -0.73)
+FILL = (0.65, -0.35, -0.67)
+ZERO = L((0, 0, 0), (0, 0, 0), (0, 0, -1))
+tod_lights = (
+    L((0.36, 0.35, 0.36), (0.92, 0.84, 0.68), SUN)      # terrain key
+    + L((0.40, 0.39, 0.41), (1.00, 0.93, 0.78), SUN)    # object key
+    + L((0.00, 0.00, 0.00), (0.14, 0.16, 0.20), FILL)   # object cool fill
+    + ZERO                                               # object light 3
+    + L((0.00, 0.00, 0.00), (0.10, 0.12, 0.16), FILL)   # terrain fill
+    + ZERO                                               # terrain light 3
+)
 lighting_payload = struct.pack("<i", 2)  # AFTERNOON
-lighting_payload += (light * 6) * 4      # per TOD: TL[0], TOL[0], TOL[1], TOL[2], TL[1], TL[2]
+lighting_payload += tod_lights * 4
 
 # ---------- PlayerScriptsList (win/lose via named CCs) ----------
 # Engine readers: ScriptList::ParseScriptsDataChunk et al. (Scripts.cpp).

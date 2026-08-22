@@ -121,8 +121,8 @@ def mesh_chunk(model, part_name, color, geo):
     norm_b = b"".join(struct.pack("<3f", *n) for n in norms)
     tri_b = b"".join(struct.pack("<3II3ff", a, b, c, 0, *n, d) for a, b, c, n, d in tris)
 
-    vmat_info = (struct.pack("<I", 0) + rgb(scale3(color, 0.55)) + rgb(color)
-                 + rgb((0, 0, 0)) + rgb(scale3(color, 0.18))
+    vmat_info = (struct.pack("<I", 0) + rgb(scale3(color, 0.50)) + rgb(color)
+                 + rgb((0, 0, 0)) + rgb(scale3(color, 0.07))
                  + struct.pack("<3f", 1.0, 1.0, 0.0))
     vmat = chunk(VERTEX_MATERIAL,
                  chunk(VERTEX_MATERIAL_NAME, b"Default\0")
@@ -169,14 +169,18 @@ MODELS = {
         part("BARREL", "GUN", 7.5, 0, 8.0, 11, 1.3, 1.3),
         part("CANOPY", "GOLD", -3.2, 0, 10.0, 3.2, 3.2, 1.1, tx=0.7, ty=0.7),
     ],
-    # Meridian Command Center: terraced white block, steel tower, gold band.
+    # Meridian Command Center: terraced white block, steel tower, gold cornice
+    # ring (four thin strips along the roof edge, not a solid gold roof).
     "MERCC01": [
         part("PODIUM", "STEEL", 0, 0, 0, 40, 40, 7, tx=0.92, ty=0.92),
         part("BLOCK", "WHITE", 0, 0, 7, 32, 32, 13, tx=0.85, ty=0.85),
-        part("BAND",  "GOLD", 0, 0, 20, 24, 24, 1.6),
-        part("TOWER", "STEEL", 5, 5, 21.6, 11, 11, 9, tx=0.85, ty=0.85),
-        part("MAST",  "GRAPHITE", 5, 5, 30.6, 1.6, 1.6, 8),
-        part("TIP",   "GOLD", 5, 5, 38.6, 2.4, 2.4, 1.4),
+        part("CORN_N", "GOLD", 0, 13.0, 19.6, 28.6, 1.3, 1.5),
+        part("CORN_S", "GOLD", 0, -13.0, 19.6, 28.6, 1.3, 1.5),
+        part("CORN_E", "GOLD", 13.0, 0, 19.6, 1.3, 26.0, 1.5),
+        part("CORN_W", "GOLD", -13.0, 0, 19.6, 1.3, 26.0, 1.5),
+        part("TOWER", "STEEL", 5, 5, 20, 11, 11, 9, tx=0.85, ty=0.85),
+        part("MAST",  "GRAPHITE", 5, 5, 29, 1.6, 1.6, 8),
+        part("TIP",   "GOLD", 5, 5, 37, 2.4, 2.4, 1.4),
         part("PAD",   "GRAPHITE", -11, -10, 7, 14, 16, 1.8),
     ],
     # Jackal Mongrel tank: rusty mismatched hull, off-center sand turret,

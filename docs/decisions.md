@@ -14,6 +14,13 @@ From-scratch web-native game; EA's GPL source is read for understanding only, ne
 
 No mobile or touch scope. User decision; simplifies input, UI, and testing matrices across all paths.
 
+## D009 — Uniform copyleft; greenfield-era code guardrail retired (2026-08-21)
+
+User-initiated license review confirmed: the project's engineering complexity comes from EA's asset-redistribution restrictions (immovable under any license we pick), not from our license choices — no switch reduces the current work. Changes made:
+- **Assets: CC BY-SA 4.0** (was CC BY-NC). One story project-wide: GPL v3 code + share-alike assets, OpenRA/0 A.D.-style. Anyone may reuse or sell, but must keep it open and credit.
+- **Guardrail update:** the greenfield-era rule "never copy EA/GPL-lineage code" is obsolete — the project *is* a GPL fork now, so GPL ecosystem code (TheSuperHackers, GeneralsX, other ports' engine layers) may be freely copied/adapted with commit-level provenance. **Concrete unlock for Stage 2:** GeneralsXWeb's audio fix and Generals-Web's HTTP-Range VFS can be lifted as code rather than reimplemented.
+- **Rules that remain (unchanged and load-bearing):** (1) no EA asset/data bytes ever ship — that's EA's redistribution right, not our license; (2) no EA trademarks in branding (§7 terms); (3) every asset gets a provenance ledger row.
+
 ## D002 — Single-player skirmish first (2026-08-21)
 
 First playable target is 1v1 vs scripted AI. Multiplayer lands in M3.

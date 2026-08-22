@@ -154,7 +154,7 @@ objects_payload = b"".join([
     obj(400.0, 400.0, 0.0, "WP_CommandCenter",
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),
-    obj(1200.0, 1200.0, 3.14159265, "WP_CommandCenter",
+    obj(1200.0, 1200.0, 3.14159265, "WPJ_CommandPost",
         [("originalOwner", D_ASCII, "teamPlayerB"),
          ("objectName", D_ASCII, "EnemyCC")]),
     obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",

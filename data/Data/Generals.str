@@ -4,12 +4,16 @@ WP:CommandCenter
 "Command Center"
 END
 
-WP:Tank
-"Tank"
+WP:Vector
+"Vector"
+END
+
+WP:CommandPost
+"Command Post"
 END
 
 WP:BuildTank
-"Build Tank"
+"Build Vector"
 END
 
 GUI:ControlBarMoneyDisplay

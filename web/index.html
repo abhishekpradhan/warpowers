@@ -2,60 +2,292 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>War Powers</title>
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%230d1117"/><path d="M32 10 L37 26 L54 26 L40 36 L45 52 L32 42 L19 52 L24 36 L10 26 L27 26 Z" fill="%23d7b45a"/></svg>'>
   <style>
-    html, body { margin: 0; background: #101116; color: #cfd2dd;
-                 font: 12px/1.45 ui-monospace, monospace; }
-    #status { position: sticky; top: 0; background: #1a1c26; padding: 8px 12px;
-              border-bottom: 1px solid #2a2d3a; font-weight: 600; z-index: 2; }
-    #stage { display: flex; justify-content: center; padding: 10px; background: #000; }
-    canvas { width: 1024px; height: 768px; background: #000; border: 1px solid #2a2d3a; }
-    #log { height: 220px; overflow-y: auto; padding: 10px 12px; white-space: pre-wrap;
-           word-break: break-all; border-top: 1px solid #2a2d3a; background: #14151d; }
+    :root {
+      --bg: #0a0c10;
+      --panel: #10141b;
+      --line: #232a35;
+      --text: #c7ceda;
+      --text-dim: #6b7686;
+      --accent: #d7b45a;
+      --danger: #e05252;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(120% 90% at 50% 0%, #10141c 0%, var(--bg) 55%);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .label {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ---- stage: canvas fills the viewport, letterboxed 4:3 ---- */
+    #stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      position: relative;
+      padding: 20px;
+    }
+    #frame {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      max-width: min(100%, calc((100vh - 40px) * 4 / 3));
+      max-height: 100%;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+    }
+    #fsBtn {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 34px; height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(13,17,23,.72);
+      color: var(--text-dim);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .18s ease, color .18s ease;
+      z-index: 5;
+    }
+    #frame:hover #fsBtn { opacity: 1; }
+    #fsBtn:hover { color: var(--text); }
+
+    /* ---- loading / error overlay ---- */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      background: linear-gradient(180deg, rgba(10,12,16,.97), rgba(10,12,16,.99));
+      transition: opacity .5s ease;
+      z-index: 10;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+    .wordmark {
+      font-size: clamp(26px, 4.4vw, 40px);
+      font-weight: 750;
+      letter-spacing: .34em;
+      margin-right: -.34em; /* optical centering of tracked caps */
+      color: #e8ebf0;
+    }
+    .wordmark .accent { color: var(--accent); }
+    #meter {
+      width: min(340px, 70%);
+      height: 3px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #meterFill {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width .18s ease;
+    }
+    #phase { min-height: 1.2em; }
+    #errorBox { display: none; text-align: center; max-width: 420px; padding: 0 16px; }
+    #errorBox p { color: var(--danger); margin: 0 0 14px; font-size: 14px; }
+    #errorBox button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      padding: 8px 22px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #errorBox button:hover { border-color: var(--text-dim); }
+
+    /* ---- debug log (only with ?debug=1) ---- */
+    #log {
+      display: none;
+      height: 180px;
+      overflow-y: auto;
+      padding: 10px 14px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      font: 11px/1.5 ui-monospace, Menlo, monospace;
+      color: var(--text-dim);
+    }
+    body.debug #log { display: block; }
   </style>
 </head>
 <body>
-  <div id="status">war powers: fetching game data…</div>
-  <div id="stage"><canvas id="canvas" width="1024" height="768" oncontextmenu="event.preventDefault()"></canvas></div>
+  <div id="stage">
+    <div id="frame">
+      <canvas id="canvas" width="1024" height="768" oncontextmenu="event.preventDefault()"></canvas>
+      <button id="fsBtn" title="Fullscreen">⛶</button>
+      <div id="overlay">
+        <div class="wordmark">WAR<span class="accent">POWERS</span></div>
+        <div id="meter"><div id="meterFill"></div></div>
+        <div id="phase" class="label">Contacting command&hellip;</div>
+        <div id="errorBox">
+          <p id="errorMsg"></p>
+          <button onclick="location.reload()">Reload</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="log"></div>
+
   <script>
-    var statusEl = document.getElementById('status');
+    'use strict';
+    var params = new URLSearchParams(location.search);
+    var DEBUG = params.get('debug') === '1';
+    if (DEBUG) document.body.classList.add('debug');
+
     var logEl = document.getElementById('log');
-    var lineCount = 0;
-    var pinned = true;
-    logEl.addEventListener('scroll', function() {
-      pinned = logEl.scrollTop + logEl.clientHeight >= logEl.scrollHeight - 8;
-    });
     function log(t) {
-      lineCount++;
-      if (lineCount < 6000) {
-        logEl.textContent += t + '\n';
-        if (pinned) logEl.scrollTop = logEl.scrollHeight;
-      }
       console.log(t);
-      statusEl.textContent = 'war powers [' + lineCount + ']: ' + String(t).slice(0, 160);
+      if (DEBUG) {
+        logEl.textContent += t + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+
+    // ---- loading overlay state ----
+    var phaseEl = document.getElementById('phase');
+    var fillEl = document.getElementById('meterFill');
+    var overlayEl = document.getElementById('overlay');
+    var meterEl = document.getElementById('meter');
+    var failed = false;
+    var totals = { engine: 0, data: 0 };
+    var loaded = { engine: 0, data: 0 };
+    function setPhase(t) { if (!failed) phaseEl.textContent = t; }
+    function paint() {
+      var total = totals.engine + totals.data;
+      var done = loaded.engine + loaded.data;
+      if (total > 0) fillEl.style.width = Math.min(100, Math.round(done / total * 100)) + '%';
+    }
+    function fail(msg) {
+      failed = true;
+      log('FAILED: ' + msg);
+      meterEl.style.display = 'none';
+      phaseEl.style.display = 'none';
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorBox').style.display = 'block';
     }
     window.addEventListener('error', function(e) {
       log('UNCAUGHT: ' + (e.error && e.error.stack ? e.error.stack : e.message));
     });
-    window.addEventListener('unhandledrejection', function(e) {
-      log('REJECTION: ' + e.reason + '\n' + (e.reason && e.reason.stack ? e.reason.stack : ''));
+
+    // ---- fullscreen ----
+    document.getElementById('fsBtn').addEventListener('click', function() {
+      var frame = document.getElementById('frame');
+      if (document.fullscreenElement) document.exitFullscreen();
+      else frame.requestFullscreen && frame.requestFullscreen();
+    });
+
+    // ---- byte-accurate fetch ----
+    function fetchBytes(url, onBytes) {
+      return fetch(url).then(function(r) {
+        if (!r.ok) throw new Error(url.split('?')[0] + ': HTTP ' + r.status);
+        if (!r.body || !onBytes) return r.arrayBuffer().then(function(b) {
+          if (onBytes) onBytes(b.byteLength);
+          return new Uint8Array(b);
+        });
+        var reader = r.body.getReader();
+        var chunks = [], size = 0;
+        function pump() {
+          return reader.read().then(function(step) {
+            if (step.done) {
+              var out = new Uint8Array(size), off = 0;
+              chunks.forEach(function(c) { out.set(c, off); off += c.length; });
+              return out;
+            }
+            chunks.push(step.value);
+            size += step.value.length;
+            onBytes(step.value.length);
+            return pump();
+          });
+        }
+        return pump();
+      });
+    }
+
+    // Manifest first, so the meter knows the full byte budget up front.
+    var bust = 'v=' + Date.now();
+    var manifestReady = fetchBytes('gamedata/manifest.json?' + bust, null).then(function(bytes) {
+      var files = JSON.parse(new TextDecoder().decode(bytes));
+      totals.data = files.reduce(function(a, e) { return a + e.s; }, 0) + 420000 /* font */;
+      paint();
+      return files;
     });
 
     var Module = {
       canvas: document.getElementById('canvas'),
-      locateFile: function(path) { return path + '?v=' + Date.now(); },
-      // Boot straight into the Boot Slice match. Extra args via ?args=a,b
+      locateFile: function(path) { return path + '?' + bust; },
       arguments: ['-win', '-noshellmap', '-file', 'Maps/WPTest.map'].concat(
-        (new URLSearchParams(location.search).get('args') || '')
-          .split(',').filter(function(a) { return a.length > 0; })),
+        (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; })),
       print: log,
       printErr: log,
-      onAbort: function(w) { log('ABORT: ' + w); },
+      onAbort: function(w) { fail('The engine stopped unexpectedly. (' + w + ')'); },
+      instantiateWasm: function(imports, cb) {
+        setPhase('Downloading engine…');
+        fetch('GeneralsXZH.wasm?' + bust, { method: 'HEAD' }).then(function(r) {
+          totals.engine = parseInt(r.headers.get('Content-Length') || '11000000', 10);
+          paint();
+          return fetchBytes('GeneralsXZH.wasm?' + bust, function(n) { loaded.engine += n; paint(); });
+        }).then(function(bytes) {
+          setPhase('Preparing engine…');
+          return WebAssembly.instantiate(bytes, imports);
+        }).then(function(result) {
+          cb(result.instance, result.module);
+        }).catch(function(err) { fail('Engine download failed. ' + err.message); });
+        return {};
+      },
+      onEngineRunning: function() {
+        // First main-loop tick: the match is live.
+        overlayEl.classList.add('hidden');
+      },
+      onGameExit: function() {
+        failed = false;
+        meterEl.style.display = 'none';
+        overlayEl.classList.remove('hidden');
+        phaseEl.style.display = 'block';
+        setPhase('Match complete');
+      },
       preRun: [function() {
+        setPhase('Staging battlefield data…');
         ENV.CNC_GENERALS_ZH_PATH = '/game';
         ENV.CNC_GENERALS_PATH = '/game-base';
         ENV.HOME = '/home/web_user';
+        if (DEBUG) ENV.IG_TRACE = '1';
         FS.mkdir('/game');
         FS.mkdir('/game-base');
         FS.mkdir('/fonts');
@@ -67,40 +299,40 @@
         FS.symlink('/game/Data', '/game/data');
         var userDir = '/home/web_user/.local/share/GeneralsX/GeneralsZH';
         FS.mkdirTree(userDir);
+        var hud = DEBUG ? '8' : '0';
         FS.writeFile(userDir + '/Options.ini',
           'StaticGameLOD = Low\n' +
           'UseShadowVolumes = no\n' +
           'UseShadowDecals = no\n' +
-          'Resolution = 1024 768\n');
+          'Resolution = 1024 768\n' +
+          'RenderFpsFontSize = ' + hud + '\n' +
+          'SystemTimeFontSize = ' + hud + '\n' +
+          'GameTimeFontSize = ' + hud + '\n');
         addRunDependency('gamedata');
-        var staged = 0, total = 0;
-        fetch('gamedata/manifest.json').then(function(r) {
-          if (!r.ok) throw new Error('manifest: HTTP ' + r.status);
-          return r.json();
-        }).then(function(files) {
-          total = files.length + 1;
-          function done() { if (++staged === total) {
-            log('[staged] ' + total + ' files; starting engine');
-            removeRunDependency('gamedata');
-          } }
-          // the wasm fontconfig stub resolves every font query here
-          fetch('fonts/default.ttf').then(function(r) { return r.arrayBuffer(); })
-            .then(function(buf) {
-              FS.writeFile('/fonts/default.ttf', new Uint8Array(buf));
-              done();
-            });
-          files.forEach(function(rel) {
-            fetch('gamedata/' + rel).then(function(r) {
-              if (!r.ok) throw new Error(rel + ': HTTP ' + r.status);
-              return r.arrayBuffer();
-            }).then(function(buf) {
-              var dest = '/game/' + rel;
-              FS.mkdirTree(dest.substring(0, dest.lastIndexOf('/')));
-              FS.writeFile(dest, new Uint8Array(buf));
-              done();
-            }).catch(function(err) { log('[stage failed] ' + err); done(); });
+        manifestReady.then(function(files) {
+          var pending = files.length + 1;
+          function done() {
+            if (--pending === 0) {
+              setPhase('Starting engine…');
+              // Let the overlay paint before main()'s synchronous load
+              // freezes the tab for a moment.
+              setTimeout(function() { removeRunDependency('gamedata'); }, 30);
+            }
+          }
+          fetchBytes('fonts/default.ttf?' + bust, function(n) { loaded.data += n; paint(); })
+            .then(function(bytes) { FS.writeFile('/fonts/default.ttf', bytes); done(); })
+            .catch(function(err) { fail('Font staging failed. ' + err.message); });
+          files.forEach(function(entry) {
+            fetchBytes('gamedata/' + entry.p + '?' + bust, function(n) { loaded.data += n; paint(); })
+              .then(function(bytes) {
+                var dest = '/game/' + entry.p;
+                FS.mkdirTree(dest.substring(0, dest.lastIndexOf('/')));
+                FS.writeFile(dest, bytes);
+                done();
+              })
+              .catch(function(err) { fail('Data staging failed. ' + err.message); });
           });
-        }).catch(function(err) { log('[manifest failed] ' + err); });
+        }).catch(function(err) { fail('Could not reach the data manifest. ' + err.message); });
       }]
     };
   </script>
@@ -108,6 +340,10 @@
     (function() {
       var s = document.createElement('script');
       s.src = 'GeneralsXZH.js?v=' + Date.now();
+      s.onerror = function() {
+        document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
+        document.getElementById('errorBox').style.display = 'block';
+      };
       document.body.appendChild(s);
     })();
   </script>

@@ -32,7 +32,7 @@ for f in ["GeneralsXZH.js", "GeneralsXZH.wasm"]:
         sys.exit(f"missing build artifact: {src} — build the wasm target first")
     shutil.copy2(src, os.path.join(STAGE, f))
 
-# game data
+# game data — manifest entries carry byte sizes for byte-accurate progress
 manifest = []
 dst_root = os.path.join(STAGE, "gamedata")
 shutil.rmtree(dst_root, ignore_errors=True)
@@ -46,9 +46,10 @@ for d in DATA_DIRS:
             dst = os.path.join(dst_root, rel)
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy2(full, dst)
-            manifest.append(rel)
+            manifest.append({"p": rel, "s": os.path.getsize(full)})
+manifest.sort(key=lambda e: e["p"])
 with open(os.path.join(dst_root, "manifest.json"), "w") as f:
-    json.dump(sorted(manifest), f, indent=0)
+    json.dump(manifest, f, indent=0)
 
 # font for the wasm fontconfig stub
 os.makedirs(os.path.join(STAGE, "fonts"), exist_ok=True)

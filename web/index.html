@@ -59,6 +59,12 @@
         FS.mkdir('/game');
         FS.mkdir('/game-base');
         FS.mkdir('/fonts');
+        // Loose-file asset root = process cwd (native runs cd into the game
+        // dir; the .big resolver only matters for archive datasets).
+        FS.chdir('/game');
+        // MEMFS is case-sensitive; macOS wasn't. The engine asks for
+        // lowercase 'data/Generals.str' & friends — alias it.
+        FS.symlink('/game/Data', '/game/data');
         var userDir = '/home/web_user/.local/share/GeneralsX/GeneralsZH';
         FS.mkdirTree(userDir);
         FS.writeFile(userDir + '/Options.ini',

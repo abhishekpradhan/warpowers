@@ -113,7 +113,7 @@ def build_w3d(model, hx, hy, h, ambient, diffuse, emissive):
 MODELS = [
     # name, half-x, half-y, height, ambient, diffuse, emissive
     ("WPCC01", 20, 20, 30, (150, 155, 165), (200, 205, 215), (45, 45, 50)),
-    ("WPTANK01", 11, 7, 7, (120, 130, 115), (170, 180, 160), (40, 42, 38)),
+    ("WPTANK01", 11, 7, 7, (60, 70, 45), (95, 110, 70), (18, 22, 14)),
 ]
 
 out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")

@@ -139,7 +139,8 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerA"),
 sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerB"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, True)])
-# no nested PlayerScriptsList
+# nested PlayerScriptsList appended below (win/lose scripts), after its
+# helper definitions
 
 # ---------- ObjectsList v3 with nested Object v3 chunks ----------
 def obj(x, y, angle, name, pairs):
@@ -151,9 +152,11 @@ def obj(x, y, angle, name, pairs):
 
 objects_payload = b"".join([
     obj(400.0, 400.0, 0.0, "WP_CommandCenter",
-        [("originalOwner", D_ASCII, "teamPlayerA")]),
+        [("originalOwner", D_ASCII, "teamPlayerA"),
+         ("objectName", D_ASCII, "PlayerCC")]),
     obj(1200.0, 1200.0, 3.14159265, "WP_CommandCenter",
-        [("originalOwner", D_ASCII, "teamPlayerB")]),
+        [("originalOwner", D_ASCII, "teamPlayerB"),
+         ("objectName", D_ASCII, "EnemyCC")]),
     obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
     obj(1200.0, 1150.0, 0.0, "*Waypoints/Waypoint",
@@ -166,6 +169,55 @@ objects_payload = b"".join([
 light = struct.pack("<9f", 0.3, 0.3, 0.3, 0.7, 0.7, 0.7, -0.5, 0.5, -0.75)
 lighting_payload = struct.pack("<i", 2)  # AFTERNOON
 lighting_payload += (light * 6) * 4      # per TOD: TL[0], TOL[0], TOL[1], TOL[2], TL[1], TL[2]
+
+# ---------- PlayerScriptsList (win/lose via named CCs) ----------
+# Engine readers: ScriptList::ParseScriptsDataChunk et al. (Scripts.cpp).
+# The map reader only accepts this chunk NESTED inside SidesList (registered
+# with the SidesList label scope in SidesList::ParseSidesDataChunk); the
+# ScriptList sub-chunk order maps 1:1 to side order.
+# Condition/action chunks are v4/v2 so the engine rematches the type by its
+# internal-name key (we write ordinal 0); parameter type ordinals are fixed
+# by enum Parameter::ParameterType (UNIT = 14).
+P_UNIT = 14
+
+def namekey(name):
+    return struct.pack("<i", (toc.id(name) << 8) | D_ASCII)
+
+def parameter(ptype, i=0, r=0.0, s=""):
+    return struct.pack("<iif", ptype, i, r) + ascii_s(s)
+
+def condition(internal_name, params):
+    payload = struct.pack("<i", 0) + namekey(internal_name)
+    payload += struct.pack("<i", len(params)) + b"".join(params)
+    return chunk("Condition", 4, payload)
+
+def action(internal_name, params=()):
+    payload = struct.pack("<i", 0) + namekey(internal_name)
+    payload += struct.pack("<i", len(params)) + b"".join(params)
+    return chunk("ScriptAction", 2, payload)
+
+def script(name, conditions, actions):
+    payload = ascii_s(name) + ascii_s("") * 3          # name + 3 comments
+    payload += bytes([1, 1, 1, 1, 1, 0])               # active, oneShot, easy, normal, hard, subroutine
+    payload += struct.pack("<i", 0)                    # delayEvaluationSeconds
+    payload += chunk("OrCondition", 1, b"".join(conditions))
+    payload += b"".join(actions)
+    return chunk("Script", 2, payload)
+
+scripts_a = (
+    script("WP_Win",
+           [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="EnemyCC")])],
+           [action("VICTORY")])
+    + script("WP_Lose",
+             [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="PlayerCC")])],
+             [action("LOCALDEFEAT")])
+)
+scripts_payload = (
+    chunk("ScriptList", 1, b"")            # index 0: neutral
+    + chunk("ScriptList", 1, scripts_a)    # index 1: PlayerA (local)
+    + chunk("ScriptList", 1, b"")          # index 2: PlayerB
+)
+sides_payload += chunk("PlayerScriptsList", 5, scripts_payload)
 
 # ---------- WaypointsList v1 ----------
 waylinks_payload = struct.pack("<i", 0)

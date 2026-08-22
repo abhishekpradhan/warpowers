@@ -1,0 +1,21 @@
+// War Powers original strings — Boot Slice UI text (format: LABEL / "text" / END)
+
+WP:CommandCenter
+"Command Center"
+END
+
+WP:Tank
+"Tank"
+END
+
+WP:BuildTank
+"Build Tank"
+END
+
+GUI:ControlBarMoneyDisplay
+"$ %d"
+END
+
+GUI:ControlBarMoneyDisplayIncome
+"$ %ls +%ls/min"
+END

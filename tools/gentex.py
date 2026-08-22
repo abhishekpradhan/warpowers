@@ -114,6 +114,41 @@ def write_shadow(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path} ({len(hdr) + len(body)} bytes)")
 
+
+def write_glow(path):
+    """32x32 additive sprite: black field, warm-white radial core."""
+    n = 32
+    hdr = bytearray(18); hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 24; hdr[17] = 0x20
+    body = bytearray()
+    for y in range(n):
+        for x in range(n):
+            dx, dy = (x - 15.5) / 14.0, (y - 15.5) / 14.0
+            r = (dx * dx + dy * dy) ** 0.5
+            t = max(0.0, 1.0 - r)
+            v = t * t
+            body += bytes((clamp(255 * v * 0.55), clamp(255 * v * 0.85), clamp(255 * v)))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
+def write_soft(path):
+    """32x32 alpha sprite: neutral gray, radial alpha falloff (smoke/dust)."""
+    n = 32
+    hdr = bytearray(18); hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 32; hdr[17] = 0x28
+    body = bytearray()
+    for y in range(n):
+        for x in range(n):
+            dx, dy = (x - 15.5) / 15.0, (y - 15.5) / 15.0
+            r = (dx * dx + dy * dy) ** 0.5
+            t = max(0.0, 1.0 - r)
+            a = clamp(255 * t * t)
+            body += bytes((150, 158, 168, a))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 targets = sys.argv[1:] or [
     os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Terrain/wp_ground.tga"),
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -121,5 +156,7 @@ targets = sys.argv[1:] or [
 ]
 for t in targets:
     write_tga(t)
-    shadow = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures", "shadow.tga")
-    write_shadow(shadow)
+    texdir = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures")
+    write_shadow(os.path.join(texdir, "shadow.tga"))
+    write_glow(os.path.join(texdir, "wp_glow.tga"))
+    write_soft(os.path.join(texdir, "wp_soft.tga"))

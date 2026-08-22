@@ -9,8 +9,7 @@ A free, browser-playable RTS in the Command & Conquer: Generals / Zero Hour idio
 ## Layout
 
 - `docs/` — all planning and decisions
-  - [brainstorm.md](docs/brainstorm.md) — original vision & nostalgia pillars (v0.1, partly superseded)
-  - [port-vs-greenfield.md](docs/port-vs-greenfield.md) — the fork-vs-scratch trade study
+  - [vision.md](docs/vision.md) — what we're building: pillars, the nostalgia checklist, the modern bar
   - [fork-plan.md](docs/fork-plan.md) — **the active plan**: base choice (§1a) + staged roadmap
   - [decisions.md](docs/decisions.md) — append-only decision log (D001–D008)
 - `ASSETS.md` — asset provenance ledger (every asset, source, license)

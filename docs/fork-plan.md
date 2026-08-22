@@ -1,6 +1,6 @@
 # Fork Plan — Base Choice & Staged Roadmap
 
-Written 2026-08-21 after the user redirected: **desktop-only, much lighter than 3–6 months, start from "ZH free in a browser, no files needed" and evolve from there.** This supersedes the greenfield-first framing of [brainstorm.md](brainstorm.md) if confirmed; trade-study context in [port-vs-greenfield.md](port-vs-greenfield.md).
+Written 2026-08-21 after the user redirected: **desktop-only, much lighter than 3–6 months, start from "ZH free in a browser, no files needed" and evolve from there.** The game this builds toward is defined in [vision.md](vision.md); earlier greenfield-era documents were removed in the D011 cleanup (git history keeps them).
 
 ---
 

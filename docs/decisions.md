@@ -33,6 +33,23 @@ User-initiated review of "not a fork / engine outside the repo." Findings and ch
 
 User direction: keep the repo clean and ready for eventual open-sourcing. Policy: the repo carries only **living** documents — README, vision.md (distilled from the brainstorm's still-current sections: pillars, nostalgia checklist, modern bar), fork-plan.md (active plan + progress log), engine-notes.md (living engine reference), decisions.md (this compact why-trail), ASSETS.md (ledger). Superseded documents are **deleted, not banner-archived** — brainstorm.md and port-vs-greenfield.md removed; anyone needing them reads git history. Future doc rot gets the same treatment; docs polish is a standing item on the Stage 2 go-public checklist.
 
+## D012 — Publish-time repo plan: GitHub org + real forks; multi-repo stays (2026-08-22)
+
+User review: "repos aren't proper forks and aren't well organized; consider an org at publish; consider whether we still need multiple repos at all."
+
+**Do we still need multiple repos?** Yes, for exactly two, and D010's reasons still hold: (1) the engine must rebase onto GeneralsX/TheSuperHackers via real git remotes — folding its ~80MB full history into the workspace as a subtree would make upstream tracking painful (the Generals-Web failure mode) and bloat every workspace clone; (2) the repo edge is the cleanest license boundary (engine = GPL v3 + EA §7; workspace assets = CC BY-SA 4.0; both repos are copyleft, but provenance stays legible). The **DXVK fork** is the marginal case: it exists only for the native macOS dev path (the web build won't use DXVK at all) and to upstream our three fixes. It stays a separate repo — but gets **formalized as a submodule of the engine repo** (today it's an untracked nested checkout at `engine/references/fbraz3-dxvk` with only a backup remote), so `clone --recursive` reproduces the full native build.
+
+**Why the repos aren't GitHub forks today:** a GitHub fork of a public repo **cannot be private**, and "private until playable" (D007/D010) wins until Stage 2. Our engine history is a full clone of upstream, so fork-ability is preserved — pushing our branch to a real fork later is a plain `git push` (shared ancestry).
+
+**At publish (Stage 2 go-public checklist):**
+1. Create the GitHub **org** — name follows the D006 trademark check (do not squat a name that may change).
+2. Fork `GeneralsX/GeneralsX` → `<org>/warpowers-engine` via the fork button (public, carries the "forked from" banner, enables upstream PRs), then `git push` our `warpowers` branch into it.
+3. Fork `fbraz3/dxvk` → `<org>/warpowers-dxvk`, push `warpowers-dxvk` branch. (fbraz3 is the fork parent because our branch builds on their macOS patchset and they're the first PR target; dxvk-upstream PRs can still be opened cross-fork.)
+4. Transfer the workspace repo to `<org>/warpowers`, make public; update the engine submodule URL to the org fork.
+5. Retire the private standalones (`abhishekpradhan/warpowers-engine`, `-dxvk` backup) after verifying the org repos are complete.
+
+Until then the private standalone repos remain the working truth, and the upstreamable-fixes PR option (D010) stays available via a clean public fork that cherry-picks only generic fixes.
+
 ## D002 — Single-player skirmish first (2026-08-21)
 
 First playable target is 1v1 vs scripted AI. Multiplayer lands in M3.

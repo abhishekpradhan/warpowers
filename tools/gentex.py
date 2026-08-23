@@ -271,6 +271,49 @@ def write_concrete(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
+def write_icons(path):
+    """64x32 icon sheet, 32-bit alpha: heal cross (0..31), no-power bolt (32..63)."""
+    W2, H2 = 64, 32
+    hdr = bytearray(18); hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, W2, H2); hdr[16] = 32; hdr[17] = 0x28
+    px = [[(0, 0, 0, 0)] * W2 for _ in range(H2)]
+    # heal cross: green with white outline feel
+    for y in range(32):
+        for x in range(32):
+            cx, cy = x - 15.5, y - 15.5
+            in_v = abs(cx) <= 4.5 and abs(cy) <= 12.5
+            in_h = abs(cy) <= 4.5 and abs(cx) <= 12.5
+            if in_v or in_h:
+                edge = (abs(cx) > 3.0 and in_v and not in_h) or (abs(cy) > 3.0 and in_h and not in_v)
+                px[y][x] = (235, 255, 240, 255) if edge else (70, 200, 90, 255)
+    # power bolt: gold zigzag on faint dark disc
+    bolt = [(38+14,3),(38+10,13),(38+14,13),(38+8,27),(38+12,16),(38+8,16)]
+    for y in range(32):
+        for x in range(32, 64):
+            cx, cy = x - 47.5, y - 15.5
+            r = (cx * cx + cy * cy) ** 0.5
+            if r < 14:
+                px[y][x] = (30, 30, 34, 170)
+    def line(x0, y0, x1, y1):
+        n = max(abs(x1 - x0), abs(y1 - y0)) * 2 + 1
+        for i in range(int(n) + 1):
+            t = i / n
+            xx, yy = int(x0 + (x1 - x0) * t), int(y0 + (y1 - y0) * t)
+            for oy in (-1, 0, 1):
+                for ox in (-1, 0, 1):
+                    if 0 <= yy + oy < 32 and 32 <= xx + ox < 64:
+                        px[yy + oy][xx + ox] = (255, 210, 80, 255)
+    for i in range(len(bolt) - 1):
+        line(*bolt[i], *bolt[i + 1])
+    body = bytearray()
+    for y in range(H2):
+        for x in range(W2):
+            r, g, b, a = px[y][x]
+            body += bytes((b, g, r, a))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 targets = sys.argv[1:] or [
     os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Terrain/wp_ground.tga"),
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -284,3 +327,4 @@ for t in targets:
     write_soft(os.path.join(texdir, "wp_soft.tga"))
     write_scorch(os.path.join(texdir, "EXScorch01.tga"))
     write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))
+    write_icons(os.path.join(texdir, "wp_icons.tga"))

@@ -188,7 +188,7 @@ sides_payload += side([
     ("playerStartMoney", D_INT, 5000),
     ("multiplayerStartIndex", D_INT, 1),
 ])
-sides_payload += struct.pack("<i", 3)
+sides_payload += struct.pack("<i", 4)
 sides_payload += dict_pairs([("teamName", D_ASCII, "team"),
                              ("teamOwner", D_ASCII, ""),
                              ("teamIsSingleton", D_BOOL, True)])
@@ -198,6 +198,15 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerA"),
 sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerB"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, True)])
+# attack-wave team: 2 Mongrels, spawned by script, attacks on creation
+sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveRaiders"),
+                             ("teamOwner", D_ASCII, "PlayerB"),
+                             ("teamIsSingleton", D_BOOL, False),
+                             ("teamHome", D_ASCII, "WaveSpawn"),
+                             ("teamUnitType1", D_ASCII, "WPJ_Mongrel"),
+                             ("teamUnitMinCount1", D_INT, 2),
+                             ("teamUnitMaxCount1", D_INT, 2),
+                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
 # nested PlayerScriptsList appended below (win/lose scripts), after its
 # helper definitions
 
@@ -231,6 +240,8 @@ objects_payload = b"".join(preview + [
         [("waypointID", D_INT, 2), ("waypointName", D_ASCII, "Player_2_Start")]),
     obj(400.0, 400.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 3), ("waypointName", D_ASCII, "InitialCameraPosition")]),
+    obj(1150.0, 1100.0, 0.0, "*Waypoints/Waypoint",
+        [("waypointID", D_INT, 4), ("waypointName", D_ASCII, "WaveSpawn")]),
 ])
 
 # ---------- GlobalLighting v3 ----------
@@ -279,9 +290,10 @@ def action(internal_name, params=()):
     payload += struct.pack("<i", len(params)) + b"".join(params)
     return chunk("ScriptAction", 2, payload)
 
-def script(name, conditions, actions):
+def script(name, conditions, actions, one_shot=True, subroutine=False):
     payload = ascii_s(name) + ascii_s("") * 3          # name + 3 comments
-    payload += bytes([1, 1, 1, 1, 1, 0])               # active, oneShot, easy, normal, hard, subroutine
+    payload += bytes([1, 1 if one_shot else 0, 1, 1, 1,
+                      1 if subroutine else 0])         # active, oneShot, easy, normal, hard, subroutine
     payload += struct.pack("<i", 0)                    # delayEvaluationSeconds
     payload += chunk("OrCondition", 1, b"".join(conditions))
     payload += b"".join(actions)
@@ -295,10 +307,33 @@ scripts_a = (
              [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="PlayerCC")])],
              [action("LOCALDEFEAT")])
 )
+P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
+
+# Attack waves: after a 90s grace, 2 Mongrels spawn at WaveSpawn every 75s
+# and attack the player CC (team on-create script drives the attack so
+# "<This Team>" binds to the fresh instance).
+scripts_b = (
+    script("WP_WaveStart",
+           [condition("CONDITION_TRUE", [])],
+           [action("SET_MILLISECOND_TIMER",
+                   [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=90.0)])])
+    + script("WP_WaveSpawn",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="WaveTimer")])],
+             [action("CREATE_REINFORCEMENT_TEAM",
+                     [parameter(P_TEAM, s="teamWaveRaiders"), parameter(P_WAYPOINT, s="WaveSpawn")]),
+              action("SET_MILLISECOND_TIMER",
+                     [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=75.0)])],
+             one_shot=False)
+    + script("WP_WaveAttack",
+             [condition("CONDITION_TRUE", [])],
+             [action("TEAM_ATTACK_NAMED",
+                     [parameter(P_TEAM, s="<This Team>"), parameter(P_UNIT, s="PlayerCC")])],
+             one_shot=False, subroutine=True)
+)
 scripts_payload = (
     chunk("ScriptList", 1, b"")            # index 0: neutral
     + chunk("ScriptList", 1, scripts_a)    # index 1: PlayerA (local)
-    + chunk("ScriptList", 1, b"")          # index 2: PlayerB
+    + chunk("ScriptList", 1, scripts_b)    # index 2: PlayerB
 )
 sides_payload += chunk("PlayerScriptsList", 5, scripts_payload)
 

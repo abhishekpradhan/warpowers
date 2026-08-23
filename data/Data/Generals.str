@@ -121,7 +121,7 @@ WP:RadarUplink
 END
 
 CONTROLBAR:UnderConstructionDesc
-"Constructing... %d%%"
+"Constructing... %.0f%%"
 END
 
 WP:CancelConstruction
@@ -138,4 +138,76 @@ END
 
 TOOLTIP:TooltipCannotPurchaseBecauseQueueFull
 "Production queue is full."
+END
+
+WP:DescVector
+"Main battle tank. Sturdy, dependable, and happiest in groups."
+END
+
+WP:DescFabricator
+"Construction vehicle. Builds and repairs Meridian structures."
+END
+
+WP:DescPowerArray
+"Generates power for the base. Production stalls without it."
+END
+
+WP:DescVehiclePlant
+"Produces Meridian armor: the Vector, Outrider, and Zenith."
+END
+
+WP:DescOutrider
+"Fast recon vehicle. Light gun, long sightlines, thin skin."
+END
+
+WP:DescZenith
+"Long-range siege gun. Devastating at a distance, helpless up close."
+END
+
+WP:DescVulture
+"Jackal raider. Cheap, quick, and vicious in a pack."
+END
+
+WP:DescMongrel
+"Jackal battle tank. Scrap-built, but it hits like the real thing."
+END
+
+WP:DescRigger
+"Salvage rig. Builds and repairs Jackal structures."
+END
+
+WP:DescBulwark
+"Automated defense turret. Holds the line while your armor is away."
+END
+
+WP:DescChopShop
+"Produces Jackal vehicles: the Mongrel and the Vulture."
+END
+
+WP:DescWatchpost
+"Fortified tower. Watches the perimeter and fires on anything hostile."
+END
+
+WP:DescCancelConstruction
+"Stop construction and refund the full cost."
+END
+
+CONTROLBAR:Requirements
+"Requires: %ls"
+END
+
+WP:CancelUnitCreate
+"Cancel"
+END
+
+WP:DescCancelUnit
+"Remove this item from the production queue and refund its cost."
+END
+
+DOZER:ConstructionComplete
+"Construction complete."
+END
+
+OBJECT:Prop
+"Terrain Feature"
 END

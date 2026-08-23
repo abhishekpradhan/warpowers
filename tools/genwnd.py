@@ -23,8 +23,11 @@ def drawdata(bg, border=None):
 
 def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
            syscb="[None]", bg="0 0 0 255", extra="", children=(),
-           drawcb="[None]", inputcb="[None]", border=None):
+           drawcb="[None]", inputcb="[None]", border=None, textcolor=None,
+           fontsize=10, bold=0):
     x0, y0, x1, y1 = rect
+    if textcolor is None:
+        textcolor = "255 255 255 255"
     body = f"""WINDOW
   WINDOWTYPE = {wtype};
   SCREENRECT = UPPERLEFT: {x0} {y0}, BOTTOMRIGHT: {x1} {y1}, CREATIONRESOLUTION: 800 600;
@@ -35,10 +38,10 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
   INPUTCALLBACK = "{inputcb}";
   TOOLTIPCALLBACK = "[None]";
   DRAWCALLBACK = "{drawcb}";
-  FONT = NAME: "Arial", SIZE: 10, BOLD: 0;
+  FONT = NAME: "Arial", SIZE: {fontsize}, BOLD: {bold};
   HEADERTEMPLATE = "[NONE]";
   TOOLTIPDELAY = -1;
-{extra}  TEXTCOLOR = ENABLED: 255 255 255 255, ENABLEDBORDER: 255 255 255 255,
+{extra}  TEXTCOLOR = ENABLED: {textcolor}, ENABLEDBORDER: {textcolor},
               DISABLED: 128 128 128 255, DISABLEDBORDER: 128 128 128 255,
               HILITE: 255 255 128 255, HILITEBORDER: 255 255 255 255;
   ENABLEDDRAWDATA = {drawdata(bg, border)};
@@ -94,7 +97,10 @@ children.append(window("ProductionQueueWindow", (210, 566, 590, 598), bg=DARK, b
 children.append(window("ObserverPlayerListWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
 children.append(window("ObserverPlayerInfoWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
 children.append(window("WinUnitSelected", (10, 440, 200, 470), bg=DARK, border=DARK))
-children.append(window("CameoWindow", (10, 475, 90, 565), bg=DARK, border=DARK))
+# portrait cameo: transparent when no image is set (during production the
+# engine intentionally nulls the portrait and shows the queue instead — an
+# opaque bg here reads as a broken black box)
+children.append(window("CameoWindow", (10, 475, 90, 565), bg="0 0 0 0", border="0 0 0 0"))
 children.append(window("PopupCommunicator", (762, 402, 790, 418), bg=DARK, border=DARK))
 children.append(window("BackgroundMarker", (0, 420, 8, 428), bg=DARK, border=DARK))
 children.append(window("WinUAttack", (0, 400, 8, 408), bg=DARK, border=DARK))
@@ -137,16 +143,22 @@ for t in targets:
     print(f"wrote {t} ({len(content)} bytes)")
 
 # ---------- ControlBarPopupDescription.wnd (build-button hover tooltip) ----------
-POPUP = window("PopupParent", (250, 300, 490, 392), status="ENABLED+IMAGE+NOFOCUS",
-               bg="12 14 17 255", border="120 104 60 255", children=[
-    window("StaticTextName", (256, 306, 484, 326), wtype="STATICTEXT", status="ENABLED",
-           bg="12 14 17 255", border="12 14 17 255",
+# One seamless panel docked just above the command grid (grid top = 468).
+# Engine contract (ControlBarPopupDescription.cpp): parent min height 102; the
+# description row is measured with word-wrap and BOTH desc + parent grow by the
+# overflow while the parent slides UP by the same amount — so the panel is
+# bottom-anchored: author the fixed look, long descriptions extend upward.
+PBG = "15 17 21 255"
+POPUP = window("PopupParent", (210, 352, 500, 454), status="ENABLED+IMAGE+NOFOCUS",
+               bg=PBG, border="120 104 60 255", children=[
+    window("StaticTextName", (218, 358, 492, 376), wtype="STATICTEXT", status="ENABLED",
+           bg=PBG, border=PBG, fontsize=12, bold=1,
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
-    window("StaticTextCost", (256, 330, 484, 348), wtype="STATICTEXT", status="ENABLED",
-           bg="12 14 17 255", border="12 14 17 255",
+    window("StaticTextCost", (218, 380, 492, 396), wtype="STATICTEXT", status="ENABLED",
+           bg=PBG, border=PBG, textcolor="215 180 90 255",
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
-    window("StaticTextDescription", (256, 352, 484, 388), wtype="STATICTEXT", status="ENABLED",
-           bg="12 14 17 255", border="12 14 17 255",
+    window("StaticTextDescription", (218, 400, 492, 448), wtype="STATICTEXT", status="ENABLED",
+           bg=PBG, border=PBG, textcolor="196 202 210 255",
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
 ])
 popup_content = ("FILE_VERSION = 2;\n"

@@ -32,9 +32,16 @@ Nothing ships or deploys until the user says go.
 - [ ] Main-menu shell instead of booting straight into a match
 
 ## 6. Web hardening
-- [ ] Performance measurement (fps, load time) + budgets
-- [ ] Audio in the wasm build
+- [ ] Performance measurement (fps, load time) + budgets — includes the wasm logic-clock crawl under tab throttling (FramePacer vs throttled clocks)
+- [x] Audio in the wasm build (two engine bugs found+fixed: zero-channel decode buffers, dead group routing; user-confirmed audible)
 - [ ] Settings persistence
+
+## 6b. Polish debt (from playtesting/debugging)
+- [ ] Voice-limit tuning: GameSounds occasionally rejects select-barks
+- [ ] Silence W3DFS_MISS 'Locater01.w3d' spam (engine hunts a locater model in userdata)
+- [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
+- [ ] EVA-style announcer (Eva.ini system) — "unit ready", "base under attack"
+- [ ] Interactive checks: dozer placement-cursor UI flow; LocalDefeat input-disable
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
@@ -42,4 +49,5 @@ Nothing ships or deploys until the user says go.
 - [x] README.draft.md for the workspace repo (engine/dvijoke fork READMEs at D012 time)
 - [ ] Fresh-clone reproducibility (submodules, pipelines, build docs)
 - [ ] D012 execution checklist: org, true forks (engine, dvijoke, dxvk), private→public flip order
+- [ ] Upstream PR candidates (with user approval): wasm audio fixes (decode config, group routing), INI unknown-block diagnostics, icon null-guards
 - [ ] Hosting comparison doc (Vercel/Railway/Modal/other) — decision only, no deploy

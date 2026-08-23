@@ -57,7 +57,20 @@ shutil.copy2(os.path.join(ROOT, "data", "Fonts", "LiberationSans-Regular.ttf"),
              os.path.join(STAGE, "fonts", "default.ttf"))
 
 # boot page
-shutil.copy2(os.path.join(ROOT, "web", "index.html"), os.path.join(STAGE, "index.html"))
+# stage the page with a build stamp injected (staging time + engine wasm mtime)
+# so "which build is this session running" is answerable at a glance
+import datetime
+wasm_mtime = os.path.getmtime(os.path.join(STAGE, "GeneralsXZH.wasm"))
+stamp = "staged %s / engine %s" % (
+    datetime.datetime.now().strftime("%m-%d %H:%M"),
+    datetime.datetime.fromtimestamp(wasm_mtime).strftime("%m-%d %H:%M"))
+page = open(os.path.join(ROOT, "web", "index.html")).read()
+badge = ('<div style="position:fixed;right:8px;bottom:6px;font:10px monospace;'
+         'color:#5a616c;z-index:9;pointer-events:none">' + stamp + '</div>'
+         '<script>console.log("[build] ' + stamp + '")</script></body>')
+page = page.replace("</body>", badge)
+with open(os.path.join(STAGE, "index.html"), "w") as f:
+    f.write(page)
 
 total = sum(os.path.getsize(os.path.join(dp, f))
             for dp, _, fs in os.walk(STAGE) for f in fs)

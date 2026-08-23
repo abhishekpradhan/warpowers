@@ -188,7 +188,7 @@ sides_payload += side([
     ("playerStartMoney", D_INT, 5000),
     ("multiplayerStartIndex", D_INT, 1),
 ])
-sides_payload += struct.pack("<i", 4)
+sides_payload += struct.pack("<i", 5)
 sides_payload += dict_pairs([("teamName", D_ASCII, "team"),
                              ("teamOwner", D_ASCII, ""),
                              ("teamIsSingleton", D_BOOL, True)])
@@ -207,6 +207,17 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveRaiders"),
                              ("teamUnitMinCount1", D_INT, 2),
                              ("teamUnitMaxCount1", D_INT, 2),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
+sides_payload += dict_pairs([("teamName", D_ASCII, "teamWavePack"),
+                             ("teamOwner", D_ASCII, "PlayerB"),
+                             ("teamIsSingleton", D_BOOL, False),
+                             ("teamHome", D_ASCII, "WaveSpawn"),
+                             ("teamUnitType1", D_ASCII, "WPJ_Vulture"),
+                             ("teamUnitMinCount1", D_INT, 2),
+                             ("teamUnitMaxCount1", D_INT, 2),
+                             ("teamUnitType2", D_ASCII, "WPJ_Mongrel"),
+                             ("teamUnitMinCount2", D_INT, 1),
+                             ("teamUnitMaxCount2", D_INT, 1),
+                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
 # nested PlayerScriptsList appended below (win/lose scripts), after its
 # helper definitions
 
@@ -222,8 +233,15 @@ def obj(x, y, angle, name, pairs):
 # camera so new assets can be judged without driving across the map.
 preview = []
 if os.environ.get("WP_PREVIEW"):
-    preview.append(obj(510.0, 320.0, 0.3, "WPJ_CommandPost",
-                       [("originalOwner", D_ASCII, "teamPlayerB")]))
+    row = [("WPJ_CommandPost", 510.0, 320.0, 0.3), ("WPJ_ChopShop", 640.0, 360.0, 0.2),
+           ("WPJ_Watchpost", 700.0, 300.0, 0.0), ("WPJ_Rigger", 560.0, 260.0, 0.8),
+           ("WPJ_Vulture", 620.0, 260.0, 0.8),
+           ("WP_Bulwark", 300.0, 300.0, 0.0), ("WP_Outrider", 250.0, 350.0, 0.6),
+           ("WP_Zenith", 250.0, 430.0, 0.6)]
+    for tmpl, px, py, ang in row:
+        preview.append(obj(px, py, ang, tmpl,
+                           [("originalOwner", D_ASCII,
+                             "teamPlayerB" if tmpl.startswith("WPJ") else "teamPlayerA")]))
 
 objects_payload = b"".join(preview + [
     obj(400.0, 400.0, 0.0, "WP_CommandCenter",
@@ -323,6 +341,17 @@ scripts_b = (
                      [parameter(P_TEAM, s="teamWaveRaiders"), parameter(P_WAYPOINT, s="WaveSpawn")]),
               action("SET_MILLISECOND_TIMER",
                      [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=75.0)])],
+             one_shot=False)
+    + script("WP_PackStart",
+           [condition("CONDITION_TRUE", [])],
+           [action("SET_MILLISECOND_TIMER",
+                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=240.0)])])
+    + script("WP_PackSpawn",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="PackTimer")])],
+             [action("CREATE_REINFORCEMENT_TEAM",
+                     [parameter(P_TEAM, s="teamWavePack"), parameter(P_WAYPOINT, s="WaveSpawn")]),
+              action("SET_MILLISECOND_TIMER",
+                     [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=120.0)])],
              one_shot=False)
     + script("WP_WaveAttack",
              [condition("CONDITION_TRUE", [])],

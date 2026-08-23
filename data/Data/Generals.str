@@ -32,26 +32,86 @@ WP:TankShell
 "Shell"
 END
 
-WP:BuildSurveyor
-"Build Surveyor"
+WP:BuildFabricator
+"Build Fabricator"
 END
 
-WP:BuildPowerPlant
-"Construct Power Station"
+WP:BuildPowerArray
+"Construct Power Array"
 END
 
-WP:BuildWarFactory
-"Construct Vehicle Works"
+WP:BuildVehiclePlant
+"Construct Vehicle Plant"
 END
 
-WP:Surveyor
-"Surveyor"
+WP:Fabricator
+"Fabricator"
 END
 
-WP:PowerPlant
-"Power Station"
+WP:PowerArray
+"Power Array"
 END
 
-WP:WarFactory
-"Vehicle Works"
+WP:VehiclePlant
+"Vehicle Plant"
+END
+
+WP:BuildOutrider
+"Build Outrider"
+END
+
+WP:BuildZenith
+"Build Zenith"
+END
+
+WP:BuildVulture
+"Build Vulture"
+END
+
+WP:BuildMongrel
+"Build Mongrel"
+END
+
+WP:BuildRigger
+"Build Rigger"
+END
+
+WP:BuildBulwark
+"Construct Bulwark"
+END
+
+WP:BuildChopShop
+"Construct Chop Shop"
+END
+
+WP:BuildWatchpost
+"Construct Watchpost"
+END
+
+WP:Outrider
+"Outrider"
+END
+
+WP:Zenith
+"Zenith"
+END
+
+WP:Vulture
+"Vulture"
+END
+
+WP:Rigger
+"Rigger"
+END
+
+WP:ChopShop
+"Chop Shop"
+END
+
+WP:Bulwark
+"Bulwark"
+END
+
+WP:Watchpost
+"Watchpost"
 END

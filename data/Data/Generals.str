@@ -12,6 +12,10 @@ WP:CommandPost
 "Command Post"
 END
 
+WP:Mongrel
+"Mongrel"
+END
+
 WP:BuildTank
 "Build Vector"
 END

@@ -167,6 +167,22 @@ MODELS = {
     "WPSHELL01": [
         part("TRACER", (245, 216, 150), 0, 0, -0.25, 2.4, 0.5, 0.5),
     ],
+    # Building-placement cursor (engine-hardcoded names): corner-bracket
+    # anchor ring + direction arrow, bright gold, floating just off ground.
+    "LOCATER01": [
+        part("BR1A", "GOLD", -9, -10, 0.4, 6, 1.2, 0.5),
+        part("BR1B", "GOLD", -10, -9, 0.4, 1.2, 6, 0.5),
+        part("BR2A", "GOLD", 9, -10, 0.4, 6, 1.2, 0.5),
+        part("BR2B", "GOLD", 10, -9, 0.4, 1.2, 6, 0.5),
+        part("BR3A", "GOLD", -9, 10, 0.4, 6, 1.2, 0.5),
+        part("BR3B", "GOLD", -10, 9, 0.4, 1.2, 6, 0.5),
+        part("BR4A", "GOLD", 9, 10, 0.4, 6, 1.2, 0.5),
+        part("BR4B", "GOLD", 10, 9, 0.4, 1.2, 6, 0.5),
+    ],
+    "LOCATER02": [
+        part("SHAFT", "GOLD", -2, 0, 0.4, 10, 2.0, 0.5),
+        part("HEADC", "GOLD", 4.6, 0, 0.4, 3.2, 5.0, 0.5, ty=0.1, ox=1.6),
+    ],
 }
 
 out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")

@@ -334,24 +334,24 @@ scripts_b = (
     script("WP_WaveStart",
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=90.0)])])
+                   [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=150.0)])])
     + script("WP_WaveSpawn",
              [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="WaveTimer")])],
              [action("CREATE_REINFORCEMENT_TEAM",
                      [parameter(P_TEAM, s="teamWaveRaiders"), parameter(P_WAYPOINT, s="WaveSpawn")]),
               action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=75.0)])],
+                     [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=90.0)])],
              one_shot=False)
     + script("WP_PackStart",
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=240.0)])])
+                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=300.0)])])
     + script("WP_PackSpawn",
              [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="PackTimer")])],
              [action("CREATE_REINFORCEMENT_TEAM",
                      [parameter(P_TEAM, s="teamWavePack"), parameter(P_WAYPOINT, s="WaveSpawn")]),
               action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=120.0)])],
+                     [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=150.0)])],
              one_shot=False)
     + script("WP_WaveAttack",
              [condition("CONDITION_TRUE", [])],

@@ -13,8 +13,9 @@ import sys
 import bpy
 import mathutils
 
-PLUGIN_REPO = '/Users/abhishekpradhan/Projects/cnc-project/engine/references/OpenSAGE.BlenderPlugin'
-REFS = '/Users/abhishekpradhan/Projects/cnc-project/refs/quaternius-tanks'
+PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
+REFS = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'refs', 'quaternius-tanks')
 OUT_DIR = '/tmp/hero'
 
 sys.path.insert(0, PLUGIN_REPO)

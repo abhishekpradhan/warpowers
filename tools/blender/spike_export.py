@@ -7,11 +7,13 @@ so no INI changes are needed to see it in-game).
 
 Run: blender --background --python spike_export.py
 """
+import os
 import sys
 
 import bpy
 
-PLUGIN_REPO = '/Users/abhishekpradhan/Projects/cnc-project/engine/references/OpenSAGE.BlenderPlugin'
+PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
 OUT_W3D = '/tmp/mertank01.w3d'
 TEX_NAME = 'wp_spike'
 

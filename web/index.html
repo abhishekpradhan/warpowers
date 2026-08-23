@@ -95,6 +95,16 @@
       z-index: 10;
     }
     #overlay.hidden { opacity: 0; pointer-events: none; }
+    #menu { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    #tagline { letter-spacing: 0.18em; }
+    #playBtn {
+      font: 700 15px/1 'SF Mono', ui-monospace, monospace;
+      letter-spacing: 0.35em; padding: 14px 46px 14px 52px;
+      color: #0d0f12; background: var(--accent); border: 0; cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    #playBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(215,180,90,.35); }
+    #menu.hidden { display: none; }
     .wordmark {
       font-size: clamp(26px, 4.4vw, 40px);
       font-weight: 750;
@@ -154,6 +164,10 @@
       <button id="fsBtn" title="Fullscreen">⛶</button>
       <div id="overlay">
         <div class="wordmark">WAR<span class="accent">POWERS</span></div>
+        <div id="menu">
+          <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
+          <button id="playBtn">DEPLOY</button>
+        </div>
         <div id="meter"><div id="meterFill"></div></div>
         <div id="phase" class="label">Contacting command&hellip;</div>
         <div id="errorBox">
@@ -338,13 +352,24 @@
   </script>
   <script>
     (function() {
-      var s = document.createElement('script');
-      s.src = 'GeneralsXZH.js?v=' + Date.now();
-      s.onerror = function() {
-        document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
-        document.getElementById('errorBox').style.display = 'block';
-      };
-      document.body.appendChild(s);
+      var meterEl = document.getElementById('meter');
+      var phase = document.getElementById('phase');
+      meterEl.style.display = 'none';
+      phase.style.display = 'none';
+      // The page is the main menu: the engine loads on DEPLOY. The click is
+      // also the user gesture that unlocks the WebAudio context.
+      document.getElementById('playBtn').addEventListener('click', function() {
+        document.getElementById('menu').classList.add('hidden');
+        meterEl.style.display = '';
+        phase.style.display = '';
+        var s = document.createElement('script');
+        s.src = 'GeneralsXZH.js?v=' + Date.now();
+        s.onerror = function() {
+          document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
+          document.getElementById('errorBox').style.display = 'block';
+        };
+        document.body.appendChild(s);
+      }, { once: true });
     })();
   </script>
 </body>

@@ -13,8 +13,9 @@ import sys
 
 import bpy
 
-PLUGIN_REPO = '/Users/abhishekpradhan/Projects/cnc-project/engine/references/OpenSAGE.BlenderPlugin'
-SRC_FBX = '/Users/abhishekpradhan/Projects/cnc-project/refs/quaternius-tanks/Tank3.fbx'
+PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
+SRC_FBX = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'refs', 'quaternius-tanks', 'Tank3.fbx')
 OUT_DIR = '/tmp/hero'
 ATLAS = 512            # imported meshes carry many more UV islands than the hero builds
 TARGET_LENGTH = 21.0   # world units along X (Vector is ~25 with barrel)

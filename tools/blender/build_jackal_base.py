@@ -12,7 +12,8 @@ import sys
 
 import bpy
 
-PLUGIN_REPO = '/Users/abhishekpradhan/Projects/cnc-project/engine/references/OpenSAGE.BlenderPlugin'
+PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
 OUT_DIR = '/tmp/hero'
 
 sys.path.insert(0, PLUGIN_REPO)

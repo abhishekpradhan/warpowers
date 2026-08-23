@@ -18,18 +18,18 @@ Nothing ships or deploys until the user says go.
 - [x] Money/power economy live (HUD already displays both)
 
 ## 3. Roster breadth
-- [ ] Convert remaining Quaternius tanks into distinct units
-- [ ] Base defenses per faction
-- [ ] Second unit class (infantry or light vehicle) per faction
+- [x] Convert remaining Quaternius tanks into distinct units (Outrider, Vulture, Zenith)
+- [x] Base defenses per faction (Bulwark, Watchpost)
+- [x] Second unit class per faction (recon/gun-truck/artillery; infantry still open)
 
 ## 4. Opponent
 - [x] Scripted attack waves via map scripts
-- [ ] Skirmish AI investigation (engine's real AI path)
+- [x] Skirmish AI investigation — findings + implementation plan in engine-notes (build lists + AISkirmishPlayer + .scb; deferred)
 
 ## 5. UI/UX
-- [ ] Radar/minimap (currently a black box)
-- [ ] Styled command bar + unit portraits
-- [ ] Main-menu shell instead of booting straight into a match
+- [x] Radar/minimap live (terrain, shroud, view frustum; layout polish pending)
+- [~] Command bar: programmatic icon sheet wired via ButtonImage (browser verify + portraits/tooltips pending)
+- [x] Main menu: the web page is the menu (DEPLOY gates boot + doubles as the WebAudio unlock gesture)
 
 ## 6. Web hardening
 - [ ] Performance measurement (fps, load time) + budgets — includes the wasm logic-clock crawl under tab throttling (FramePacer vs throttled clocks)
@@ -47,7 +47,7 @@ Nothing ships or deploys until the user says go.
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
 - [x] LICENSE-ASSETS.md (CC BY-SA 4.0) + ledger + credits current (engine GPL file present upstream)
 - [x] README.draft.md for the workspace repo (engine/dvijoke fork READMEs at D012 time)
-- [ ] Fresh-clone reproducibility (submodules, pipelines, build docs)
-- [ ] D012 execution checklist: org, true forks (engine, dvijoke, dxvk), private→public flip order
+- [x] Fresh-clone reproducibility verified (clone --recursive + genmap/genwnd/Blender-from-clone; blender scripts de-absolutized; gentex single-arg mode quirk noted)
+- [x] D012 execution runbook written (docs/publish-checklist.md)
 - [ ] Upstream PR candidates (with user approval): wasm audio fixes (decode config, group routing), INI unknown-block diagnostics, icon null-guards
-- [ ] Hosting comparison doc (Vercel/Railway/Modal/other) — decision only, no deploy
+- [x] Hosting comparison doc (docs/hosting.md): Vercel static now, Railway reserved for lobby

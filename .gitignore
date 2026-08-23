@@ -12,3 +12,4 @@ build/
 /gamedata-local/
 dvijoke/
 webstage/
+__pycache__/

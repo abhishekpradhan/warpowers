@@ -23,8 +23,10 @@ OUT_DIR = '/tmp/hero'
 ATLAS = 256
 
 sys.path.insert(0, PLUGIN_REPO)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import io_mesh_w3d  # noqa: E402
 io_mesh_w3d.register()
+import wp_pipeline  # noqa: E402
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -157,79 +159,11 @@ bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.uv.smart_project(angle_limit=1.0, island_margin=0.012)
 bpy.ops.object.mode_set(mode='OBJECT')
 
-# ---------- bake: diffuse color + AO into the atlas ----------
-scene = bpy.context.scene
-scene.render.engine = 'CYCLES'
-scene.cycles.device = 'CPU'
-scene.cycles.samples = 24
-
-img_diff = bpy.data.images.new('bake_diff', ATLAS, ATLAS)
-img_ao = bpy.data.images.new('bake_ao', ATLAS, ATLAS)
-
-def add_bake_target(image):
-    for m in tank.data.materials:
-        nt = m.node_tree
-        for n in [n for n in nt.nodes if n.name.startswith('BakeTarget')]:
-            nt.nodes.remove(n)
-        node = nt.nodes.new('ShaderNodeTexImage')
-        node.name = 'BakeTarget'
-        node.image = image
-        nt.nodes.active = node
-
-bpy.ops.object.select_all(action='DESELECT')
-tank.select_set(True)
-bpy.context.view_layer.objects.active = tank
-
-add_bake_target(img_diff)
-bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=3)
-add_bake_target(img_ao)
-bpy.ops.object.bake(type='AO', margin=3)
-
-# ---------- composite: diffuse * shaped AO + grain -> TGA ----------
-import random
-rng = random.Random(5)
-diff = list(img_diff.pixels)
-ao = list(img_ao.pixels)
-out = bytearray()
-rows = []
-for y in range(ATLAS):
-    row = bytearray()
-    for x in range(ATLAS):
-        i = (y * ATLAS + x) * 4
-        a = ao[i]
-        shade = 0.52 + 0.48 * (a ** 1.4)
-        g = rng.uniform(-0.022, 0.022)
-        r = max(0.0, min(1.0, diff[i] * shade + g))
-        gg = max(0.0, min(1.0, diff[i + 1] * shade + g))
-        b = max(0.0, min(1.0, diff[i + 2] * shade + g))
-        row += bytes((int(b * 255), int(gg * 255), int(r * 255)))
-    rows.append(bytes(row))
-import struct as _s
-hdr = bytearray(18)
-hdr[2] = 2
-_s.pack_into('<HH', hdr, 12, ATLAS, ATLAS)
-hdr[16] = 24
-# Blender image origin is bottom-left; TGA default is bottom-up too — no flag.
-with open(os.path.join(OUT_DIR, 'wp_vector.tga'), 'wb') as f:
-    f.write(bytes(hdr) + b''.join(rows))
+# ---------- bake + composite + export (shared pipeline) ----------
+diff, ao, mask = wp_pipeline.bake_images(tank, ATLAS)
+tga = os.path.join(OUT_DIR, 'wp_vector.tga')
+wp_pipeline.composite(diff, ao, mask, ATLAS, tga, seed=5,
+                      grain=0.022, edge_strength=0.55, edge_radius=1)
 print('TEXTURE_OK')
-
-# ---------- swap to a single textured material for export ----------
-final_img = bpy.data.images.load(os.path.join(OUT_DIR, 'wp_vector.tga'))
-final_img.name = 'wp_vector'
-export_mat = bpy.data.materials.new('VectorSkin')
-export_mat.use_nodes = True
-bsdf = export_mat.node_tree.nodes['Principled BSDF']
-texn = export_mat.node_tree.nodes.new('ShaderNodeTexImage')
-texn.image = final_img
-export_mat.node_tree.links.new(bsdf.inputs['Base Color'], texn.outputs['Color'])
-tank.data.materials.clear()
-tank.data.materials.append(export_mat)
-
-bpy.ops.export_mesh.westwood_w3d(
-    filepath=os.path.join(OUT_DIR, 'mertank01.w3d'),
-    file_format='W3D',
-    export_mode='HM',
-    force_vertex_materials=True,
-)
+wp_pipeline.export_w3d(tank, tga, os.path.join(OUT_DIR, 'mertank01.w3d'), 'wp_vector')
 print('HERO_EXPORT_OK')

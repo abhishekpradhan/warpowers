@@ -185,7 +185,14 @@ def obj(x, y, angle, name, pairs):
     payload += dict_pairs(pairs)
     return chunk("Object", 3, payload)
 
-objects_payload = b"".join([
+# WP_PREVIEW=1: art-review mode — park enemy structures in view of the start
+# camera so new assets can be judged without driving across the map.
+preview = []
+if os.environ.get("WP_PREVIEW"):
+    preview.append(obj(510.0, 320.0, 0.3, "WPJ_CommandPost",
+                       [("originalOwner", D_ASCII, "teamPlayerB")]))
+
+objects_payload = b"".join(preview + [
     obj(400.0, 400.0, 0.0, "WP_CommandCenter",
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),

@@ -160,49 +160,12 @@ def build_w3d(model, parts):
 
 # ---- the models (docs/creative.md rosters; unit faces +X at angle 0) ----
 MODELS = {
-    # Meridian Vector MBT: sloped steel hull on dark treads, gold canopy.
-    "MERTANK01": [
-        part("TREADL", "TREAD", 0, -5.5, 0, 22, 3.6, 3.2),
-        part("TREADR", "TREAD", 0, +5.5, 0, 22, 3.6, 3.2),
-        part("HULL",  "STEEL", 0.5, 0, 2.6, 20, 11, 4.2, tx=0.78, ty=0.72, ox=1.2),
-        part("TURRET", "WHITE", -1.0, 0, 6.8, 9.5, 8, 3.4, tx=0.7, ty=0.7),
-        part("BARREL", "GUN", 7.5, 0, 8.0, 11, 1.3, 1.3),
-        part("CANOPY", "GOLD", -3.2, 0, 10.0, 3.2, 3.2, 1.1, tx=0.7, ty=0.7),
-    ],
-    # Meridian Command Center: terraced white block, steel tower, gold cornice
-    # ring (four thin strips along the roof edge, not a solid gold roof).
-    "MERCC01": [
-        part("PODIUM", "STEEL", 0, 0, 0, 40, 40, 7, tx=0.92, ty=0.92),
-        part("BLOCK", "WHITE", 0, 0, 7, 32, 32, 13, tx=0.85, ty=0.85),
-        part("CORN_N", "GOLD", 0, 13.0, 19.6, 28.6, 1.3, 1.5),
-        part("CORN_S", "GOLD", 0, -13.0, 19.6, 28.6, 1.3, 1.5),
-        part("CORN_E", "GOLD", 13.0, 0, 19.6, 1.3, 26.0, 1.5),
-        part("CORN_W", "GOLD", -13.0, 0, 19.6, 1.3, 26.0, 1.5),
-        part("TOWER", "STEEL", 5, 5, 20, 11, 11, 9, tx=0.85, ty=0.85),
-        part("MAST",  "GRAPHITE", 5, 5, 29, 1.6, 1.6, 8),
-        part("TIP",   "GOLD", 5, 5, 37, 2.4, 2.4, 1.4),
-        part("PAD",   "GRAPHITE", -11, -10, 7, 14, 16, 1.8),
-    ],
-    # Jackal Mongrel tank: rusty mismatched hull, off-center sand turret,
-    # uneven treads, one salvaged oxide plate.
-    "JAKTANK01": [
-        part("TREADL", "TREAD", -0.8, -5.2, 0, 21, 3.4, 3.0),
-        part("TREADR", "TREAD", 0.8, +5.2, 0, 19, 3.4, 3.0),
-        part("HULL",  "RUST", 0, 0, 2.4, 19, 10.4, 4.0, tx=0.85, ty=0.9, ox=0.8),
-        part("PLATE", "OXIDE", 2.0, -5.0, 3.0, 7, 1.0, 3.2),
-        part("TURRET", "SAND", -1.5, 1.2, 6.2, 8.5, 7.5, 3.2, tx=0.8, ty=0.75),
-        part("BARREL", "GUN", 6.0, 1.2, 7.2, 9, 1.6, 1.6),
-        part("STACK", "CHARCOAL", -6.5, -3.0, 5.5, 1.8, 1.8, 4.5),
-    ],
-    # Jackal Command Post: offset slab, shack, tarp, watchtower — asymmetric.
-    "JAKCP01": [
-        part("SLAB",  "RUST", 1, -1, 0, 38, 34, 6, tx=0.95, ty=0.95),
-        part("SHACK", "SAND", -4, 3, 6, 21, 16, 8, tx=0.9, ty=0.92),
-        part("TARP",  "OXIDE", -1, 6, 14, 15, 11, 1.2, ox=1.5),
-        part("POLE",  "RUST", 12, -9, 6, 2.6, 2.6, 17),
-        part("NEST",  "SAND", 12, -9, 23, 8.5, 8.5, 5, tx=0.85, ty=0.85),
-        part("SCRAP", "CHARCOAL", -13, -11, 6, 9, 7, 3, tx=0.7, ty=0.6, ox=1.0),
-        part("DISH",  "GUN", 6, 10, 14.5, 4.5, 4.5, 2.2, tx=0.3, ty=0.3),
+    # Placeholder-tier generator (D015): hero assets from tools/blender/
+    # superseded MERCC01/MERTANK01/JAKTANK01/JAKCP01 — keep them OUT of this
+    # dict or a rerun overwrites the Blender-built files in the runtime dir.
+    # Tank shell tracer: bright elongated slab, oriented +X (flight dir).
+    "WPSHELL01": [
+        part("TRACER", (245, 216, 150), 0, 0, -0.25, 2.4, 0.5, 0.5),
     ],
 }
 

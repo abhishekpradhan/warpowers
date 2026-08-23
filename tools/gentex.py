@@ -149,6 +149,43 @@ def write_soft(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
+def write_scorch(path):
+    """256px scorch atlas (engine hardcodes EXScorch01.tga; 4x4 UV grid,
+    SCORCH_PER_ROW=3 with 1.5-cell spacing -> marks at cells (0,0),(1,0),
+    (2,0),(0,1), each mark spanning a quarter of the texture, alpha-blended)."""
+    import random
+    n = 256
+    hdr = bytearray(18); hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 32; hdr[17] = 0x28
+    px = [[(0, 0, 0, 0)] * n for _ in range(n)]
+    centers = [(32, 32, 1), (128, 32, 2), (224, 32, 3), (32, 128, 4)]
+    for cx, cy, seed in centers:
+        rng = random.Random(seed * 77)
+        blobs = [(0.0, 0.0, 1.0)] + [
+            (rng.uniform(-0.4, 0.4), rng.uniform(-0.4, 0.4), rng.uniform(0.35, 0.6))
+            for _ in range(3)]
+        for y in range(cy - 31, cy + 32):
+            for x in range(cx - 31, cx + 32):
+                dx, dy = (x - cx) / 30.0, (y - cy) / 30.0
+                a = 0.0
+                for bx, by, br in blobs:
+                    d = (((dx - bx) / br) ** 2 + ((dy - by) / br) ** 2) ** 0.5
+                    a = max(a, 1.0 - d)
+                if a <= 0.0:
+                    continue
+                a *= a * rng.uniform(0.75, 1.0)          # soft edge + grime
+                shade = rng.uniform(0.85, 1.0)
+                px[y][x] = (int(24 * shade), int(20 * shade), int(16 * shade),
+                            clamp(235 * a))
+    body = bytearray()
+    for y in range(n):
+        for x in range(n):
+            r, g, b, a = px[y][x]
+            body += bytes((b, g, r, a))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 targets = sys.argv[1:] or [
     os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Terrain/wp_ground.tga"),
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -160,3 +197,4 @@ for t in targets:
     write_shadow(os.path.join(texdir, "shadow.tga"))
     write_glow(os.path.join(texdir, "wp_glow.tga"))
     write_soft(os.path.join(texdir, "wp_soft.tga"))
+    write_scorch(os.path.join(texdir, "EXScorch01.tga"))

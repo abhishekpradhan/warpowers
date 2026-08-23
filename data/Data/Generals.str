@@ -27,3 +27,7 @@ END
 GUI:ControlBarMoneyDisplayIncome
 "$ %ls +%ls/min"
 END
+
+WP:TankShell
+"Shell"
+END

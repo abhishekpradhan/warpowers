@@ -243,3 +243,47 @@ END
 GUI:CantBuildTooCloseToSupplies
 "Cannot build here - too close to supplies."
 END
+
+GUI:Closed
+"Closed"
+END
+
+GUI:SelectNextIdleWorker
+"Idle Worker"
+END
+
+GUI:SelectNextIdleWorkerDescription
+"Select the next idle construction vehicle."
+END
+
+GUI:PlayerInfoListLabelTeam
+"Team"
+END
+
+GUI:PlayerInfoListLabelMoney
+"Funds"
+END
+
+GUI:PlayerInfoListLabelMoneyPerMinute
+"Income"
+END
+
+GUI:PlayerInfoListLabelRank
+"Rank"
+END
+
+GUI:PlayerInfoListLabelXp
+"Experience"
+END
+
+SCIENCE:GeneralName
+"Commander"
+END
+
+WP:Victory
+"VICTORY"
+END
+
+WP:Defeat
+"DEFEAT"
+END

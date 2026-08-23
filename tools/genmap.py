@@ -70,13 +70,13 @@ def chunk(label, version, payload):
 import math
 
 BASES = [(400.0, 400.0), (1200.0, 1200.0)]   # world coords
-FLAT_R, FLAT_FADE = 190.0, 130.0             # flat radius, blend band
+FLAT_R, FLAT_FADE = 320.0, 160.0             # flat radius, blend band (wide enough to actually build a base)
 
 def dune_height(wx, wy):
     d = (math.sin(wx * 0.0071 + 1.3) + math.sin(wy * 0.0063 + 4.1)
          + 0.6 * math.sin((wx + wy) * 0.0047 + 2.2)
          + 0.5 * math.sin((wx * 0.9 - wy) * 0.0102 + 0.7))
-    h = HEIGHT_BYTE + d * 2.2                # ~±5.7 height bytes = ±3.6 world z
+    h = HEIGHT_BYTE + d * 1.2                # gentle dunes; steeper amp left too little legal build ground
     near = min(((wx - bx) ** 2 + (wy - by) ** 2) ** 0.5 for bx, by in BASES)
     if near < FLAT_R:
         return float(HEIGHT_BYTE)
@@ -323,7 +323,7 @@ scripts_a = (
            [action("VICTORY")])
     + script("WP_Lose",
              [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="PlayerCC")])],
-             [action("LOCALDEFEAT")])
+             [action("DEFEAT")])
 )
 P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
 

@@ -174,3 +174,30 @@ for t in targets:
         f.write(popup_content)
     print("wrote", pt)
 
+
+# ---------- match-result screens (ScriptActions loads these on VICTORY/DEFEAT) ----------
+def result_screen(fname, key, color):
+    NAME = f"Menus/{fname}"
+    body = window("ResultBanner", (200, 240, 600, 320), wtype="STATICTEXT",
+                  status="ENABLED", bg="12 14 17 235", border=color,
+                  textcolor=color, fontsize=32, bold=1,
+                  extra=f'  TEXT = "{key}";\n  STATICTEXTDATA = CENTERED: 1;\n')
+    parent = window("ResultParent", (180, 220, 620, 340),
+                    status="ENABLED+IMAGE+NOFOCUS",
+                    bg="9 10 12 220", border=color, children=[body])
+    content = ("FILE_VERSION = 2;\n"
+               "STARTLAYOUTBLOCK\n"
+               "  LAYOUTINIT = \"[None]\";\n"
+               "  LAYOUTUPDATE = \"[None]\";\n"
+               "  LAYOUTSHUTDOWN = \"[None]\";\n"
+               "ENDLAYOUTBLOCK\n") + parent.replace(CB + ":", NAME + ".wnd:")
+    for t in targets:
+        d = os.path.join(os.path.dirname(t), "Menus")
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, fname + ".wnd"), "w") as f:
+            f.write(content)
+        print("wrote", os.path.join(d, fname + ".wnd"))
+
+result_screen("Victorious", "WP:Victory", "215 180 90 255")
+result_screen("Defeat", "WP:Defeat", "200 70 70 255")
+result_screen("LocalDefeat", "WP:Defeat", "200 70 70 255")

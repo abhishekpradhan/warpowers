@@ -1,4 +1,4 @@
-// War Powers original strings — Boot Slice UI text (format: LABEL / "text" / END)
+// War Powers original strings - Boot Slice UI text (format: LABEL / "text" / END)
 
 WP:CommandCenter
 "Command Center"
@@ -210,4 +210,36 @@ END
 
 OBJECT:Prop
 "Terrain Feature"
+END
+
+WP:Cancel
+"Cancel"
+END
+
+GUI:CantBuildNotFlatEnough
+"Cannot build here - the ground is not flat enough."
+END
+
+GUI:CantBuildNoClearPath
+"Cannot build here - no clear path to the site."
+END
+
+GUI:CantBuildObjectsInTheWay
+"Cannot build here - something is in the way."
+END
+
+GUI:CantBuildRestrictedTerrain
+"Cannot build on this terrain."
+END
+
+GUI:CantBuildShroud
+"Cannot build in unexplored territory."
+END
+
+GUI:CantBuildThere
+"Cannot build there."
+END
+
+GUI:CantBuildTooCloseToSupplies
+"Cannot build here - too close to supplies."
 END

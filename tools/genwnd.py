@@ -75,10 +75,11 @@ children.append(window("UnderConstructionWindow", (10, 440, 200, 590), bg=DARK, 
                                         wtype="STATICTEXT", status="ENABLED",
                                         bg="16 18 21 255", border="70 76 84 255",
                                         extra="  STATICTEXTDATA = CENTERED: 1;\n"),
-                                 window("ButtonCancelConstruction", (60, 486, 150, 530),
-                                        wtype="PUSHBUTTON", status="ENABLED+IMAGE",
+                                 window("ButtonCancelConstruction", (100, 486, 190, 514),
+                                        wtype="PUSHBUTTON", status="ENABLED",
                                         syscb="PassSelectedButtonsToParentSystem",
-                                        bg="60 34 34 255", border="120 60 60 255")]))
+                                        bg="128 36 36 255", border="220 96 96 255",
+                                        extra='  TEXT = "WP:Cancel";\n')]))
 children.append(window("OCLTimerWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
 children.append(window("BeaconWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
 # command grid and production queue get DISJOINT rects: overlapped, the

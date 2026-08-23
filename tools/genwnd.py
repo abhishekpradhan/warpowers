@@ -20,7 +20,8 @@ def drawdata(bg):
     return ",\n                    ".join(rows)
 
 def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
-           syscb="[None]", bg="0 0 0 255", extra="", children=()):
+           syscb="[None]", bg="0 0 0 255", extra="", children=(),
+           drawcb="[None]", inputcb="[None]"):
     x0, y0, x1, y1 = rect
     body = f"""WINDOW
   WINDOWTYPE = {wtype};
@@ -29,9 +30,9 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
   STATUS = {status};
   STYLE = {wtype};
   SYSTEMCALLBACK = "{syscb}";
-  INPUTCALLBACK = "[None]";
+  INPUTCALLBACK = "{inputcb}";
   TOOLTIPCALLBACK = "[None]";
-  DRAWCALLBACK = "[None]";
+  DRAWCALLBACK = "{drawcb}";
   FONT = NAME: "Arial", SIZE: 10, BOLD: 0;
   HEADERTEMPLATE = "[NONE]";
   TOOLTIPDELAY = -1;
@@ -89,6 +90,9 @@ children.append(window("MoneyDisplay", (600, 422, 750, 438), wtype="STATICTEXT",
                        status="ENABLED", bg="20 20 20 255",
                        extra="  STATICTEXTDATA = CENTERED: 1;\n"))
 children.append(window("PowerWindow", (600, 402, 750, 418), bg="20 30 60 255"))
+# radar draws into this window (engine hardcodes the name ControlBar.wnd:LeftHUD)
+children.append(window("LeftHUD", (598, 440, 758, 560), bg="8 10 12 255",
+                       drawcb="W3DLeftHUDDraw", inputcb="LeftHUDInput"))
 
 parent = window("ControlBarParent", (0, 420, 800, 600),
                 status="ENABLED+IMAGE+NOFOCUS", syscb="ControlBarSystem",

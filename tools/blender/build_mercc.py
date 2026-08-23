@@ -86,6 +86,8 @@ k.box('WALK', 'STEEL', 5, 2, 21.2, 6.0, 2.6, 0.7)
 structure = k.join('MERCC01')
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
+if wp_pipeline.maybe_portrait_exit(structure, 'mercc'):
+    raise SystemExit
 wp_pipeline.smart_uv(structure, 0.006)
 diff, ao, mask = wp_pipeline.bake_images(structure, ATLAS)
 tga = os.path.join(OUT_DIR, 'wp_mercc.tga')

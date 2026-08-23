@@ -46,6 +46,8 @@ def build(name, atlas, tga_name, fn, **comp):
     fn(k)
     obj = k.join(name)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    if wp_pipeline.maybe_portrait_exit(obj, tga_name.replace('wp_', '')):
+        return
     wp_pipeline.smart_uv(obj, 0.006)
     diff, ao, mask = wp_pipeline.bake_images(obj, atlas)
     tga = os.path.join(OUT_DIR, tga_name + '.tga')

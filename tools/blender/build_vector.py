@@ -154,6 +154,9 @@ tank.data.name = 'VECTOR'
 tris = sum(len(p.vertices) - 2 for p in tank.data.polygons)
 print('TRIS:', tris)
 
+if wp_pipeline.maybe_portrait_exit(tank, 'vector'):
+    raise SystemExit
+
 # ---------- UV ----------
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')

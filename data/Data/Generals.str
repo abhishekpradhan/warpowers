@@ -119,3 +119,11 @@ END
 WP:RadarUplink
 "Radar Uplink"
 END
+
+CONTROLBAR:UnderConstructionDesc
+"Constructing... %d%%"
+END
+
+WP:CancelConstruction
+"Cancel Construction"
+END

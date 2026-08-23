@@ -99,6 +99,8 @@ k.cyl('DISH', 'GUN', 4.6, 10.1, 14.0, 3.0, 0.7, axis='Z', verts=10,
 structure = k.join('JAKCP01')
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
+if wp_pipeline.maybe_portrait_exit(structure, 'jakcp'):
+    raise SystemExit
 wp_pipeline.smart_uv(structure, 0.006)
 diff, ao, mask = wp_pipeline.bake_images(structure, ATLAS)
 tga = os.path.join(OUT_DIR, 'wp_jakcp.tga')

@@ -67,7 +67,15 @@ DARK = "13 15 18 255"
 children = []
 # context panels (ControlBar shows/hides these per selection context) — all
 # borderless so idle contexts leave no chrome behind
-children.append(window("UnderConstructionWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
+children.append(window("UnderConstructionWindow", (10, 440, 200, 590), bg=DARK, border=DARK,
+                       children=[window("UnderConstructionDesc", (16, 448, 194, 478),
+                                        wtype="STATICTEXT", status="ENABLED",
+                                        bg="16 18 21 255", border="70 76 84 255",
+                                        extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+                                 window("ButtonCancelConstruction", (60, 486, 150, 530),
+                                        wtype="PUSHBUTTON", status="ENABLED+IMAGE",
+                                        syscb="PassSelectedButtonsToParentSystem",
+                                        bg="60 34 34 255", border="120 60 60 255")]))
 children.append(window("OCLTimerWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
 children.append(window("BeaconWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
 children.append(window("CommandWindow", (210, 440, 590, 590), bg=DARK, border=DARK,

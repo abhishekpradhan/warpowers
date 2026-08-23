@@ -269,3 +269,60 @@ def export_w3d(obj, tga_path, w3d_path, image_name):
         export_mode='HM',
         force_vertex_materials=True,
     )
+
+def render_portrait(obj, out_path, size=128):
+    """Render a 3/4-view cameo of the object (flat materials, transparent bg).
+
+    Cheap EEVEE still — call before the bake with WP_PORTRAIT_DIR set and the
+    script can exit early; icon sheets get real silhouettes for free.
+    """
+    import mathutils
+    scene = bpy.context.scene
+    try:
+        scene.render.engine = 'BLENDER_EEVEE_NEXT'
+    except TypeError:
+        scene.render.engine = 'BLENDER_EEVEE'
+    scene.render.film_transparent = True
+    scene.render.resolution_x = size
+    scene.render.resolution_y = size
+    scene.render.image_settings.file_format = 'TARGA'
+    scene.render.filepath = out_path
+
+    bb = [obj.matrix_world @ mathutils.Vector(c) for c in obj.bound_box]
+    ctr = sum(bb, mathutils.Vector()) / 8
+    radius = max((v - ctr).length for v in bb)
+
+    cam_data = bpy.data.cameras.new('WPPortraitCam')
+    cam_data.lens = 60
+    cam = bpy.data.objects.new('WPPortraitCam', cam_data)
+    bpy.context.collection.objects.link(cam)
+    direction = mathutils.Vector((1.0, -0.9, 0.65)).normalized()
+    cam.location = ctr + direction * radius * 2.35
+    cam.rotation_euler = (ctr - cam.location).to_track_quat('-Z', 'Y').to_euler()
+    scene.camera = cam
+
+    sun_data = bpy.data.lights.new('WPSun', 'SUN')
+    sun_data.energy = 3.0
+    sun = bpy.data.objects.new('WPSun', sun_data)
+    bpy.context.collection.objects.link(sun)
+    sun.rotation_euler = (0.9, 0.2, 0.6)
+    world = bpy.data.worlds.new('WPPortraitWorld') if not scene.world else scene.world
+    scene.world = world
+    world.use_nodes = True
+    bgn = world.node_tree.nodes.get('Background')
+    if bgn:
+        bgn.inputs[0].default_value = (0.6, 0.6, 0.65, 1.0)
+        bgn.inputs[1].default_value = 0.7
+
+    bpy.ops.render.render(write_still=True)
+    print('PORTRAIT_OK', out_path)
+
+
+def maybe_portrait_exit(obj, name):
+    """Env-gated portrait mode: render and skip the expensive bake/export."""
+    d = os.environ.get('WP_PORTRAIT_DIR')
+    if not d:
+        return False
+    os.makedirs(d, exist_ok=True)
+    render_portrait(obj, os.path.join(d, name + '.tga'))
+    return True

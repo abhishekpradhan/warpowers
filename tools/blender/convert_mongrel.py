@@ -128,6 +128,9 @@ for idx, m in enumerate(fresh):
     tank.data.materials[idx] = m
 print('MATERIALS:', len(fresh))
 
+if wp_pipeline.maybe_portrait_exit(tank, 'mongrel'):
+    raise SystemExit
+
 # ---------- UV + bake (same recipe as the hero Vector) ----------
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')

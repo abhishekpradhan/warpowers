@@ -135,6 +135,8 @@ def convert(cfg):
     for idx, m in enumerate(fresh):
         unit.data.materials[idx] = m
 
+    if wp_pipeline.maybe_portrait_exit(unit, cfg['tga'].replace('wp_', '')):
+        return
     wp_pipeline.smart_uv(unit, 0.002)
     diff, ao, mask = wp_pipeline.bake_images(unit, 512)
     tga = os.path.join(OUT_DIR, cfg['tga'] + '.tga')

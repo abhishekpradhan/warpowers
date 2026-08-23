@@ -117,3 +117,11 @@ User-selected from proposals: factions **Meridian Command** (superpower), **Jack
 User review of the beauty target: the procedural part-language models are "nowhere close to the quality of Command and Conquer Zero Hour" — and the nostalgia pillar demands that bar. Recalibration: **"finished" assets mean ZH-comparable quality** — modeled forms (wheel wells, muzzle brakes, greebles), painted-detail textures (panel lines, weathering, baked AO — texture carries most of the look), team-color regions, and eventually animation (turret traverse, treads, build-ups). The part-language (`genw3d.py`) is demoted to **placeholder tier**: gameplay stand-ins until each asset's real replacement lands.
 
 Production path: **Blender pipeline, everything self-produced** (user decision: no commissioned art). Model + UV + bake + texture in Blender via headless Python scripting; export W3D via the OpenSAGE Blender plugin (the unproven link — validated by spike before anything else). CC-licensed asset packs (Kenney/Quaternius/Sketchfab CC-BY) remain an opportunistic accelerator through the same pipeline, with ledger rows. Commissioned art: ruled out.
+
+## D016 — Construction model: dozer-built (2026-08-22, overnight run; user delegated)
+
+**Dozer-built, Generals-style.** The engine decides it: DozerAIUpdate, GUI_COMMAND_DOZER_CONSTRUCT buttons, the placement UI, and construction-percent rendering are native engine paths — while "build from Command Center" (C&C sidebar style) has no engine support and would need custom BuildAssistant/ControlBar changes that also pull away from the Generals nostalgia feel. Each faction gets a construction vehicle (Meridian: Surveyor; Jackal: Packrat — creative.md naming rules apply). Structures build where you place them; base layout stays a player skill.
+
+## D017 — Publish faction scope: 2 playable, no tease (2026-08-22, user decision)
+
+Meridian Command vs Jackal Front are the publish bar; **Iron Pact stays fully internal** — no roster, no teaser presence, nothing on public surfaces until after launch. All overnight/roster work targets the two factions only.

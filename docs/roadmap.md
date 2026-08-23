@@ -38,8 +38,8 @@ Nothing ships or deploys until the user says go.
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
-- [ ] LICENSE files: GPL (code), CC BY-SA 4.0 (assets); ledger + credits complete
-- [ ] Public README drafts for each repo
+- [x] LICENSE-ASSETS.md (CC BY-SA 4.0) + ledger + credits current (engine GPL file present upstream)
+- [x] README.draft.md for the workspace repo (engine/dvijoke fork READMEs at D012 time)
 - [ ] Fresh-clone reproducibility (submodules, pipelines, build docs)
 - [ ] D012 execution checklist: org, true forks (engine, dvijoke, dxvk), private→public flip order
 - [ ] Hosting comparison doc (Vercel/Railway/Modal/other) — decision only, no deploy

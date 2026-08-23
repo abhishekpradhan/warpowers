@@ -99,10 +99,33 @@ height_payload += struct.pack("<i", N) + bytes(height_bytes)
 # WPGround is a 4x4 grid of 64px tiles (16 variants); each 2x2 cell block
 # shows one full tile, chosen by a position hash to break repetition.
 NUM_TILES, TILE_GRID_W = 16, 4
+CONCRETE_FIRST, CONCRETE_NUM = 16, 16          # 4x4 sheet: 0-7 clean, 8-15 worn
+
+# base aprons: concrete pads under the start locations (ZH bases sat on
+# concrete, not bare dunes). Cell size is MAP_XY_FACTOR world units.
+APRONS = [(400.0, 400.0, 150.0), (1200.0, 1200.0, 150.0)]
+
+def apron_state(bx, by):
+    """0 = sand, 1 = worn concrete (edge ring), 2 = clean concrete."""
+    wx = (bx * 2 + 0.5 - BORDER) * 10.0                   # block center, world
+    wy = (by * 2 + 0.5 - BORDER) * 10.0
+    best = 0
+    for ax, ay, ar in APRONS:
+        d = ((wx - ax) ** 2 + (wy - ay) ** 2) ** 0.5
+        if d < ar - 26.0:
+            return 2
+        if d < ar:
+            best = max(best, 1)
+    return best
 
 def tile_pick(bx, by):
     h = (bx * 73856093) ^ (by * 19349663)
     h = (h ^ (h >> 13)) * 0x5BD1E995 & 0xFFFFFFFF
+    state = apron_state(bx, by)
+    if state == 2:
+        return CONCRETE_FIRST + (h >> 8) % 8           # clean rows
+    if state == 1:
+        return CONCRETE_FIRST + 8 + (h >> 8) % 8       # worn rows
     return (h >> 8) % NUM_TILES
 
 tile_ndx = bytearray()
@@ -117,8 +140,9 @@ blend_payload += zeros16                  # blendTileNdxes
 blend_payload += zeros16                  # extraBlendTileNdxes
 blend_payload += zeros16                  # cliffInfoNdxes
 blend_payload += bytes(H * FSW)           # cellCliffState
-blend_payload += struct.pack("<iiii", NUM_TILES, 1, 1, 1)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
-blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s("WPGround")  # first,num,width,legacyGDF,name
+blend_payload += struct.pack("<iiii", NUM_TILES + CONCRETE_NUM, 1, 1, 2)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
+blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s("WPGround")
+blend_payload += struct.pack("<iiii", CONCRETE_FIRST, CONCRETE_NUM, 4, 0) + ascii_s("WPConcrete")
 blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
 
 # ---------- WorldInfo v1 ----------

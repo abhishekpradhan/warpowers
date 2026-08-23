@@ -186,6 +186,91 @@ def write_scorch(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
+def write_concrete(path):
+    """256x512 concrete sheet: 4x8 grid of 64px tiles. Rows 0-3 clean panels
+    (seam lines, subtle stains), rows 4-7 worn (cracks, sand encroachment) for
+    apron edges. Same top-left-origin 24-bit TGA as the ground sheet."""
+    import random as _r
+    CW, CH = 256, 256
+    CBASE = (152, 149, 142)
+    SAND = BASE
+    cimg = [[CBASE for _ in range(CW)] for _ in range(CH)]
+    for ti in range(16):
+        tx, ty = ti % 4, ti // 4
+        worn = ti >= 8
+        rng = _r.Random(500 + ti)
+        tone = rng.uniform(-6, 6)
+        coarse = value_noise_grid(TILE, 4, -6, 6, 900 + ti * 3)
+        fine = value_noise_grid(TILE, 16, -3, 3, 901 + ti * 3)
+        for y in range(TILE):
+            for x in range(TILE):
+                d = tone + coarse[y][x] + fine[y][x]
+                px = (clamp(CBASE[0] + d), clamp(CBASE[1] + d), clamp(CBASE[2] + d * 0.97))
+                cimg[ty * TILE + y][tx * TILE + x] = px
+        # panel seams: darker lines at tile borders + one mid seam
+        for y in range(TILE):
+            for x in range(TILE):
+                on_seam = (x < 1 or y < 1 or x == 32 or y == 32)
+                if on_seam:
+                    pxl = cimg[ty * TILE + y][tx * TILE + x]
+                    dk = 14 if (x == 32 or y == 32) else 20
+                    cimg[ty * TILE + y][tx * TILE + x] = (
+                        clamp(pxl[0] - dk), clamp(pxl[1] - dk), clamp(pxl[2] - dk))
+        # stains
+        for _ in range(rng.randint(1, 3)):
+            cx, cy = rng.randrange(6, TILE - 6), rng.randrange(6, TILE - 6)
+            rad = rng.uniform(3, 8)
+            dk = rng.uniform(6, 14)
+            for oy in range(-int(rad), int(rad) + 1):
+                for ox in range(-int(rad), int(rad) + 1):
+                    if ox * ox + oy * oy > rad * rad:
+                        continue
+                    yy, xx = ty * TILE + cy + oy, tx * TILE + cx + ox
+                    if 0 <= yy < CH and 0 <= xx < CW:
+                        pxl = cimg[yy][xx]
+                        f = 1.0 - (ox * ox + oy * oy) / (rad * rad)
+                        cimg[yy][xx] = (clamp(pxl[0] - dk * f), clamp(pxl[1] - dk * f), clamp(pxl[2] - dk * f))
+        if worn:
+            # cracks: dark random walks
+            for _ in range(rng.randint(2, 4)):
+                x, y = rng.randrange(TILE), rng.randrange(TILE)
+                for _ in range(rng.randint(14, 30)):
+                    yy, xx = ty * TILE + y, tx * TILE + x
+                    if 0 <= yy < CH and 0 <= xx < CW:
+                        pxl = cimg[yy][xx]
+                        cimg[yy][xx] = (clamp(pxl[0] - 26), clamp(pxl[1] - 26), clamp(pxl[2] - 26))
+                    x += rng.choice((-1, 0, 1)); y += rng.choice((-1, 0, 1))
+                    x = max(0, min(TILE - 1, x)); y = max(0, min(TILE - 1, y))
+            # sand encroachment: blotches lerped toward the sand base
+            for _ in range(rng.randint(3, 6)):
+                cx, cy = rng.randrange(TILE), rng.randrange(TILE)
+                rad = rng.uniform(4, 11)
+                for oy in range(-int(rad), int(rad) + 1):
+                    for ox in range(-int(rad), int(rad) + 1):
+                        d2 = ox * ox + oy * oy
+                        if d2 > rad * rad:
+                            continue
+                        yy, xx = ty * TILE + cy + oy, tx * TILE + cx + ox
+                        if 0 <= yy < CH and 0 <= xx < CW:
+                            f = 0.75 * (1.0 - d2 / (rad * rad))
+                            pxl = cimg[yy][xx]
+                            cimg[yy][xx] = (
+                                clamp(pxl[0] * (1 - f) + SAND[0] * f),
+                                clamp(pxl[1] * (1 - f) + SAND[1] * f),
+                                clamp(pxl[2] * (1 - f) + SAND[2] * f))
+    hdr = bytearray(18)
+    hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, CW, CH)
+    hdr[16] = 24
+    hdr[17] = 0x20
+    body = bytearray()
+    for row in cimg:
+        for (r, g, b) in row:
+            body += bytes((b, g, r))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 targets = sys.argv[1:] or [
     os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Terrain/wp_ground.tga"),
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -198,3 +283,4 @@ for t in targets:
     write_glow(os.path.join(texdir, "wp_glow.tga"))
     write_soft(os.path.join(texdir, "wp_soft.tga"))
     write_scorch(os.path.join(texdir, "EXScorch01.tga"))
+    write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))

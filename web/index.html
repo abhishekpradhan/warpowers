@@ -302,6 +302,9 @@
         ENV.CNC_GENERALS_PATH = '/game-base';
         ENV.HOME = '/home/web_user';
         if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
+        // WarPowers @debug forward autotest/diagnostic env knobs from the URL
+        if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
+        if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
         FS.mkdir('/game');
         FS.mkdir('/game-base');
         FS.mkdir('/fonts');

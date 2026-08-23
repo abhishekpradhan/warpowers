@@ -287,7 +287,7 @@
         ENV.CNC_GENERALS_ZH_PATH = '/game';
         ENV.CNC_GENERALS_PATH = '/game-base';
         ENV.HOME = '/home/web_user';
-        if (DEBUG) ENV.IG_TRACE = '1';
+        if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
         FS.mkdir('/game');
         FS.mkdir('/game-base');
         FS.mkdir('/fonts');

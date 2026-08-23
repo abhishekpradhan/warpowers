@@ -78,13 +78,18 @@ children.append(window("UnderConstructionWindow", (10, 440, 200, 590), bg=DARK, 
                                         bg="60 34 34 255", border="120 60 60 255")]))
 children.append(window("OCLTimerWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
 children.append(window("BeaconWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
-children.append(window("CommandWindow", (210, 440, 590, 590), bg=DARK, border=DARK,
+# command grid and production queue get DISJOINT rects: overlapped, the
+# invisible queue buttons swallow command clicks while producing (a click on
+# queue slot 1 cancels production — reads as "my clicks do nothing").
+# command grid (2 rows) on top, queue strip below — disjoint rects, and both
+# clear of the 3D viewport overdraw (scene renders down to ~UI y465).
+children.append(window("CommandWindow", (210, 468, 590, 562), bg=DARK, border=DARK,
                        syscb="PassSelectedButtonsToParentSystem",
-                       children=grid("ButtonCommand", 18, 6, 212, 442, 58, 44, 63, 49,
+                       children=grid("ButtonCommand", 18, 6, 212, 470, 58, 44, 63, 47,
                                      bg="34 38 44 255")))
-children.append(window("ProductionQueueWindow", (210, 440, 590, 590), bg=DARK, border=DARK,
+children.append(window("ProductionQueueWindow", (210, 566, 590, 598), bg=DARK, border=DARK,
                        syscb="PassSelectedButtonsToParentSystem",
-                       children=grid("ButtonQueue", 9, 5, 212, 442, 44, 44, 47, 47,
+                       children=grid("ButtonQueue", 9, 9, 212, 567, 30, 30, 34, 34,
                                      bg="30 40 34 255")))
 children.append(window("ObserverPlayerListWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
 children.append(window("ObserverPlayerInfoWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
@@ -130,3 +135,29 @@ for t in targets:
     with open(t, "w") as f:
         f.write(content)
     print(f"wrote {t} ({len(content)} bytes)")
+
+# ---------- ControlBarPopupDescription.wnd (build-button hover tooltip) ----------
+POPUP = window("PopupParent", (250, 300, 490, 392), status="ENABLED+IMAGE+NOFOCUS",
+               bg="12 14 17 255", border="120 104 60 255", children=[
+    window("StaticTextName", (256, 306, 484, 326), wtype="STATICTEXT", status="ENABLED",
+           bg="12 14 17 255", border="12 14 17 255",
+           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+    window("StaticTextCost", (256, 330, 484, 348), wtype="STATICTEXT", status="ENABLED",
+           bg="12 14 17 255", border="12 14 17 255",
+           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+    window("StaticTextDescription", (256, 352, 484, 388), wtype="STATICTEXT", status="ENABLED",
+           bg="12 14 17 255", border="12 14 17 255",
+           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+])
+popup_content = ("FILE_VERSION = 2;\n"
+                 "STARTLAYOUTBLOCK\n"
+                 "  LAYOUTINIT = \"[None]\";\n"
+                 "  LAYOUTUPDATE = \"[None]\";\n"
+                 "  LAYOUTSHUTDOWN = \"[None]\";\n"
+                 "ENDLAYOUTBLOCK\n") + POPUP.replace(CB + ":", "ControlBarPopupDescription.wnd:")
+for t in targets:
+    pt = os.path.join(os.path.dirname(t), "ControlBarPopupDescription.wnd")
+    with open(pt, "w") as f:
+        f.write(popup_content)
+    print("wrote", pt)
+

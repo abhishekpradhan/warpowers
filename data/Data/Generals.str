@@ -127,3 +127,15 @@ END
 WP:CancelConstruction
 "Cancel Construction"
 END
+
+TOOLTIP:Cost
+"Cost: %d"
+END
+
+TOOLTIP:TooltipNotEnoughMoneyToBuild
+"Insufficient funds."
+END
+
+TOOLTIP:TooltipCannotPurchaseBecauseQueueFull
+"Production queue is full."
+END

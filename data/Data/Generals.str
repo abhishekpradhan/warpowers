@@ -31,3 +31,27 @@ END
 WP:TankShell
 "Shell"
 END
+
+WP:BuildSurveyor
+"Build Surveyor"
+END
+
+WP:BuildPowerPlant
+"Construct Power Station"
+END
+
+WP:BuildWarFactory
+"Construct Vehicle Works"
+END
+
+WP:Surveyor
+"Surveyor"
+END
+
+WP:PowerPlant
+"Power Station"
+END
+
+WP:WarFactory
+"Vehicle Works"
+END

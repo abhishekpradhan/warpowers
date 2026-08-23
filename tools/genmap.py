@@ -220,7 +220,7 @@ objects_payload = b"".join(preview + [
     obj(400.0, 400.0, 0.0, "WP_CommandCenter",
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),
-    obj(600.0, 480.0, 2.4, "WPJ_Mongrel",
+    obj(720.0, 560.0, 2.4, "WPJ_Mongrel",
         [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(1200.0, 1200.0, 3.14159265, "WPJ_CommandPost",
         [("originalOwner", D_ASCII, "teamPlayerB"),

@@ -6,16 +6,16 @@ decisions.md. Publish bar: polished modern experience, ZH-level nostalgia,
 Nothing ships or deploys until the user says go.
 
 ## 1. Combat juice — fights feel like Generals
-- [ ] Real projectile on WP_TankGun (visible, dodgeable shells; ProjectileDetonationFX fires)
-- [ ] Death FX: explosions, husks, scorch decals
-- [ ] Audio pipeline: cannon/explosion SFX, processed-radio unit barks, EVA-style announcer (all original/CC0)
-- [ ] LocalDefeat runtime verification (enemy that shoots back)
+- [x] Real projectile on WP_TankGun (visible, dodgeable shells; ProjectileDetonationFX fires)
+- [x] Death FX: explosions, smoke, scorch decals (husks: later)
+- [x] Audio pipeline: cannon/explosion SFX + processed-radio unit barks wired (EVA announcer: later; audibility = user morning test)
+- [x] LocalDefeat path exercised (enemy razed an undefended CC mid-test); input-disable still needs an interactive check
 
 ## 2. Base-building loop
-- [ ] Ground context: aprons/pads so structures sit in bases, not on bare dunes
-- [ ] Construction model decision (D016) implemented
-- [ ] Economy structures per faction: power + production
-- [ ] Money/power economy live (HUD already displays both)
+- [x] Ground context: aprons/pads so structures sit in bases, not on bare dunes
+- [x] Construction model decision (D016) implemented
+- [x] Economy structures: Meridian power + production (Jackal mirror pending)
+- [x] Money/power economy live (HUD already displays both)
 
 ## 3. Roster breadth
 - [ ] Convert remaining Quaternius tanks into distinct units
@@ -23,7 +23,7 @@ Nothing ships or deploys until the user says go.
 - [ ] Second unit class (infantry or light vehicle) per faction
 
 ## 4. Opponent
-- [ ] Scripted attack waves via map scripts
+- [x] Scripted attack waves via map scripts
 - [ ] Skirmish AI investigation (engine's real AI path)
 
 ## 5. UI/UX
@@ -37,7 +37,7 @@ Nothing ships or deploys until the user says go.
 - [ ] Settings persistence
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
-- [ ] Rebrand sweep: no EA trademarks on any surface (audit + fix)
+- [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
 - [ ] LICENSE files: GPL (code), CC BY-SA 4.0 (assets); ledger + credits complete
 - [ ] Public README drafts for each repo
 - [ ] Fresh-clone reproducibility (submodules, pipelines, build docs)

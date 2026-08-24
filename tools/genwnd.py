@@ -177,7 +177,7 @@ for t in targets:
 
 # ---------- match-result screens (ScriptActions loads these on VICTORY/DEFEAT) ----------
 def result_screen(fname, key, color):
-    NAME = f"Menus/{fname}"
+    NAME = fname
     body = window("ResultBanner", (200, 240, 600, 320), wtype="STATICTEXT",
                   status="ENABLED", bg="12 14 17 235", border=color,
                   textcolor=color, fontsize=32, bold=1,
@@ -210,7 +210,7 @@ def menu_layout(fname, body, init="[None]", update="[None]", shutdown="[None]"):
                f"  LAYOUTINIT = \"{init}\";\n"
                f"  LAYOUTUPDATE = \"{update}\";\n"
                f"  LAYOUTSHUTDOWN = \"{shutdown}\";\n"
-               "ENDLAYOUTBLOCK\n") + body.replace(CB + ":", f"Menus/{fname}.wnd:")
+               "ENDLAYOUTBLOCK\n") + body.replace(CB + ":", f"{fname}.wnd:")
     for t in targets:
         d = os.path.join(os.path.dirname(t), "Menus")
         os.makedirs(d, exist_ok=True)

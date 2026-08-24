@@ -64,6 +64,7 @@ Nothing ships or deploys until the user says go.
 - [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen
 - [ ] Victory screen live-confirm (same path as defeat; not yet witnessed)
 - [ ] Full-autotest retune (2-tank fleet now loses to the defended enemy base)
+- [ ] Restart Battle renders black (map reloads fine - extentW ok, logic runs, no HUD; stock restartMissionMenu path needs the same state forensics the menu path got; workaround: Abandon + redeploy)
 - [ ] Balance pass after a real playthrough (incl. start-money discrepancy between maps)
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)

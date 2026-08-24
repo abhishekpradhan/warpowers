@@ -44,6 +44,14 @@ Upstreams (fetch-only in practice; **never push**): engine → `generalsxweb`
 (meerzulee/GeneralsXWeb), dvijoke → `origin` (meerzulee/dvijoke), dxvk →
 fbraz3 lineage.
 
+**GitHub Actions: none run on these repos.** The engine/dxvk forks inherited
+upstream CI workflows that billed private-repo runner minutes (Windows/macOS
+at 2x/10x multipliers) on every push and drained the account's monthly
+Actions budget (2026-08-24); the workflow files are removed from our
+branches — CI belongs upstream. If a future upstream sync reintroduces
+`.github/workflows/`, delete it again (or disable Actions in the repo
+settings UI: Settings → Actions → General → Disable actions).
+
 ## Push routine
 
 ```

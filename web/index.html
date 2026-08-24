@@ -143,6 +143,34 @@
     }
     #errorBox button:hover { border-color: var(--text-dim); }
 
+    /* ---- post-match result card ---- */
+    #result { display: none; text-align: center; }
+    #resultBanner {
+      font: 750 34px/1.2 -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+      letter-spacing: .3em;
+      margin-right: -.3em;
+      margin-bottom: 6px;
+    }
+    #resultBanner.victory { color: var(--accent); }
+    #resultBanner.defeat { color: var(--danger); }
+    #resultBanner.neutral { color: var(--text); letter-spacing: .18em; font-size: 22px; }
+    #resultStats {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: .08em;
+      color: var(--text-dim);
+      line-height: 2;
+      margin-bottom: 18px;
+    }
+    #resultStats b { color: var(--text); font-weight: 600; }
+    #redeployBtn {
+      font: 700 14px/1 'SF Mono', ui-monospace, monospace;
+      letter-spacing: 0.3em; padding: 13px 40px 13px 46px;
+      color: #0d0f12; background: var(--accent); border: 0; cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    #redeployBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(215,180,90,.35); }
+
     /* ---- debug log (only with ?debug=1) ---- */
     #log {
       display: none;
@@ -183,6 +211,11 @@
         <div id="errorBox">
           <p id="errorMsg"></p>
           <button onclick="location.reload()">Reload</button>
+        </div>
+        <div id="result">
+          <div id="resultBanner"></div>
+          <div id="resultStats"></div>
+          <button id="redeployBtn" onclick="location.reload()">REDEPLOY</button>
         </div>
       </div>
     </div>
@@ -305,6 +338,11 @@
         }).catch(function(err) { fail('Engine download failed. ' + err.message); });
         return {};
       },
+      onMatchResult: function(r) {
+        // Fired from the engine at VICTORY/DEFEAT with the ScoreKeeper
+        // snapshot; the engine then quits back to this page.
+        window.wpMatchResult = r;
+      },
       onEngineRunning: function() {
         // First main-loop tick: the shell (or match, in direct-load mode) is
         // live. Boot budget (D018): deploy click -> here in <=20s.
@@ -330,17 +368,33 @@
         } catch (e) { /* marks missing on odd paths - report is best-effort */ }
       },
       onGameExit: function() {
+        // The page is the shell: every match exit lands here. Render the
+        // result card (or a stand-down note) + REDEPLOY. The wasm runtime
+        // can't restart in place, so redeploy = reload.
         failed = false;
         meterEl.style.display = 'none';
+        phaseEl.style.display = 'none';
         overlayEl.classList.remove('hidden');
-        phaseEl.style.display = 'block';
-        setPhase('Standing down.');
-        // The wasm runtime can't restart in-place — offer a one-click
-        // redeploy (page reload) instead of a dead-end message.
-        var eb = document.getElementById('errorBox');
-        document.getElementById('errorMsg').textContent = '';
-        eb.querySelector('button').textContent = 'REDEPLOY';
-        eb.style.display = 'block';
+        var r = window.wpMatchResult;
+        var banner = document.getElementById('resultBanner');
+        var stats = document.getElementById('resultStats');
+        if (r) {
+          banner.textContent = r.victory ? 'VICTORY' : 'DEFEAT';
+          banner.className = r.victory ? 'victory' : 'defeat';
+          var mm = Math.floor(r.durationSeconds / 60);
+          var ss = ('0' + (r.durationSeconds % 60)).slice(-2);
+          stats.innerHTML =
+            'UNITS <b>' + r.unitsBuilt + '</b> BUILT / <b>' + r.unitsLost +
+            '</b> LOST / <b>' + r.unitsDestroyed + '</b> DESTROYED<br>' +
+            'STRUCTURES BUILT <b>' + r.buildingsBuilt + '</b> &nbsp;&middot;&nbsp; ' +
+            'CREDITS EARNED <b>' + r.moneyEarned + '</b><br>' +
+            'BATTLE DURATION <b>' + mm + ':' + ss + '</b>';
+        } else {
+          banner.textContent = 'STOOD DOWN';
+          banner.className = 'neutral';
+          stats.textContent = '';
+        }
+        document.getElementById('result').style.display = 'block';
       },
       preRun: [function() {
         setPhase('Staging battlefield data…');

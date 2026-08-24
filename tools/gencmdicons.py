@@ -67,7 +67,27 @@ poly_fill(O, oct_pts, DIM)
 poly_fill(O, [(x + (32 - x) * 0.18, y + (32 - y) * 0.18) for x, y in oct_pts], GOLD)
 line(O + 25, 32, O + 39, 32, FACE, 3)
 
-# cell 3: spare (blank face)
+# cell 3 region: power-meter pixels for the engine's W3DPowerDraw
+# (hardcoded image names). Tick cells are 6x10 (5px color + 1px trough
+# separator - the sheet has no alpha, so the separator IS the trough
+# color); the needle is 4x10, bright core with trough edges.
+TROUGH = (16, 20, 27)
+PGREEN = (96, 168, 104)
+PAMBER = GOLD
+PRED   = (198, 74, 60)
+NEEDLE = (242, 232, 202)
+def tick_cell(x0, color):
+    for y in range(10):
+        for x in range(6):
+            px(x0 + x, y, TROUGH if x == 5 else color)
+def needle_cell(x0):
+    for y in range(10):
+        for x in range(4):
+            px(x0 + x, y, TROUGH if x in (0, 3) else NEEDLE)
+tick_cell(192, PGREEN)    # PowerPointG
+tick_cell(200, PAMBER)    # PowerPointY
+tick_cell(208, PRED)      # PowerPointR
+needle_cell(216)          # PowerBarSlider
 
 def write(path):
     hdr = bytearray(18)

@@ -114,11 +114,18 @@ children.append(window("RightHUD", (600, 560, 636, 596), bg=DARK, border=DARK,
 children.append(window("MoneyDisplay", (612, 426, 788, 442), wtype="STATICTEXT",
                        status="ENABLED", bg="16 18 21 255", border="120 104 60 255",
                        extra="  STATICTEXTDATA = CENTERED: 1;\n"))
-# Power meter strip: must NOT carry WIN_STATUS_IMAGE or its fill never
-# paints - it then hit-tests for the hover tooltip while showing nothing
-# (an invisible window answering "Power" reads as a haunted tooltip).
-children.append(window("PowerWindow", (612, 446, 788, 455), status="ENABLED+NOFOCUS",
-                       bg="30 40 58 255", border="120 104 60 255"))
+# Power meter: a decorative trough frame with the live meter as its child.
+# The child carries DRAWCALLBACK W3DPowerDraw (engine draw: log-scale tick
+# bar green/yellow/red by margin + consumption needle - images PowerPointG/
+# Y/R + PowerBarSlider on the glyph sheet). A draw callback REPLACES the
+# default bg/border paint, hence the split; neither window may carry
+# WIN_STATUS_IMAGE (image-flagged windows without an image paint nothing
+# and haunt the tooltip hit-test).
+# One window, no decorative sibling: an overlapping sibling wins the input
+# hit-test and eats the hover tooltip. W3DPowerDraw paints its own trough +
+# border around the window rect, then ticks + needle.
+children.append(window("PowerWindow", (613, 446, 787, 455), status="ENABLED+NOFOCUS",
+                       drawcb="W3DPowerDraw"))
 # radar draws into this window (engine hardcodes the name ControlBar.wnd:LeftHUD).
 # Square, so the square map fills it edge to edge.
 children.append(window("LeftHUD", (648, 456, 788, 596), bg="10 12 14 255",

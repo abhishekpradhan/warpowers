@@ -173,6 +173,10 @@
             <button class="factionBtn" data-faction="jackal" style="font-size:12px; letter-spacing:1px;">JACKAL LEAGUE</button>
           </div>
           <button id="playBtn">DEPLOY</button>
+          <div id="volRow" class="label" style="display:flex; align-items:center; gap:8px; font-size:11px;">
+            SOUND <input id="volSlider" type="range" min="0" max="100" value="80" style="width:120px;">
+            <span id="volVal">80</span>
+          </div>
         </div>
         <div id="meter"><div id="meterFill"></div></div>
         <div id="phase" class="label">Contacting command&hellip;</div>
@@ -272,7 +276,7 @@
     var Module = {
       canvas: document.getElementById('canvas'),
       locateFile: function(path) { return path + '?' + bust; },
-      arguments: ['-win', '-noshellmap', '-file', (window.wpFaction === 'jackal' ? 'Maps/WPTestJ.map' : 'Maps/WPTest.map')].concat(
+      arguments: ['-win', '-noshellmap', '-file', 'Maps/WPTest.map'].concat(
         (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; })),
       print: log,
       printErr: log,
@@ -309,6 +313,7 @@
         ENV.HOME = '/home/web_user';
         if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
         // WarPowers @debug forward autotest/diagnostic env knobs from the URL
+        ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
         if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
         if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
         FS.mkdir('/game');
@@ -365,6 +370,15 @@
       var phase = document.getElementById('phase');
       meterEl.style.display = 'none';
       phase.style.display = 'none';
+      // Volume: persisted, forwarded to the engine via ENV at boot.
+      var volSlider = document.getElementById('volSlider');
+      var volVal = document.getElementById('volVal');
+      volSlider.value = localStorage.getItem('wpVolume') || '80';
+      volVal.textContent = volSlider.value;
+      volSlider.addEventListener('input', function() {
+        volVal.textContent = volSlider.value;
+        localStorage.setItem('wpVolume', volSlider.value);
+      });
       // Faction picker: highlighted selection, remembered across visits.
       window.wpFaction = localStorage.getItem('wpFaction') || 'meridian';
       Array.prototype.forEach.call(document.querySelectorAll('.factionBtn'), function(b) {
@@ -380,6 +394,10 @@
       // The page is the main menu: the engine loads on DEPLOY. The click is
       // also the user gesture that unlocks the WebAudio context.
       document.getElementById('playBtn').addEventListener('click', function() {
+        // rebuild engine args now - the faction picker may have changed since load
+        Module.arguments = ['-win', '-noshellmap', '-file',
+          (window.wpFaction === 'jackal' ? 'Maps/WPTestJ.map' : 'Maps/WPTest.map')].concat(
+          (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; }));
         document.getElementById('menu').classList.add('hidden');
         meterEl.style.display = '';
         phase.style.display = '';

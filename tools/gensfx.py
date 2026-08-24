@@ -168,6 +168,32 @@ out('wp_cannon_01', cannon(11))
 out('wp_cannon_02', cannon(23))
 out('wp_boom_01', boom(31))
 out('wp_boom_02', boom(47))
+def rifle(seed):
+    rng = random.Random(seed)
+    n = int(SR * 0.22)
+    crack = [rng.uniform(-1, 1) * math.exp(-i / (SR * 0.006)) for i in range(n)]
+    crack = bandpass(crack, 1500, 7500, 1)
+    snap, ph = [], 0.0
+    for i in range(n):
+        ph += 2 * math.pi * 240.0 / SR
+        snap.append(math.sin(ph) * math.exp(-i / (SR * 0.02)))
+    mix = [1.3 * c + 0.6 * t for c, t in zip(crack, snap)]
+    return softclip(mix, 1.6)
+
+def bodyfall(seed):
+    rng = random.Random(seed)
+    n = int(SR * 0.4)
+    thud, ph = [], 0.0
+    for i in range(n):
+        ph += 2 * math.pi * 90.0 / SR
+        thud.append(math.sin(ph) * math.exp(-i / (SR * 0.07)))
+    dust = lowpass([rng.uniform(-1, 1) for _ in range(n)], 500)
+    dust = [d * math.exp(-i / (SR * 0.12)) for i, d in enumerate(dust)]
+    return softclip([1.2 * t + 0.7 * d for t, d in zip(thud, dust)], 1.4)
+
+out('wp_rifle_01', rifle(71))
+out('wp_rifle_02', rifle(83))
+out('wp_bodyfall_01', bodyfall(91))
 out('wp_impact_01', impact(53))
 out('wp_impact_02', impact(61))
 
@@ -185,6 +211,8 @@ UNIT_STYLES = {
     'wp_mon': dict(voice='en-us+m7', pitch=28, speed=180, grit=1.35),   # Mongrel tank: surly
     'wp_vul': dict(voice='en-us+m5', pitch=62, speed=202, grit=1.5),    # Vulture raider: manic
     'wp_rig': dict(voice='en-us+m1', pitch=24, speed=148, grit=1.3),    # Rigger: gruff foreman
+    'wp_war': dict(voice='en-gb+m3', pitch=48, speed=168, grit=0.95),   # Warden rifleman: crisp drill
+    'wp_scr': dict(voice='en-us+m7', pitch=40, speed=192, grit=1.45),   # Scrapper: jumpy scrapyard kid
 }
 
 def barks(prefix, lines, base_seed):
@@ -235,6 +263,20 @@ barks('wp_vul', {
     'atk': ['Strip them down!', 'Get the shiny bits!'],
     'rdy': ['Vulture out of the cage.'],
 }, 600)
+
+barks('wp_war', {
+    'sel': ['Warden reporting.', 'Rifle ready.'],
+    'mov': ['Boots moving.', 'On the double.'],
+    'atk': ['Open fire!', 'Suppressing!'],
+    'rdy': ['Warden ready.'],
+}, 750)
+
+barks('wp_scr', {
+    'sel': ['Scrapper!', 'Yeah boss?'],
+    'mov': ['Leggin it.', 'Going going.'],
+    'atk': ['Perforate them!', 'Eat pellets!'],
+    'rdy': ['Scrapper on the yard.'],
+}, 780)
 
 barks('wp_rig', {
     'sel': ['Rigger.', 'Wrench is ready.'],

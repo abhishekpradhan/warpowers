@@ -206,6 +206,24 @@ def scaffold(hx, hy, h):
 MODELS["WPSCAF01"] = scaffold(11, 11, 12)
 MODELS["WPSCAF02"] = scaffold(19, 17, 18)
 
+# Infantry: chunky minifig troopers matching the boot-slice blocky look.
+# Faces +X at angle 0 (rifle forward). ~7 world units tall.
+def trooper(uniform, trim, skin=(214, 178, 148)):
+    GUNC = (70, 74, 80)
+    return [
+        part("LEGL", trim, -0.4, -0.75, 0, 1.4, 1.1, 2.6),
+        part("LEGR", trim, -0.4, 0.75, 0, 1.4, 1.1, 2.6),
+        part("TORS", uniform, 0, 0, 2.6, 2.2, 3.0, 2.8),
+        part("ARMR", uniform, 0.9, 1.7, 3.2, 2.6, 0.9, 1.0),
+        part("ARML", uniform, 0.9, -1.7, 3.2, 2.6, 0.9, 1.0),
+        part("HEAD", skin, 0, 0, 5.6, 1.6, 1.6, 1.5),
+        part("HELM", trim, -0.1, 0, 6.7, 1.9, 1.9, 0.7),
+        part("RIFL", GUNC, 2.2, 0.6, 3.4, 3.4, 0.5, 0.5),
+    ]
+
+MODELS["MERINF01"] = trooper((225, 229, 234), (120, 128, 138))     # Meridian Warden: white/steel
+MODELS["JAKINF01"] = trooper((196, 170, 128), (138, 90, 60))       # Jackal Scrapper: sand/rust
+
 out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
 os.makedirs(out_dir, exist_ok=True)
 for model, parts in MODELS.items():

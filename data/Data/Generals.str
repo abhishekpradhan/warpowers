@@ -295,3 +295,27 @@ END
 WP:FactionJackal
 "Jackal League"
 END
+
+WP:Warden
+"Warden"
+END
+
+WP:Scrapper
+"Scrapper"
+END
+
+WP:BuildWarden
+"Train Warden"
+END
+
+WP:BuildScrapper
+"Train Scrapper"
+END
+
+WP:DescWarden
+"Meridian rifle trooper. Cheap, quick to train, chews up other infantry."
+END
+
+WP:DescScrapper
+"Jackal scattergunner. Nasty up close, allergic to tank shells."
+END

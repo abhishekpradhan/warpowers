@@ -18,13 +18,21 @@ if '--faction=jackal' in sys.argv:
              player_cc='WPJ_CommandPost', player_faction='FactionWPJ',
              enemy_cc='WP_CommandCenter', enemy_faction='FactionWP',
              guard='WP_Tank',
-             wave_raider='WP_Tank', wave_pack_a='WP_Outrider', wave_pack_b='WP_Tank')
+             wave_raider='WP_Tank', wave_pack_a='WP_Outrider', wave_pack_b='WP_Tank',
+             enemy_factory='WP_VehiclePlant', enemy_tower='WP_Bulwark',
+             enemy_power='WP_PowerArray',
+             assault_a='WP_Tank', assault_b='WP_Zenith',
+             defender='WP_Tank', defender_scout='WP_Outrider')
 else:
     F = dict(map_name='WPTest',
              player_cc='WP_CommandCenter', player_faction='FactionWP',
              enemy_cc='WPJ_CommandPost', enemy_faction='FactionWPJ',
              guard='WPJ_Mongrel',
-             wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel')
+             wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel',
+             enemy_factory='WPJ_ChopShop', enemy_tower='WPJ_Watchpost',
+             enemy_power='WP_PowerArray',
+             assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
+             defender='WPJ_Mongrel', defender_scout='WPJ_Vulture')
 
 # ---------- geometry ----------
 BORDER = 10
@@ -204,7 +212,7 @@ sides_payload += side([
     ("playerStartMoney", D_INT, 5000),
     ("multiplayerStartIndex", D_INT, 1),
 ])
-sides_payload += struct.pack("<i", 5)
+sides_payload += struct.pack("<i", 6)
 sides_payload += dict_pairs([("teamName", D_ASCII, "team"),
                              ("teamOwner", D_ASCII, ""),
                              ("teamIsSingleton", D_BOOL, True)])
@@ -233,6 +241,17 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWavePack"),
                              ("teamUnitType2", D_ASCII, F["wave_pack_b"]),
                              ("teamUnitMinCount2", D_INT, 1),
                              ("teamUnitMaxCount2", D_INT, 1),
+                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
+sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveAssault"),
+                             ("teamOwner", D_ASCII, "PlayerB"),
+                             ("teamIsSingleton", D_BOOL, False),
+                             ("teamHome", D_ASCII, "WaveSpawn"),
+                             ("teamUnitType1", D_ASCII, F["assault_a"]),
+                             ("teamUnitMinCount1", D_INT, 3),
+                             ("teamUnitMaxCount1", D_INT, 3),
+                             ("teamUnitType2", D_ASCII, F["assault_b"]),
+                             ("teamUnitMinCount2", D_INT, 2),
+                             ("teamUnitMaxCount2", D_INT, 2),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
 # nested PlayerScriptsList appended below (win/lose scripts), after its
 # helper definitions
@@ -268,6 +287,20 @@ objects_payload = b"".join(preview + [
     obj(1200.0, 1200.0, 3.14159265, F["enemy_cc"],
         [("originalOwner", D_ASCII, "teamPlayerB"),
          ("objectName", D_ASCII, "EnemyCC")]),
+    obj(1120.0, 1250.0, 2.6, F["enemy_factory"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1270.0, 1240.0, 3.4, F["enemy_power"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1105.0, 1105.0, 2.4, F["enemy_tower"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1280.0, 1120.0, 3.6, F["enemy_tower"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1150.0, 1150.0, 2.4, F["defender"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1240.0, 1160.0, 3.2, F["defender"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(1195.0, 1120.0, 2.8, F["defender_scout"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
     obj(1200.0, 1150.0, 0.0, "*Waypoints/Waypoint",
@@ -383,6 +416,17 @@ scripts_b = (
                      [parameter(P_TEAM, s="teamWavePack"), parameter(P_WAYPOINT, s="WaveSpawn")]),
               action("SET_MILLISECOND_TIMER",
                      [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=150.0)])],
+             one_shot=False)
+    + script("WP_AssaultStart",
+           [condition("CONDITION_TRUE", [])],
+           [action("SET_MILLISECOND_TIMER",
+                   [parameter(P_COUNTER, s="AssaultTimer"), parameter(P_REAL, r=480.0)])])
+    + script("WP_AssaultSpawn",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AssaultTimer")])],
+             [action("CREATE_REINFORCEMENT_TEAM",
+                     [parameter(P_TEAM, s="teamWaveAssault"), parameter(P_WAYPOINT, s="WaveSpawn")]),
+              action("SET_MILLISECOND_TIMER",
+                     [parameter(P_COUNTER, s="AssaultTimer"), parameter(P_REAL, r=240.0)])],
              one_shot=False)
     + script("WP_WaveAttack",
              [condition("CONDITION_TRUE", [])],

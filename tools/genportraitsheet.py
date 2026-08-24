@@ -27,6 +27,7 @@ SLOTS = [
     ('WPIcoVehiclePlant', 'merwf', MER), ('WPIcoBulwark', 'bulwark', MER),
     ('WPIcoChopShop', 'jakcs', JAK), ('WPIcoWatchpost', 'watchpost', JAK),
     ('WPIcoCC', 'mercc', MER), ('WPIcoCP', 'jakcp', JAK),
+    ('WPIcoWarden', 'warden', MER), ('WPIcoScrapper', 'scrapper', JAK),
 ]
 
 

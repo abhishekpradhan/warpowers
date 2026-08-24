@@ -242,4 +242,20 @@ barks('wp_rig', {
     'rdy': ['Rigger is up.'],
 }, 700)
 
+# EVA — the command-net announcer: one composed voice, cleaner processing than
+# the unit radios (she is speaking from HQ, not a moving vehicle)
+EVA = dict(voice='en-us+f3', pitch=46, speed=148, grit=0.7)
+
+def eva(name, text, seed):
+    out('wp_eva_' + name,
+        radio(text, EVA['voice'], EVA['pitch'], EVA['speed'], seed, EVA['grit']))
+
+eva('lowpower_01', 'Warning: power levels critical.', 810)
+eva('funds_01', 'Insufficient funds.', 820)
+eva('attack_01', 'Our base is under attack.', 830)
+eva('attack_02', 'Base is under attack.', 831)
+eva('bldglost_01', 'Structure lost.', 840)
+eva('unitlost_01', 'Unit lost.', 850)
+eva('upgrade_01', 'Upgrade complete.', 860)
+
 print('audio pack complete')

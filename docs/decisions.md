@@ -145,3 +145,15 @@ Consequences:
   music) is parked until the port surface matches the reference project.
 - vision.md is trimmed to reflect this framing; the nostalgia checklist
   survives as the asset-pack ambition backlog, not the near-term plan.
+
+## D019 — License policy: legality is the bar; per-file licensing (2026-08-23, user decision)
+Third-party assets are excluded only when using them would be illegal or
+functionally impossible, never for license-mixing tidiness. Our terms adjust
+to fit: the pack is a collection of individually licensed files. Ours stay
+CC BY 4.0; imports keep their upstream license (CC0/CC-BY/CC-BY-SA/GPL art/
+OFL all acceptable), tracked per-file in ASSETS.md and credited in CREDITS.md.
+ShareAlike/GPL imports ship under their own terms without affecting sibling
+files. NC assets only by explicit per-case decision (they permanently bar
+commercial use of that asset). ND stays out on functional grounds (the
+style-coherence pipeline modifies everything, and ND bars derivatives).
+EA-derived content stays out on legality (unlicensed derivative works).

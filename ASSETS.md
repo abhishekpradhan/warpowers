@@ -5,11 +5,16 @@ Every asset file that enters the project gets a row **when it is added, not late
 **License note (2026-08-23):** rows below marked "CC BY-SA 4.0 (ours)" are
 now **CC BY 4.0** — relicensed by the sole author; see LICENSE-ASSETS.md.
 
-**Acceptance rules (from decisions D007/D009):**
-- ✅ Original work (ours) — licensed CC BY 4.0 on release (relicensed from BY-SA 2026-08-23; see LICENSE-ASSETS.md)
-- ✅ CC0 / public domain
-- ✅ CC-BY / CC-BY-SA (attribution tracked here, credited in-game)
-- ❌ Anything EA-derived, anything NC/ND-encumbered, anything unlicensed
+**Acceptance rules (D019 — legality is the only bar; per-file licensing):**
+- ✅ Original work (ours) — CC BY 4.0 (relicensed from BY-SA 2026-08-23; see LICENSE-ASSETS.md)
+- ✅ CC0 / public domain (adaptations ship under our CC BY 4.0)
+- ✅ CC-BY / CC-BY-SA / GPL-licensed art / OFL — the file (and adaptations,
+  where the license requires) ships under its upstream license; this ledger
+  is the authoritative per-file license map, CREDITS.md carries the credits
+- ⚠️ NC only by explicit per-case decision noted here (permanently bars
+  commercial use of that asset)
+- ❌ Anything EA-derived (unlicensed derivative works), anything unlicensed,
+  ND-encumbered (the style pipeline modifies everything; ND bars derivatives)
 
 | Path | What | Source | Author | License | Added | Notes |
 |---|---|---|---|---|---|---|

@@ -319,3 +319,52 @@ END
 WP:DescScrapper
 "Jackal scattergunner. Nasty up close, allergic to tank shells."
 END
+
+// Pause menu + confirm dialogs (QuitMenu.cpp / gogoMessageBox contracts)
+WP:PausedTitle
+"BATTLE PAUSED"
+END
+
+WP:ReturnToBattle
+"Return to Battle"
+END
+
+GUI:RestartMission
+"Restart Battle"
+END
+
+GUI:ExitMission
+"Abandon Battle"
+END
+
+GUI:QuitPopupTitle
+"Abandon battle?"
+END
+
+GUI:QuitPopupMessage
+"Stand down and leave the battlefield?"
+END
+
+GUI:RestartConfirmationTitle
+"Restart battle?"
+END
+
+GUI:RestartConfirmation
+"Start this battle over from deployment?"
+END
+
+GUI:Yes
+"Yes"
+END
+
+GUI:No
+"No"
+END
+
+GUI:Ok
+"OK"
+END
+
+GUI:Cancel
+"Cancel"
+END

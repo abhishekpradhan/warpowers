@@ -1,23 +1,47 @@
 # War Powers (working title)
 
-A free, browser-playable RTS in the Command & Conquer: Generals / Zero Hour idiom — built on the GPL-released engine lineage with **fully original replacement assets**, so players need no game files, no install, no launcher.
+A free, browser-playable RTS in the Command & Conquer: Generals / Zero Hour
+idiom — built on the GPL-released engine lineage with **fully original
+replacement assets**, so players need no game files, no install, no launcher.
 
-**Status:** Stage 1 — the engine runs matches on 100% original data (zero-retail boot achieved; first match simulating; terrain rendering). Current work: visible models, input, win condition.
+**Direction (D018):** port-parity first — the product is the browser port
+(the wasm-generals experience minus the "supply your own game files"
+requirement); our content is the bundled default asset pack on a swappable
+data layer. **Status:** full matches run in the browser on 100% original
+data (base-building, combat, fog of war, win/lose, audio, two factions);
+current work is the port surface (in-engine shell, boot time, QoL) and
+content toward the parity bar ([docs/parity.md](docs/parity.md)).
 
-**Licensing (D009):** uniform copyleft — engine code GPL v3 + EA §7 additional terms; our assets and data CC BY-SA 4.0.
+**Licensing (D019):** per-file; legality is the only exclusion bar.
+- Our code: **MIT** ([LICENSE](LICENSE)) · our content: **CC BY 4.0**
+- Imports keep their upstream license (CC0/CC-BY/CC-BY-SA/GPL art/OFL),
+  tracked per-file in [ASSETS.md](ASSETS.md)
+- Engine chain: GPL-3.0 (engine fork) / MIT (dvijoke) / zlib (DXVK fork) —
+  see [LICENSE-ASSETS.md](LICENSE-ASSETS.md)
 
 ## Layout
 
-- `docs/` — all planning and decisions
-  - [vision.md](docs/vision.md) — what we're building: pillars, the nostalgia checklist, the modern bar
-  - [fork-plan.md](docs/fork-plan.md) — **the active plan**: base choice (§1a) + staged roadmap
-  - [decisions.md](docs/decisions.md) — append-only decision log (D001–D008)
-- `ASSETS.md` — asset provenance ledger (every asset, source, license)
-- `engine/` — **submodule** → private `warpowers-engine` (our GPL fork of [fbraz3/GeneralsX](https://github.com/fbraz3/GeneralsX), branch `warpowers`, with `upstream` and `superhackers` remotes for rebasing). Clone with `--recursive`
-- `data/` — our original game data (INI, maps) — the zero-retail dataset *(coming in Stage 1)*
+See [docs/WORKSPACE.md](docs/WORKSPACE.md) for the full map. Short version:
+
+- `data/` — the complete original game dataset (INI, maps, art, audio, UI)
+- `tools/` — generators and gates (models, textures, SFX/VO, maps, WND
+  layouts, web staging, lints); `tools/blender/` hero-asset pipeline
+- `web/` — the browser boot page
+- `docs/` — vision, roadmap, decisions log, engine notes, parity matrix
+- `engine/` — **submodule**: our GPL fork of the GeneralsX engine lineage
+- `dvijoke/` — **submodule**: our fork of the D3D8→WebGL2 layer (MIT)
+- clone with `git clone --recursive`; build recipes in
+  [docs/engine-notes.md](docs/engine-notes.md)
 
 ## Hard rules
 
-1. **No EA asset or data bytes ever ship** — no EA art, audio, INI text, maps, or archive contents in any repo or deployment. EA never granted redistribution rights to anyone; this rule is what makes "no files needed" legal. (GPL *code* from the engine lineage and its ports is fine to copy/adapt — the project is a GPL fork — with provenance noted in commits.)
-2. **No EA trademarks** in branding — per the engine license's additional terms.
-3. **Every asset has a ledger row** in `ASSETS.md` before it's used. Shipped assets: our own work (CC BY-SA 4.0), CC0, CC-BY, or CC-BY-SA (with credit). Nothing else.
+1. **No EA asset or data bytes ever ship** — no EA art, audio, INI text,
+   maps, or archive contents in any repo or deployment. EA never granted
+   redistribution rights; this rule is what makes "no files needed" legal.
+   (GPL *code* from the engine lineage is fine — the project is a GPL fork.)
+2. **No EA trademarks** in branding — per the engine license's additional
+   terms.
+3. **Every asset has a ledger row** in [ASSETS.md](ASSETS.md) before it's
+   used, with its license (per-file licensing per D019).
+4. **Private until polished** — nothing deploys or publishes without an
+   explicit go.

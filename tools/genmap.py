@@ -378,17 +378,16 @@ P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
 P_TEXT, P_SIDE = 10, 11
 P_INT = 0
 
-# Fog-of-war start: the engine default leaves most of the map bright; force
-# classic C&C black shroud, then punch a permanent reveal around home.
+# Fog-of-war start: force classic C&C black shroud. No scripted home reveal —
+# own structures light the base themselves (CC ShroudClearingRange 300), and
+# the old 450wu permanent reveal was the "initial-reveal anomaly": it swallowed
+# the whole starting viewport plus the enemy guard at (720,560), reading as
+# "map starts bright / never-seen enemies visible" (MAP_SHROUD_ALL worked all
+# along — the far corners it left black were the tell).
 scripts_a += (
     script("WP_FogStart",
            [condition("CONDITION_TRUE", [])],
-           [action("MAP_SHROUD_ALL", [parameter(P_SIDE, s="")]),   # all human players
-            action("MAP_REVEAL_PERMANENTLY_AT_WAYPOINT",
-                   [parameter(P_WAYPOINT, s="Player_1_Start"),
-                    parameter(P_REAL, r=450.0),
-                    parameter(P_SIDE, s="PlayerA"),
-                    parameter(P_TEXT, s="WPHomeReveal")])])
+           [action("MAP_SHROUD_ALL", [parameter(P_SIDE, s="")])])   # all human players
 )
 
 # Attack waves: after a 90s grace, 2 Mongrels spawn at WaveSpawn every 75s

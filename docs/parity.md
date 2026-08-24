@@ -11,9 +11,9 @@ do not have to generate everything ourselves.
 |---|---|---|
 | **A. Generate** | Our pipeline: genw3d/gentex/gensfx/genmap/genwnd, Blender hero passes | ours, CC BY 4.0 |
 | **B. Import CC0** | Kenney (models+audio+UI), Quaternius (proven in our pipeline), KayKit (characters **with rigs/animations**), itch.io CC0 tag, Poly Pizza; always through the retint/re-UV/bake pipeline so it looks native | CC0 → ships under our CC BY |
-| **C. Import CC-BY** | Kevin MacLeod / incompetech (2000+ tracks, CC BY 4.0 — solves music), OpenGameArt CC0/CC-BY (e.g. military-orchestral tracks), Free Music Archive, freesound (CC0 filter) | attribution rows in ASSETS.md + CREDITS.md |
-| **D. Community (post-publish)** | Nobody has built open replacement assets for the Generals GPL engine — OpenSAGE explicitly lists it as an unstarted "very long-term goal." **Our pack can be that project.** Publishing CC BY on a swappable data layer invites the OpenRA-style contribution dynamic | contributions accepted CC0/CC-BY only (ledger rule) |
-| **✗ Unusable** | Classic C&C mods (EA-derivative, nearly all of them), Synty/paid packs, CC-BY-SA / NC / ND, GPL-licensed art (license mixing) | never |
+| **C. Import CC-BY / CC-BY-SA / GPL art** | Kevin MacLeod / incompetech (2000+ tracks, CC BY 4.0 — solves music), OpenGameArt (CC0/CC-BY/CC-BY-SA, e.g. military-orchestral tracks), Free Music Archive, freesound, Warzone 2100-class GPL art | per-file licensing (D019): the file ships under its upstream license, ledger row + CREDITS.md; SA/GPL adaptations keep the upstream license |
+| **D. Community (post-publish)** | Nobody has built open replacement assets for the Generals GPL engine — OpenSAGE explicitly lists it as an unstarted "very long-term goal." **Our pack can be that project.** Publishing openly on a swappable data layer invites the OpenRA-style contribution dynamic | contributions under any D019-acceptable license, ledger row required |
+| **✗ Unusable** | Classic C&C mods (EA-derivative — illegal, nearly all of them), unlicensed rips, paid/proprietary packs, ND (pipeline modifies everything); NC only by explicit per-case decision | legality is the bar (D019) — nothing is excluded for mere license-mixing tidiness |
 
 ## The matrix
 

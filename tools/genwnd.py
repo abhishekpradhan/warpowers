@@ -201,3 +201,80 @@ def result_screen(fname, key, color):
 result_screen("Victorious", "WP:Victory", "215 180 90 255")
 result_screen("Defeat", "WP:Defeat", "200 70 70 255")
 result_screen("LocalDefeat", "WP:Defeat", "200 70 70 255")
+
+
+# ---------- generic Menus/ layout writer ----------
+def menu_layout(fname, body, init="[None]", update="[None]", shutdown="[None]"):
+    content = ("FILE_VERSION = 2;\n"
+               "STARTLAYOUTBLOCK\n"
+               f"  LAYOUTINIT = \"{init}\";\n"
+               f"  LAYOUTUPDATE = \"{update}\";\n"
+               f"  LAYOUTSHUTDOWN = \"{shutdown}\";\n"
+               "ENDLAYOUTBLOCK\n") + body.replace(CB + ":", f"Menus/{fname}.wnd:")
+    for t in targets:
+        d = os.path.join(os.path.dirname(t), "Menus")
+        os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, fname + ".wnd")
+        with open(p, "w") as f:
+            f.write(content)
+        print("wrote", p)
+
+GOLD = "120 104 60 255"
+PANEL = "15 17 21 250"
+
+def menu_button(name, rect, text, accent="34 38 44 255"):
+    return window(name, rect, wtype="PUSHBUTTON", status="ENABLED",
+                  syscb="PassSelectedButtonsToParentSystem", bg=accent,
+                  border=GOLD, fontsize=12,
+                  extra=f'  TEXT = "{text}";\n')
+
+# ---------- QuitMenu.wnd (ESC pause menu; stock QuitMenuSystem callback) ----------
+# Engine contract (QuitMenu.cpp): ButtonReturn/ButtonRestart/ButtonExit are
+# dereferenced unguarded; ButtonSaveLoad/ButtonOptions lookups are guarded
+# (Options added with the in-engine shell round). Restart/Exit text is set at
+# runtime (GUI:RestartMission / GUI:ExitMission).
+quit_children = [
+    window("PausedTitle", (300, 200, 500, 228), wtype="STATICTEXT", status="ENABLED",
+           bg=PANEL, border=PANEL, textcolor="215 180 90 255", fontsize=16, bold=1,
+           extra='  TEXT = "WP:PausedTitle";\n  STATICTEXTDATA = CENTERED: 1;\n'),
+    menu_button("ButtonReturn",  (300, 244, 500, 276), "WP:ReturnToBattle"),
+    menu_button("ButtonRestart", (300, 284, 500, 316), "GUI:RestartMission"),
+    menu_button("ButtonExit",    (300, 324, 500, 356), "GUI:ExitMission",
+                accent="60 34 34 255"),
+]
+QUIT = window("QuitMenuParent", (280, 180, 520, 380),
+              status="ENABLED+IMAGE+NOFOCUS", syscb="QuitMenuSystem",
+              bg=PANEL, border=GOLD, children=quit_children)
+menu_layout("QuitMenu", QUIT)
+
+# ---------- MessageBox.wnd / QuitMessageBox.wnd (yes/no/ok confirm dialogs) ----------
+# Engine contract (gogoMessageBox): all four buttons must exist (ButtonOk's
+# position is read unguarded even in yes/no boxes); engine unhides the flagged
+# ones, so buttons are authored HIDDEN. StaticTextTitle/StaticTextMessage get
+# runtime text.
+def message_box(fname, syscb):
+    kids = [
+        window("StaticTextTitle", (260, 236, 540, 260), wtype="STATICTEXT",
+               status="ENABLED", bg=PANEL, border=PANEL,
+               textcolor="215 180 90 255", fontsize=13, bold=1,
+               extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+        window("StaticTextMessage", (264, 268, 536, 316), wtype="STATICTEXT",
+               status="ENABLED", bg=PANEL, border=PANEL,
+               extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+    ]
+    bx = 270
+    for bname, blabel in [("ButtonOk", "GUI:Ok"), ("ButtonYes", "GUI:Yes"),
+                          ("ButtonNo", "GUI:No"), ("ButtonCancel", "GUI:Cancel")]:
+        kids.append(window(bname, (bx, 326, bx + 60, 354), wtype="PUSHBUTTON",
+                           status="ENABLED+HIDDEN",
+                           syscb="PassSelectedButtonsToParentSystem",
+                           bg="34 38 44 255", border=GOLD, fontsize=11,
+                           extra=f'  TEXT = "{blabel}";\n'))
+        bx += 68
+    box = window("MessageBoxParent", (250, 224, 550, 366),
+                 status="ENABLED+IMAGE+NOFOCUS", syscb=syscb,
+                 bg=PANEL, border=GOLD, children=kids)
+    menu_layout(fname, box)
+
+message_box("MessageBox", "MessageBoxSystem")
+message_box("QuitMessageBox", "QuitMessageBoxSystem")

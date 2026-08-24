@@ -7,6 +7,7 @@ the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
 ## 0. Port parity (the working plan — D018)
+- [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon
 - [x] Shell (final architecture 2026-08-24, rev 2): THE ENGINE SHELL is the only menu — the page is a pure auto-booting loader (wordmark + progress, no buttons; audio unlocks on first in-menu click). Boot lands on the in-engine main menu (two-tone wordmark, page-matched styling) → deployment picker → match; every exit returns in-engine (score screen on W/L, quit-to-menu on abandon). ESC pause unchanged. ?map= keeps the -file harness path
 - [x] Boot ≤20s: 8.7s local total; performance.mark marks + [BOOT] report permanent (re-measure on real hosting)
 - [x] QoL verified in browser: control groups (Ctrl+#/#/Shift/Alt), select-all, view-CC, stop/scatter, camera keys, pause key, force-attack/-move mod-holds (CommandMap.ini authored — was a 1-line stub, nothing was ever bound)

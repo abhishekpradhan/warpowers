@@ -20,7 +20,7 @@
     html, body { height: 100%; }
     body {
       margin: 0;
-      background: radial-gradient(120% 90% at 50% 0%, #10141c 0%, var(--bg) 55%);
+      background: #000;
       color: var(--text);
       font: 15px/1.5 -apple-system, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
       display: flex;
@@ -36,6 +36,9 @@
     }
 
     /* ---- stage: canvas fills the viewport, letterboxed 4:3 ---- */
+    /* Seamless stage: the game frames itself (in-engine border); any page
+       chrome here reads as a stray line beside the letterboxed canvas in
+       fullscreen/wide windows. */
     #stage {
       flex: 1;
       display: flex;
@@ -43,19 +46,17 @@
       justify-content: center;
       min-height: 0;
       position: relative;
-      padding: 20px;
+      padding: 0;
+      background: #000;
     }
     #frame {
       position: relative;
       aspect-ratio: 4 / 3;
-      max-width: min(100%, calc((100vh - 40px) * 4 / 3));
+      max-width: min(100%, calc(100vh * 4 / 3));
       max-height: 100%;
       width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 6px;
       overflow: hidden;
       background: #000;
-      box-shadow: 0 24px 80px rgba(0,0,0,.55);
     }
     canvas {
       width: 100%;
@@ -63,23 +64,51 @@
       display: block;
       background: #000;
     }
-    #fsBtn {
+    /* ---- overlay control strip (volume, fullscreen) ---- */
+    #ctrlStrip {
       position: absolute;
       top: 10px; right: 10px;
-      width: 34px; height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      background: rgba(13,17,23,.72);
-      color: var(--text-dim);
-      font-size: 16px;
-      line-height: 1;
-      cursor: pointer;
+      border-radius: 8px;
+      background: rgba(13,17,23,.78);
       opacity: 0;
-      transition: opacity .18s ease, color .18s ease;
+      transition: opacity .18s ease;
       z-index: 5;
     }
-    #frame:hover #fsBtn { opacity: 1; }
-    #fsBtn:hover { color: var(--text); }
+    #frame:hover #ctrlStrip, #ctrlStrip:focus-within { opacity: 1; }
+    .ctrlBtn {
+      width: 30px; height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color .18s ease, background .18s ease;
+    }
+    .ctrlBtn:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    #muteBtn.muted { color: var(--danger); }
+    #ovVol {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 110px; height: 3px;
+      border-radius: 2px;
+      background: var(--line);
+      cursor: pointer;
+    }
+    #ovVol::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 0;
+    }
 
     /* ---- loading / error overlay ---- */
     #overlay {
@@ -152,7 +181,11 @@
   <div id="stage">
     <div id="frame">
       <canvas id="canvas" width="1024" height="768" oncontextmenu="event.preventDefault()"></canvas>
-      <button id="fsBtn" title="Fullscreen">⛶</button>
+      <div id="ctrlStrip">
+        <button id="muteBtn" class="ctrlBtn" title="Mute">&#128266;</button>
+        <input id="ovVol" type="range" min="0" max="100" value="80" title="Volume">
+        <button id="fsBtn" class="ctrlBtn" title="Fullscreen">⛶</button>
+      </div>
       <div id="overlay">
         <div class="wordmark">WAR<span class="accent">POWERS</span></div>
         <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
@@ -207,6 +240,37 @@
     window.addEventListener('error', function(e) {
       log('UNCAUGHT: ' + (e.error && e.error.stack ? e.error.stack : e.message));
     });
+
+    // ---- overlay volume (drives the engine live via the exported
+    //      wpSetMasterVolume; persisted to the same key the boot seeds
+    //      WP_VOLUME from) ----
+    (function() {
+      var vol = document.getElementById('ovVol');
+      var mute = document.getElementById('muteBtn');
+      var last = parseInt(localStorage.getItem('wpVolume') || '80', 10);
+      if (isNaN(last)) last = 80;
+      vol.value = last;
+      function apply(v) {
+        try {
+          if (typeof Module !== 'undefined' && Module._wpSetMasterVolume)
+            Module._wpSetMasterVolume(v);
+        } catch (e) {}
+        try { localStorage.setItem('wpVolume', String(v)); } catch (e) {}
+        mute.classList.toggle('muted', v === 0);
+        mute.innerHTML = v === 0 ? '&#128263;' : '&#128266;';
+      }
+      vol.addEventListener('input', function() {
+        apply(parseInt(vol.value, 10) || 0);
+      });
+      mute.addEventListener('click', function() {
+        var v = parseInt(vol.value, 10) || 0;
+        if (v > 0) { mute.dataset.prev = v; vol.value = 0; apply(0); }
+        else {
+          var back = parseInt(mute.dataset.prev || '80', 10);
+          vol.value = back; apply(back);
+        }
+      });
+    })();
 
     // ---- fullscreen ----
     document.getElementById('fsBtn').addEventListener('click', function() {

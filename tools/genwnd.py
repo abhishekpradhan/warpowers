@@ -296,15 +296,14 @@ def btn(name, rect, text_label, kind="ghost", size=12):
 # Restart/Exit text is set at runtime (GUI:RestartMission / GUI:ExitMission).
 quit_children = [
     backdrop(alpha=150, name="PauseDim"),
-    window("PausePanel", (288, 172, 512, 432), status="ENABLED+NOFOCUS",
+    window("PausePanel", (288, 186, 512, 400), status="ENABLED+NOFOCUS",
            bg=PANEL, border=LINE),
-    rule("PauseRule", (352, 214, 448, 216)),
-    label("PausedTitle", (300, 188, 500, 210), "WP:PausedTitle", size=15,
+    rule("PauseRule", (352, 228, 448, 230)),
+    label("PausedTitle", (300, 202, 500, 224), "WP:PausedTitle", size=15,
           color=GOLD, bold=1),
-    btn("ButtonReturn",  (312, 236, 488, 270), "WP:ReturnToBattle", "primary"),
-    btn("ButtonRestart", (312, 280, 488, 312), "GUI:RestartMission", "ghost"),
-    btn("ButtonOptions", (312, 322, 488, 354), "WP:Options", "ghost"),
-    btn("ButtonExit",    (312, 372, 488, 406), "GUI:ExitMission", "danger"),
+    btn("ButtonReturn",  (312, 250, 488, 284), "WP:ReturnToBattle", "primary"),
+    btn("ButtonRestart", (312, 294, 488, 326), "GUI:RestartMission", "ghost"),
+    btn("ButtonExit",    (312, 340, 488, 374), "GUI:ExitMission", "danger"),
 ]
 QUIT = window("QuitMenuParent", (0, 0, 800, 600),
               status="ENABLED+NOFOCUS", syscb="QuitMenuSystem",
@@ -358,9 +357,8 @@ main_children = [
           color=GOLD, bold=1, centered=0),
     rule("TitleRule", (352, 218, 448, 221)),
     label("TitleTag", (100, 232, 700, 252), "WP:Tagline", size=10, color=DIM),
-    btn("ButtonEngage",  (290, 300, 510, 340), "WP:Engage", "primary", size=13),
-    btn("ButtonOptions", (290, 352, 510, 386), "WP:Options", "ghost"),
-    btn("ButtonQuit",    (290, 398, 510, 432), "WP:QuitGame", "danger"),
+    btn("ButtonEngage",  (290, 312, 510, 352), "WP:Engage", "primary", size=13),
+    btn("ButtonQuit",    (290, 366, 510, 400), "WP:QuitGame", "danger"),
     label("LabelVersion", (540, 576, 792, 594), "", size=9, color=DIM,
           centered=0),
 ]
@@ -391,28 +389,7 @@ SKIRMISH = window("SkirmishParent", (0, 0, 800, 600),
 menu_layout("WPSkirmish", SKIRMISH, init="WPSkirmishInit",
             shutdown="WPShellShutdown")
 
-# Options: master volume slider + back. Stock filename so QuitMenu's Options
-# button and ToggleQuitMenu's close path work unchanged. The dim underlay
-# covers whatever it opened over (pause menu, main menu).
-opt_children = [
-    backdrop(alpha=210, name="OptionsDim"),
-    window("OptionsPanel", (250, 190, 550, 410), status="ENABLED+NOFOCUS",
-           bg=PANEL, border=LINE),
-    label("TitleOptions", (260, 206, 540, 232), "WP:OptionsTitle", size=16,
-          color=GOLD, bold=1),
-    rule("OptionsRule", (368, 240, 432, 242)),
-    label("LabelVolume", (280, 264, 520, 284), "WP:MasterVolume", size=11,
-          color=TEXT, centered=0),
-    window("SliderVolume", (280, 292, 520, 314), wtype="HORZSLIDER",
-           status="ENABLED", syscb="PassMessagesToParentSystem",
-           bg="30 34 42 255", border="58 66 80 255",
-           extra="  SLIDERDATA = MINVALUE: 0, MAXVALUE: 100;\n"),
-    btn("ButtonBack", (330, 350, 470, 384), "WP:Back", "primary"),
-]
-OPTIONS = window("OptionsParent", (0, 0, 800, 600),
-                 status="ENABLED+NOFOCUS", syscb="WPOptionsSystem",
-                 bg="0 0 0 0", border="0 0 0 0", children=opt_children)
-menu_layout("OptionsMenu", OPTIONS, init="WPOptionsInit")
+# (In-engine Options retired: the page overlay strip owns volume/fullscreen.)
 
 # Post-match score screen (pushed over the main menu; WPScoreInit fills
 # stats and recolors the banner on defeat).

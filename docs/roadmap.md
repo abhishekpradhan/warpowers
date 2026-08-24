@@ -6,6 +6,26 @@ wasm-generals surface with zero player-supplied files, current content as
 the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
+## Next up (ordered, 2026-08-24 — port surface is done)
+1. **Playability pass on the one match we have**: user playthrough drives a
+   balance/feel round (fix the WPTest $10000 vs WPTestJ $5000 start-money
+   mismatch in genmap first); victory path witnessed live (defeat is).
+2. **Close the QoL tail**: attack-move/guard/stop as command-bar buttons
+   (needs icon-sheet expansion — first non-portrait icons), rally-point live
+   check; retune WP_AUTOTEST=full so the regression gate is all-green.
+3. **Polish debt quickies** (§6b): W3DFS_MISS spam (Locater01 + empty-name
+   per-frame hunt), voice-limit tuning.
+4. **Content to the parity bar** (docs/parity.md): infantry via KayKit CC0
+   rigs (unlocks skeletal animation — the #1 asset gap), aircraft class,
+   structures to 10/faction, genmap biome/layout variety toward 8-10 maps,
+   SFX bulk via CC0 packs; music unpark = cheap CC-BY import when wanted.
+5. **The real opponent**: AISkirmishPlayer path (base build lists in genmap
+   + auto-reinforce teams + minimal .scb) — replaces timer waves with an AI
+   that builds and reacts; biggest "feels like a game" jump after content.
+6. **Hardening + publish prep** (gated on explicit go): fps budget pass,
+   Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;
+   LAN/relay multiplayer after (wasm-generals parity).
+
 ## 0. Port parity (the working plan — D018)
 - [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon
 - [x] Shell (final architecture 2026-08-24, rev 2): THE ENGINE SHELL is the only menu — the page is a pure auto-booting loader (wordmark + progress, no buttons; audio unlocks on first in-menu click). Boot lands on the in-engine main menu (two-tone wordmark, page-matched styling) → deployment picker → match; every exit returns in-engine (score screen on W/L, quit-to-menu on abandon). ESC pause unchanged. ?map= keeps the -file harness path

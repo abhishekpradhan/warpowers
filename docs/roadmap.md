@@ -13,6 +13,9 @@ Nothing ships or deploys until the user says go.
 - [ ] Pause menu / quit-to-menu flow (game-exit currently just returns to the page)
 - [ ] Fog-of-war start (initial-reveal anomaly — engine dig)
 - [ ] Later: LAN/relay multiplayer (wasm-generals parity)
+- Content track runs alongside (bar + per-class sourcing: docs/parity.md —
+  generate / import CC0+CC-BY / community post-publish; music is solved by
+  CC-BY import when unparked)
 - Parked until parity (game depth): economy loop, general powers, superweapons, real skirmish AI, music
 
 ## 1. Combat juice — fights feel like Generals

@@ -20,28 +20,38 @@ Nothing ships or deploys until the user says go.
 ## 3. Roster breadth
 - [x] Convert remaining Quaternius tanks into distinct units (Outrider, Vulture, Zenith)
 - [x] Base defenses per faction (Bulwark, Watchpost)
-- [x] Second unit class per faction (recon/gun-truck/artillery; infantry still open)
+- [x] Second unit class per faction (recon/gun-truck/artillery)
+- [x] Infantry class per faction (Warden/Scrapper: models, portraits, own VO, SMALL_ARMS damage model)
 
 ## 4. Opponent
 - [x] Scripted attack waves via map scripts
 - [x] Skirmish AI investigation — findings + implementation plan in engine-notes (build lists + AISkirmishPlayer + .scb; deferred)
+- [x] Scripted skirmish opponent: defended enemy base (factory/power/towers/defenders) + escalating assault tier; victory = raze it
+- [ ] True skirmish AI (builds, reacts, expands) — the AISkirmishPlayer path
 
 ## 5. UI/UX
 - [x] Radar/minimap live (terrain, shroud, view frustum; layout polish pending)
-- [~] Command bar: programmatic icon sheet wired via ButtonImage (browser verify + portraits/tooltips pending)
+- [x] Command bar complete: portraits, tooltips w/ descriptions, multi-queue with cancel, construction context
+- [x] Faction select on the menu (Meridian/Jackal, persisted); mirrored WPTestJ map
+- [x] Construction scaffolds (sites read as scaffolding, not ghost buildings)
 - [x] Main menu: the web page is the menu (DEPLOY gates boot + doubles as the WebAudio unlock gesture)
 
 ## 6. Web hardening
-- [ ] Performance measurement (fps, load time) + budgets — includes the wasm logic-clock crawl under tab throttling (FramePacer vs throttled clocks)
+- [ ] Performance measurement (fps, load time) + budgets; boot 25-40s vs the ≤20s bar
+- [x] Wasm logic-clock crawl under tab throttling fixed (catch-up: up to 10 updates/tick)
 - [x] Audio in the wasm build (two engine bugs found+fixed: zero-channel decode buffers, dead group routing; user-confirmed audible)
-- [ ] Settings persistence
+- [x] Settings persistence (volume slider + faction choice, localStorage -> WP_VOLUME env)
 
 ## 6b. Polish debt (from playtesting/debugging)
 - [ ] Voice-limit tuning: GameSounds occasionally rejects select-barks
 - [ ] Silence W3DFS_MISS 'Locater01.w3d' spam (engine hunts a locater model in userdata)
 - [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
-- [ ] EVA-style announcer (Eva.ini system) — "unit ready", "base under attack"
-- [ ] Interactive checks: dozer placement-cursor UI flow; LocalDefeat input-disable
+- [x] EVA announcer live (Eva.ini + command-net voice: base under attack, structure/unit lost, low power, funds)
+- [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen
+- [ ] Victory screen live-confirm (same path as defeat; not yet witnessed)
+- [ ] Fog-of-war start: initial-reveal anomaly blocks MAP_SHROUD_ALL (engine dig)
+- [ ] Full-autotest retune (2-tank fleet now loses to the defended enemy base)
+- [ ] Balance pass after a real playthrough (incl. start-money discrepancy between maps)
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)

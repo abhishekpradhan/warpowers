@@ -167,6 +167,14 @@ MODELS = {
     "WPSHELL01": [
         part("TRACER", (245, 216, 150), 0, 0, -0.25, 2.4, 0.5, 0.5),
     ],
+    # Rally-point marker flag (ThingTemplate literally named
+    # RallyPointMarker): pole + gold pennant + ground ring.
+    "WPRALLY01": [
+        part("POLE", (200, 204, 210), 0, 0, 0, 0.8, 0.8, 14.0),
+        part("PENN", "GOLD", 2.6, 0, 11.5, 5.2, 0.4, 2.6),
+        part("RING", "GOLD", 0, 0, 0.3, 7.0, 7.0, 0.3),
+        part("RINGC", (30, 32, 36), 0, 0, 0.45, 4.6, 4.6, 0.3),
+    ],
     # Building-placement cursor (engine-hardcoded names): corner-bracket
     # anchor ring + direction arrow, bright gold, floating just off ground.
     "LOCATER01": [

@@ -520,3 +520,32 @@ END
 CONTROLBAR:GeneralsExpDescription
 "Not in service yet."
 END
+
+// Order-command buttons (attack-move / guard / stop)
+WP:AttackMove
+"Attack Move"
+END
+
+WP:DescAttackMove
+"Advance to a point, engaging every hostile on the way."
+END
+
+WP:Guard
+"Guard"
+END
+
+WP:DescGuard
+"Hold and defend an area, chasing off attackers."
+END
+
+WP:Stop
+"Stop"
+END
+
+WP:DescStop
+"Halt all current orders."
+END
+
+GUI:RallyPointNoPath
+"No clear path from the factory exit to that rally point."
+END

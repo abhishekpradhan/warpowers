@@ -14,7 +14,7 @@ import sys
 # Jackal League and the scripted opponent is the Meridian Combine.
 if '--faction=jackal' in sys.argv:
     sys.argv = [a for a in sys.argv if a != '--faction=jackal']
-    F = dict(map_name='WPTestJ',
+    F = dict(map_name=None, is_jackal=True,
              player_cc='WPJ_CommandPost', player_faction='FactionWPJ',
              enemy_cc='WP_CommandCenter', enemy_faction='FactionWP',
              guard='WP_Tank',
@@ -24,7 +24,7 @@ if '--faction=jackal' in sys.argv:
              assault_a='WP_Tank', assault_b='WP_Zenith',
              defender='WP_Tank', defender_scout='WP_Outrider')
 else:
-    F = dict(map_name='WPTest',
+    F = dict(map_name=None,
              player_cc='WP_CommandCenter', player_faction='FactionWP',
              enemy_cc='WPJ_CommandPost', enemy_faction='FactionWPJ',
              guard='WPJ_Mongrel',
@@ -34,9 +34,34 @@ else:
              assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
              defender='WPJ_Mongrel', defender_scout='WPJ_Vulture')
 
+# ---------- layouts ----------
+# --layout=NAME picks the battlefield shape; 'flats' is the original WPTest.
+# Every coordinate below derives from these anchors, so a layout is just
+# geometry: map size, base anchors, and an optional ridge wall with passes.
+LAYOUTS = {
+    # the original: diagonal bases, open ground
+    "flats": dict(play=160, player=(400.0, 400.0), enemy=(1200.0, 1200.0),
+                  ridge=None, name="WPTest", jname="WPTestJ"),
+    # bigger field split by a NE/SW ridge wall with two passes - lane play
+    "ridge": dict(play=180, player=(360.0, 360.0), enemy=(1440.0, 1440.0),
+                  ridge=dict(gap1=0.30, gap2=0.74, halfw=52.0, h=34.0),
+                  name="WPRidge", jname="WPRidgeJ"),
+    # tight brawl: close bases, no cover - rush tempo
+    "scrap": dict(play=120, player=(300.0, 600.0), enemy=(900.0, 600.0),
+                  ridge=None, name="WPScrap", jname="WPScrapJ"),
+}
+_layout_name = "flats"
+for _a in list(sys.argv):
+    if _a.startswith("--layout="):
+        _layout_name = _a.split("=", 1)[1]
+        sys.argv.remove(_a)
+LAY = LAYOUTS[_layout_name]
+PLAYER_BASE = LAY["player"]
+ENEMY_BASE = LAY["enemy"]
+
 # ---------- geometry ----------
 BORDER = 10
-PLAY = 160
+PLAY = LAY["play"]
 W = H = PLAY + 2 * BORDER          # 84 vertices per axis, border included
 N = W * H                          # 7056
 FSW = (W + 7) // 8                 # cliff-state bitfield bytes per row
@@ -93,8 +118,27 @@ def chunk(label, version, payload):
 # so structures sit level and pathing stays trivial there.
 import math
 
-BASES = [(400.0, 400.0), (1200.0, 1200.0)]   # world coords
+BASES = [PLAYER_BASE, ENEMY_BASE]   # world coords
 FLAT_R, FLAT_FADE = 320.0, 160.0             # flat radius, blend band (wide enough to actually build a base)
+
+def ridge_height(wx, wy):
+    """impassable diagonal wall from NW edge to SE edge of the playfield,
+    broken by two pass gaps; returns extra height (0 where no ridge)."""
+    r = LAY.get("ridge")
+    if not r:
+        return 0.0
+    ext = PLAY * 10.0
+    # distance from the anti-diagonal line x + y = ext (separates the bases)
+    d = abs((wx + wy) - ext) / 1.4142136
+    if d > r["halfw"]:
+        return 0.0
+    # position ALONG the wall (0..1) for the gaps
+    t = (wx - wy + ext) / (2.0 * ext)
+    for g in (r["gap1"], r["gap2"]):
+        if abs(t - g) < 0.055:
+            return 0.0
+    prof = 1.0 - (d / r["halfw"]) ** 2
+    return r["h"] * prof
 
 def dune_height(wx, wy):
     d = (math.sin(wx * 0.0071 + 1.3) + math.sin(wy * 0.0063 + 4.1)
@@ -114,7 +158,7 @@ height_bytes = bytearray()
 for cy in range(H):
     for cx in range(W):
         wx, wy = (cx - BORDER) * 10.0, (cy - BORDER) * 10.0  # MAP_XY_FACTOR
-        height_bytes.append(max(0, min(255, int(round(dune_height(wx, wy))))))
+        height_bytes.append(max(0, min(255, int(round(dune_height(wx, wy) + ridge_height(wx, wy))))))
 height_payload = struct.pack("<iiii", W, H, BORDER, 1)      # width,height,border,numBoundaries
 height_payload += struct.pack("<ii", PLAY, PLAY)            # boundary[0]
 height_payload += struct.pack("<i", N) + bytes(height_bytes)
@@ -127,7 +171,7 @@ CONCRETE_FIRST, CONCRETE_NUM = 16, 16          # 4x4 sheet: 0-7 clean, 8-15 worn
 
 # base aprons: concrete pads under the start locations (ZH bases sat on
 # concrete, not bare dunes). Cell size is MAP_XY_FACTOR world units.
-APRONS = [(400.0, 400.0, 150.0), (1200.0, 1200.0, 150.0)]
+APRONS = [(PLAYER_BASE[0], PLAYER_BASE[1], 150.0), (ENEMY_BASE[0], ENEMY_BASE[1], 150.0)]
 
 def apron_state(bx, by):
     """0 = sand, 1 = worn concrete (edge ring), 2 = clean concrete."""
@@ -171,7 +215,7 @@ blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
 
 # ---------- WorldInfo v1 ----------
 world_payload = dict_pairs([
-    ("mapName", D_ASCII, F["map_name"]),
+    ("mapName", D_ASCII, (LAY["jname"] if F.get("is_jackal") else LAY["name"])),
     ("weather", D_INT, 0),
 ])
 
@@ -278,36 +322,58 @@ if os.environ.get("WP_PREVIEW"):
                            [("originalOwner", D_ASCII,
                              "teamPlayerB" if tmpl.startswith("WPJ") else "teamPlayerA")]))
 
+PX, PY = PLAYER_BASE
+EX, EY = ENEMY_BASE
+# enemy-base cluster offsets, expressed from the enemy anchor and mirrored
+# toward the player so every layout keeps the towers on the approach side.
+import math as _math
+_toP = _math.atan2(PY - EY, PX - EX)
+def _off(dx, dy):
+    """offset in the flats frame (enemy at 1200,1200, player toward SW),
+    rotated so 'toward player' tracks the actual layout geometry."""
+    base = _math.atan2(400.0 - 1200.0, 400.0 - 1200.0)
+    rot = _toP - base
+    c, sn = _math.cos(rot), _math.sin(rot)
+    return (EX + dx * c - dy * sn, EY + dx * sn + dy * c)
+
+_fac = _off(-80.0, 50.0)
+_pow = _off(70.0, 40.0)
+_tw1 = _off(-95.0, -95.0)
+_tw2 = _off(80.0, -80.0)
+_df1 = _off(-50.0, -50.0)
+_df2 = _off(40.0, -40.0)
+_df3 = _off(-5.0, -80.0)
+_wsp = _off(-50.0, -100.0)
 objects_payload = b"".join(preview + [
-    obj(400.0, 400.0, 0.0, F["player_cc"],
+    obj(PX, PY, 0.0, F["player_cc"],
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),
-    obj(720.0, 560.0, 2.4, F["guard"],
+    obj((PX + EX) / 2.0, (PY + EY) / 2.0, 2.4, F["guard"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1200.0, 1200.0, 3.14159265, F["enemy_cc"],
+    obj(EX, EY, 3.14159265, F["enemy_cc"],
         [("originalOwner", D_ASCII, "teamPlayerB"),
          ("objectName", D_ASCII, "EnemyCC")]),
-    obj(1120.0, 1250.0, 2.6, F["enemy_factory"],
+    obj(_fac[0], _fac[1], 2.6, F["enemy_factory"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1270.0, 1240.0, 3.4, F["enemy_power"],
+    obj(_pow[0], _pow[1], 3.4, F["enemy_power"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1105.0, 1105.0, 2.4, F["enemy_tower"],
+    obj(_tw1[0], _tw1[1], 2.4, F["enemy_tower"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1280.0, 1120.0, 3.6, F["enemy_tower"],
+    obj(_tw2[0], _tw2[1], 3.6, F["enemy_tower"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1150.0, 1150.0, 2.4, F["defender"],
+    obj(_df1[0], _df1[1], 2.4, F["defender"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1240.0, 1160.0, 3.2, F["defender"],
+    obj(_df2[0], _df2[1], 3.2, F["defender"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1195.0, 1120.0, 2.8, F["defender_scout"],
+    obj(_df3[0], _df3[1], 2.8, F["defender_scout"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",
+    obj(PX, PY + 50.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
-    obj(1200.0, 1150.0, 0.0, "*Waypoints/Waypoint",
+    obj(EX, EY - 50.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 2), ("waypointName", D_ASCII, "Player_2_Start")]),
-    obj(400.0, 400.0, 0.0, "*Waypoints/Waypoint",
+    obj(PX, PY, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 3), ("waypointName", D_ASCII, "InitialCameraPosition")]),
-    obj(1150.0, 1100.0, 0.0, "*Waypoints/Waypoint",
+    obj(_wsp[0], _wsp[1], 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 4), ("waypointName", D_ASCII, "WaveSpawn")]),
 ])
 
@@ -454,8 +520,9 @@ chunks = (
     + chunk("WaypointsList", 1, waylinks_payload)
 )
 
+MAP_NAME = LAY["jname"] if F.get("is_jackal") else LAY["name"]
 out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
-    "~/GeneralsX/GeneralsZH/Maps/%s/%s.map" % (F["map_name"], F["map_name"]))
+    "~/GeneralsX/GeneralsZH/Maps/%s/%s.map" % (MAP_NAME, MAP_NAME))
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 with open(out_path, "wb") as f:
     f.write(toc.emit() + chunks)

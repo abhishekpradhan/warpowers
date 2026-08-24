@@ -10,6 +10,5 @@ build/
 # Local game data experiments that must never be committed
 # (zero-retail rule: no EA-derived bytes enter this repo, ever)
 /gamedata-local/
-dvijoke/
 webstage/
 __pycache__/

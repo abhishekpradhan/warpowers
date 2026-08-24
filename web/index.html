@@ -95,18 +95,7 @@
       z-index: 10;
     }
     #overlay.hidden { opacity: 0; pointer-events: none; }
-    #menu { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-    #tagline { letter-spacing: 0.18em; }
-    #playBtn {
-      font: 700 15px/1 'SF Mono', ui-monospace, monospace;
-      letter-spacing: 0.35em; padding: 14px 46px 14px 52px;
-      color: #0d0f12; background: var(--accent); border: 0; cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    #playBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(215,180,90,.35); }
-    #menu.hidden { display: none; }
-    .factionBtn { opacity: 0.55; }
-    .factionBtn.sel { opacity: 1; outline: 1px solid var(--accent, #d7b45a); }
+    #tagline { letter-spacing: 0.18em; margin-bottom: 8px; }
     .wordmark {
       font-size: clamp(26px, 4.4vw, 40px);
       font-weight: 750;
@@ -143,34 +132,6 @@
     }
     #errorBox button:hover { border-color: var(--text-dim); }
 
-    /* ---- post-match result card ---- */
-    #result { display: none; text-align: center; }
-    #resultBanner {
-      font: 750 34px/1.2 -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
-      letter-spacing: .3em;
-      margin-right: -.3em;
-      margin-bottom: 6px;
-    }
-    #resultBanner.victory { color: var(--accent); }
-    #resultBanner.defeat { color: var(--danger); }
-    #resultBanner.neutral { color: var(--text); letter-spacing: .18em; font-size: 22px; }
-    #resultStats {
-      font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      font-size: 12px;
-      letter-spacing: .08em;
-      color: var(--text-dim);
-      line-height: 2;
-      margin-bottom: 18px;
-    }
-    #resultStats b { color: var(--text); font-weight: 600; }
-    #redeployBtn {
-      font: 700 14px/1 'SF Mono', ui-monospace, monospace;
-      letter-spacing: 0.3em; padding: 13px 40px 13px 46px;
-      color: #0d0f12; background: var(--accent); border: 0; cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    #redeployBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(215,180,90,.35); }
-
     /* ---- debug log (only with ?debug=1) ---- */
     #log {
       display: none;
@@ -194,28 +155,12 @@
       <button id="fsBtn" title="Fullscreen">⛶</button>
       <div id="overlay">
         <div class="wordmark">WAR<span class="accent">POWERS</span></div>
-        <div id="menu">
-          <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
-          <div id="factionRow" style="display:flex; gap:10px;">
-            <button class="factionBtn sel" data-faction="meridian" style="font-size:12px; letter-spacing:1px;">MERIDIAN COMBINE</button>
-            <button class="factionBtn" data-faction="jackal" style="font-size:12px; letter-spacing:1px;">JACKAL LEAGUE</button>
-          </div>
-          <button id="playBtn">DEPLOY</button>
-          <div id="volRow" class="label" style="display:flex; align-items:center; gap:8px; font-size:11px;">
-            SOUND <input id="volSlider" type="range" min="0" max="100" value="80" style="width:120px;">
-            <span id="volVal">80</span>
-          </div>
-        </div>
+        <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
         <div id="meter"><div id="meterFill"></div></div>
         <div id="phase" class="label">Contacting command&hellip;</div>
         <div id="errorBox">
           <p id="errorMsg"></p>
           <button onclick="location.reload()">Reload</button>
-        </div>
-        <div id="result">
-          <div id="resultBanner"></div>
-          <div id="resultStats"></div>
-          <button id="redeployBtn" onclick="location.reload()">REDEPLOY</button>
         </div>
       </div>
     </div>
@@ -311,6 +256,8 @@
     // ?autotest= restores the direct-load path (autotests only act in-game).
     function buildArgs() {
       var base = ['-win', '-noshellmap'];
+      // The engine shell is the menu: plain boot lands on it. ?map= keeps
+      // the -file direct-load (quit-after-match) path for the harness.
       var directMap = params.get('map');
       if (directMap) base = base.concat(['-file', directMap]);
       return base.concat(
@@ -338,11 +285,6 @@
         }).catch(function(err) { fail('Engine download failed. ' + err.message); });
         return {};
       },
-      onMatchResult: function(r) {
-        // Fired from the engine at VICTORY/DEFEAT with the ScoreKeeper
-        // snapshot; the engine then quits back to this page.
-        window.wpMatchResult = r;
-      },
       onEngineRunning: function() {
         // First main-loop tick: the shell (or match, in direct-load mode) is
         // live. Boot budget (D018): deploy click -> here in <=20s.
@@ -368,33 +310,18 @@
         } catch (e) { /* marks missing on odd paths - report is best-effort */ }
       },
       onGameExit: function() {
-        // The page is the shell: every match exit lands here. Render the
-        // result card (or a stand-down note) + REDEPLOY. The wasm runtime
-        // can't restart in place, so redeploy = reload.
+        // Only Stand Down (or a crash) lands here now — the shell handles
+        // everything else in-engine. The wasm runtime can't restart in
+        // place, so offer a reload.
         failed = false;
         meterEl.style.display = 'none';
-        phaseEl.style.display = 'none';
         overlayEl.classList.remove('hidden');
-        var r = window.wpMatchResult;
-        var banner = document.getElementById('resultBanner');
-        var stats = document.getElementById('resultStats');
-        if (r) {
-          banner.textContent = r.victory ? 'VICTORY' : 'DEFEAT';
-          banner.className = r.victory ? 'victory' : 'defeat';
-          var mm = Math.floor(r.durationSeconds / 60);
-          var ss = ('0' + (r.durationSeconds % 60)).slice(-2);
-          stats.innerHTML =
-            'UNITS <b>' + r.unitsBuilt + '</b> BUILT / <b>' + r.unitsLost +
-            '</b> LOST / <b>' + r.unitsDestroyed + '</b> DESTROYED<br>' +
-            'STRUCTURES BUILT <b>' + r.buildingsBuilt + '</b> &nbsp;&middot;&nbsp; ' +
-            'CREDITS EARNED <b>' + r.moneyEarned + '</b><br>' +
-            'BATTLE DURATION <b>' + mm + ':' + ss + '</b>';
-        } else {
-          banner.textContent = 'STOOD DOWN';
-          banner.className = 'neutral';
-          stats.textContent = '';
-        }
-        document.getElementById('result').style.display = 'block';
+        phaseEl.style.display = 'block';
+        setPhase('Session ended.');
+        var eb = document.getElementById('errorBox');
+        document.getElementById('errorMsg').textContent = '';
+        eb.querySelector('button').textContent = 'RE-ENTER';
+        eb.style.display = 'block';
       },
       preRun: [function() {
         setPhase('Staging battlefield data…');
@@ -404,14 +331,6 @@
         if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
         // WarPowers @debug forward autotest/diagnostic env knobs from the URL
         ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
-        // DEPLOY = straight into the picked faction's match; the in-engine
-        // shell is the between-matches hub (score screen, redeploy). ?map=
-        // keeps the -file quit-after-match path for the autotest harness,
-        // and ?shell=1 boots to the in-engine menu instead.
-        if (!params.get('map') && params.get('shell') !== '1') {
-          ENV.WP_BOOT_MAP = (window.wpFaction === 'jackal')
-            ? 'Maps\\WPTestJ\\WPTestJ.map' : 'Maps\\WPTest\\WPTest.map';
-        }
         if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
         if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
         FS.mkdir('/game');
@@ -465,50 +384,18 @@
   </script>
   <script>
     (function() {
-      var meterEl = document.getElementById('meter');
-      var phase = document.getElementById('phase');
-      meterEl.style.display = 'none';
-      phase.style.display = 'none';
-      // Volume: persisted, forwarded to the engine via ENV at boot.
-      var volSlider = document.getElementById('volSlider');
-      var volVal = document.getElementById('volVal');
-      volSlider.value = localStorage.getItem('wpVolume') || '80';
-      volVal.textContent = volSlider.value;
-      volSlider.addEventListener('input', function() {
-        volVal.textContent = volSlider.value;
-        localStorage.setItem('wpVolume', volSlider.value);
-      });
-      // Faction picker: highlighted selection, remembered across visits.
-      window.wpFaction = localStorage.getItem('wpFaction') || 'meridian';
-      Array.prototype.forEach.call(document.querySelectorAll('.factionBtn'), function(b) {
-        b.classList.toggle('sel', b.dataset.faction === window.wpFaction);
-        b.addEventListener('click', function() {
-          window.wpFaction = b.dataset.faction;
-          localStorage.setItem('wpFaction', window.wpFaction);
-          Array.prototype.forEach.call(document.querySelectorAll('.factionBtn'), function(x) {
-            x.classList.toggle('sel', x === b);
-          });
-        });
-      });
-      // The page is the main menu: the engine loads on DEPLOY. The click is
-      // also the user gesture that unlocks the WebAudio context.
-      document.getElementById('playBtn').addEventListener('click', function() {
-        // rebuild engine args now - the faction picker may have changed since
-        // load (it only matters for the ?autotest= direct-load path; normal
-        // play boots to the in-engine menu)
-        Module.arguments = buildArgs();
-        performance.mark('wpBoot:deploy');
-        document.getElementById('menu').classList.add('hidden');
-        meterEl.style.display = '';
-        phase.style.display = '';
-        var s = document.createElement('script');
-        s.src = 'GeneralsXZH.js?v=' + Date.now();
-        s.onerror = function() {
-          document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
-          document.getElementById('errorBox').style.display = 'block';
-        };
-        document.body.appendChild(s);
-      }, { once: true });
+      // Pure loader: boot starts immediately — the in-engine shell is the
+      // menu. Audio starts suspended and resumes on the user's first click
+      // (miniaudio's WebAudio glue installs the gesture handlers).
+      Module.arguments = buildArgs();
+      performance.mark('wpBoot:deploy');
+      var s = document.createElement('script');
+      s.src = 'GeneralsXZH.js?v=' + Date.now();
+      s.onerror = function() {
+        document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
+        document.getElementById('errorBox').style.display = 'block';
+      };
+      document.body.appendChild(s);
     })();
   </script>
 </body>

@@ -243,6 +243,13 @@ def backdrop(alpha=255, name="ScreenBackdrop"):
     return window(name, (0, 0, 800, 600), status="ENABLED+NOFOCUS",
                   bg=bg, border=bg)
 
+def frame_border(name="ScreenFrame"):
+    # Inset 1px outline matching the page's framed-stage look (the window
+    # draw paints BORDERCOLOR as the outline; bg alpha 0 keeps the inside
+    # untouched).
+    return window(name, (14, 12, 786, 588), status="ENABLED+NOFOCUS",
+                  bg="0 0 0 0", border=LINE)
+
 def label(name, rect, text_label, size=11, color=None, centered=1, bold=0,
           bg=None):
     fill = bg or "0 0 0 0"
@@ -341,8 +348,14 @@ message_box("QuitMessageBox", "QuitMessageBoxSystem")
 
 main_children = [
     backdrop(),
-    label("TitleWordmark", (100, 158, 700, 210), "WP:Title", size=36,
-          color="232 226 214 255", bold=1),
+    frame_border(),
+    # Two-tone wordmark like the page (WAR warm-white, POWERS gold): two
+    # left-justified labels on one baseline; box origins hand-tuned to the
+    # rendered glyph widths (checked via native frame dump).
+    label("TitleWar", (217, 158, 383, 210), "WP:TitleWar", size=36,
+          color="232 226 214 255", bold=1, centered=0),
+    label("TitlePowers", (363, 158, 720, 210), "WP:TitlePowers", size=36,
+          color=GOLD, bold=1, centered=0),
     rule("TitleRule", (352, 218, 448, 221)),
     label("TitleTag", (100, 232, 700, 252), "WP:Tagline", size=10, color=DIM),
     btn("ButtonEngage",  (290, 300, 510, 340), "WP:Engage", "primary", size=13),
@@ -360,6 +373,7 @@ menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit",
 # Deployment picker: choosing a front launches its map (no separate state).
 sk_children = [
     backdrop(),
+    frame_border(),
     label("TitleDeploy", (100, 168, 700, 204), "WP:Deployment", size=22,
           color="232 226 214 255", bold=1),
     rule("DeployRule", (368, 212, 432, 214)),
@@ -404,6 +418,7 @@ menu_layout("OptionsMenu", OPTIONS, init="WPOptionsInit")
 # stats and recolors the banner on defeat).
 score_children = [
     backdrop(),
+    frame_border(),
     label("ResultBanner", (150, 150, 650, 200), "", size=32, color=GOLD,
           bold=1),
     rule("ScoreRule", (352, 212, 448, 214)),

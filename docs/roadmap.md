@@ -7,7 +7,7 @@ the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
 ## 0. Port parity (the working plan — D018)
-- [x] Shell (final architecture 2026-08-24): THE PAGE is the only menu — DEPLOY boots the picked faction's match directly; every match exit returns to the page (result card with W/L + ScoreKeeper stats + REDEPLOY). In-match: ESC pause (Return/Restart/Options+volume/Abandon+confirm). The in-engine menu/deployment/score screens are retained as the native dev harness only (?shell=1 in web)
+- [x] Shell (final architecture 2026-08-24, rev 2): THE ENGINE SHELL is the only menu — the page is a pure auto-booting loader (wordmark + progress, no buttons; audio unlocks on first in-menu click). Boot lands on the in-engine main menu (two-tone wordmark, page-matched styling) → deployment picker → match; every exit returns in-engine (score screen on W/L, quit-to-menu on abandon). ESC pause unchanged. ?map= keeps the -file harness path
 - [x] Boot ≤20s: 8.7s local total; performance.mark marks + [BOOT] report permanent (re-measure on real hosting)
 - [x] QoL verified in browser: control groups (Ctrl+#/#/Shift/Alt), select-all, view-CC, stop/scatter, camera keys, pause key, force-attack/-move mod-holds (CommandMap.ini authored — was a 1-line stub, nothing was ever bound)
   - [ ] Attack-move + guard as command-bar buttons (ATTACK_MOVE/GUARD CommandButtons in unit command sets); rally-point live check

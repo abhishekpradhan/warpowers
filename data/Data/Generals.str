@@ -423,12 +423,20 @@ WP:Title
 "W A R   P O W E R S"
 END
 
+WP:TitleWar
+"W A R"
+END
+
+WP:TitlePowers
+"P O W E R S"
+END
+
 WP:Tagline
 "A FREE BROWSER RTS - BUILD, DEFEND, DESTROY"
 END
 
 WP:Engage
-"ENGAGE"
+"E N G A G E"
 END
 
 WP:Options

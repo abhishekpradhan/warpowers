@@ -11,13 +11,16 @@ Nothing ships or deploys until the user says go.
 **Phase 2 — Playability (CURRENT):** make the one match we have feel right.
 - [ ] User playthrough → balance/feel round with real notes
 - [x] Start-money mismatch fixed (both maps deploy with $10000)
-- [ ] Victory path witnessed live (defeat is; same code path)
-- [ ] QoL tail: attack-move/guard/stop as command-bar buttons (icon-sheet
-      expansion — first non-portrait glyphs); rally-point live check
-- [ ] WP_AUTOTEST=full retune → regression gate all-green
-- [ ] Polish debt: W3DFS_MISS spam (Locater01 + per-frame empty-name hunt),
-      voice-limit tuning, invisible-hoverable window sweep (power meter now
-      paints)
+- [x] Victory path witnessed live (WP_AUTOTEST=win + full both end in the
+      score screen)
+- [x] QoL tail: attack-move/guard/stop command-bar buttons (gencmdicons
+      glyph sheet) live in wasm; rally points end-to-end (locomotor probe +
+      WPNODE01/WPRALLY01 + line texture, set-message + flag verified)
+- [x] WP_AUTOTEST=full retune → real 4-tank fleet; gate all-green
+      (base/cycle/win/defeat/full)
+- [x] Polish debt: W3DFS_MISS spam killed (move-hint root cause + WPMOVE01),
+      voice pools 12/32, invisible-hoverable sweep (power meter paints,
+      popup panels opaque)
 
 **Phase 3 — Content to the parity bar** (its own phase; the plan and
 per-class sourcing live in docs/parity.md): infantry via KayKit CC0 rigs

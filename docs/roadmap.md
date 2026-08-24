@@ -8,8 +8,10 @@ Nothing ships or deploys until the user says go.
 
 ## Phases (2026-08-24 — the port surface is done; user-defined structure)
 
-**Phase 2 — Playability (CURRENT):** make the one match we have feel right.
-- [ ] User playthrough → balance/feel round with real notes
+**Phase 2 — Playability (DONE 2026-08-24):** make the one match we have feel right.
+- [x] User playthrough passed with no balance notes ("looks good") — no
+      dedicated balance round needed; tuning rides along with Phase 3
+      content as new units land
 - [x] Start-money mismatch fixed (both maps deploy with $10000)
 - [x] Victory path witnessed live (WP_AUTOTEST=win + full both end in the
       score screen)
@@ -22,7 +24,7 @@ Nothing ships or deploys until the user says go.
       voice pools 12/32, invisible-hoverable sweep (power meter paints,
       popup panels opaque)
 
-**Phase 3 — Content to the parity bar** (its own phase; the plan and
+**Phase 3 — Content to the parity bar (CURRENT)** (its own phase; the plan and
 per-class sourcing live in docs/parity.md): infantry via KayKit CC0 rigs
 (unlocks skeletal animation), aircraft class, structures to ~10/faction,
 genmap biome/layout variety toward 8-10 maps, SFX bulk, VO expansion; music

@@ -14,6 +14,12 @@ Serve with any static server, e.g.:  python3 -m http.server -d stage 8080
 import json
 import os
 import shutil
+import subprocess
+
+# data-quality gates: a failed lint fails the stage
+subprocess.run([__import__('sys').executable,
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lint_voices.py')],
+               check=True)
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

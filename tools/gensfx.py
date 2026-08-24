@@ -171,28 +171,75 @@ out('wp_boom_02', boom(47))
 out('wp_impact_01', impact(53))
 out('wp_impact_02', impact(61))
 
-MERIDIAN = dict(voice='en-us+m3', pitch=44, speed=156, grit=0.9)
-JACKAL = dict(voice='en-us+m7', pitch=28, speed=180, grit=1.35)
+# One voice per unit — every unit gets its own synth voice, pitch, cadence and
+# grit so nothing on the battlefield shares a throat. (Lesson learned: the
+# Fabricator shipped saying "Vector ready" — tools/lint_voices.py now fails the
+# web stage if two templates ever share a voice event again.)
+UNIT_STYLES = {
+    # Meridian: clean, professional radio discipline
+    'wp_vec': dict(voice='en-us+m3', pitch=44, speed=156, grit=0.9),    # Vector MBT: steady
+    'wp_out': dict(voice='en-us+m4', pitch=57, speed=186, grit=0.8),    # Outrider scout: young, eager
+    'wp_zen': dict(voice='en-us+m2', pitch=30, speed=134, grit=1.0),    # Zenith artillery: slow gravel
+    'wp_fab': dict(voice='en-us+m6', pitch=50, speed=166, grit=0.9),    # Fabricator: matter-of-fact site boss
+    # Jackal: scrap-yard rowdies
+    'wp_mon': dict(voice='en-us+m7', pitch=28, speed=180, grit=1.35),   # Mongrel tank: surly
+    'wp_vul': dict(voice='en-us+m5', pitch=62, speed=202, grit=1.5),    # Vulture raider: manic
+    'wp_rig': dict(voice='en-us+m1', pitch=24, speed=148, grit=1.3),    # Rigger: gruff foreman
+}
 
-def barks(prefix, style, lines, base_seed):
+def barks(prefix, lines, base_seed):
+    style = UNIT_STYLES[prefix]
     for key, texts in lines.items():
         for i, text in enumerate(texts):
             out(f'{prefix}_{key}_{i + 1:02d}',
                 radio(text, style['voice'], style['pitch'], style['speed'],
                       base_seed + i * 7 + hash(key) % 97, style['grit']))
 
-barks('wp_vec', MERIDIAN, {
+barks('wp_vec', {
     'sel': ['Vector online.', 'Standing by.'],
     'mov': ['Moving out.', 'Course set.'],
     'atk': ['Engaging.', 'Target locked.'],
     'rdy': ['Vector ready.'],
 }, 100)
 
-barks('wp_mon', JACKAL, {
+barks('wp_out', {
+    'sel': ['Outrider, eyes open.', 'Scout on the line.'],
+    'mov': ['On it.', 'Fast run.'],
+    'atk': ['Tagging them!', 'Peppering!'],
+    'rdy': ['Outrider ready.'],
+}, 300)
+
+barks('wp_zen', {
+    'sel': ['Zenith standing by.', 'Big gun listening.'],
+    'mov': ['Repositioning.', 'Hauling the piece.'],
+    'atk': ['Firing solution set.', 'Rain incoming.'],
+    'rdy': ['Zenith deployed.'],
+}, 400)
+
+barks('wp_fab', {
+    'sel': ['Fabricator.', 'Site crew here.'],
+    'mov': ['Rolling out.', 'On the clock.'],
+    'rdy': ['Fabricator ready.'],
+}, 500)
+
+barks('wp_mon', {
     'sel': ['Mongrel here.', 'Talk to me.'],
     'mov': ['Rolling.', 'Yeah yeah, going.'],
     'atk': ['Light them up!', 'Chew them down!'],
     'rdy': ['Mongrel loose.'],
 }, 200)
+
+barks('wp_vul', {
+    'sel': ['Vulture!', 'Yeah, what?'],
+    'mov': ['Gone!', 'Zip zip.'],
+    'atk': ['Strip them down!', 'Get the shiny bits!'],
+    'rdy': ['Vulture out of the cage.'],
+}, 600)
+
+barks('wp_rig', {
+    'sel': ['Rigger.', 'Wrench is ready.'],
+    'mov': ['Hauling.', 'Moving the rig.'],
+    'rdy': ['Rigger is up.'],
+}, 700)
 
 print('audio pack complete')

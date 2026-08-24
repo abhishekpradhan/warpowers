@@ -197,6 +197,13 @@ MODELS = {
         part("E", "GOLD", 6.5, 0, 0.4, 1.1, 5.0, 0.4),
         part("C", "GOLD", 0, 0, 0.4, 1.8, 1.8, 0.5),
     ],
+    # Rally/waypoint path node puck (engine-hardcoded lookup in
+    # W3DWaypointBuffer, renamed to our namespace): small flat gold disc
+    # drawn at line elbows and the natural rally point.
+    "WPNODE01": [
+        part("DISC", "GOLD", 0, 0, 0.5, 3.4, 3.4, 0.6),
+        part("CORE", (30, 32, 36), 0, 0, 0.85, 1.6, 1.6, 0.5),
+    ],
     "LOCATER02": [
         part("SHAFT", "GOLD", -2, 0, 0.4, 10, 2.0, 0.5),
         part("HEADC", "GOLD", 4.6, 0, 0.4, 3.2, 5.0, 0.5, ty=0.1, ox=1.6),

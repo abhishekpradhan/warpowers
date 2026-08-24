@@ -149,6 +149,26 @@ def write_soft(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
+def write_rallyline(path):
+    """64x8 additive line texture, tiled along rally/waypoint segmented
+    lines: bright gold core dash with soft head/tail so tiling reads as a
+    dotted energy path."""
+    w, h = 64, 8
+    hdr = bytearray(18); hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, w, h); hdr[16] = 24; hdr[17] = 0x20
+    body = bytearray()
+    for y in range(h):
+        dy = abs((y - 3.5) / 3.5)
+        vy = max(0.0, 1.0 - dy * dy)
+        for x in range(w):
+            t = x / (w - 1.0)
+            dash = max(0.0, 1.0 - abs(t - 0.5) * 2.6)
+            v = vy * (dash ** 1.5)
+            body += bytes((clamp(255 * v * 0.35), clamp(255 * v * 0.72), clamp(255 * v)))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 def write_scorch(path):
     """256px scorch atlas (engine hardcodes EXScorch01.tga; 4x4 UV grid,
     SCORCH_PER_ROW=3 with 1.5-cell spacing -> marks at cells (0,0),(1,0),
@@ -326,5 +346,6 @@ for t in targets:
     write_glow(os.path.join(texdir, "wp_glow.tga"))
     write_soft(os.path.join(texdir, "wp_soft.tga"))
     write_scorch(os.path.join(texdir, "EXScorch01.tga"))
+    write_rallyline(os.path.join(texdir, "wp_rallyline.tga"))
     write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))
     write_icons(os.path.join(texdir, "wp_icons.tga"))

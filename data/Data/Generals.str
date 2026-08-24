@@ -549,3 +549,7 @@ END
 GUI:RallyPointNoPath
 "No clear path from the factory exit to that rally point."
 END
+
+GUI:RallyPointSet
+"Rally point set: %ls."
+END

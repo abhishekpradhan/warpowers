@@ -7,11 +7,12 @@ the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
 ## 0. Port parity (the working plan — D018)
-- [ ] In-engine shell: main menu (in engine, replacing page-as-menu or behind it), skirmish setup (map/faction/color), options screen, score screen, load screens
-- [ ] Boot ≤20s: chunked/streamed init behind the menu; performance.mark instrumentation
-- [ ] Verify native engine QoL in the browser: control groups, rally points, attack-move, stances, hotkeys (engine features — likely work, never tested)
-- [ ] Pause menu / quit-to-menu flow (game-exit currently just returns to the page)
-- [ ] Fog-of-war start (initial-reveal anomaly — engine dig)
+- [x] In-engine shell (2026-08-23): main menu, deployment picker (map+faction), options (volume slider), score screen (stats+duration) — all browser-verified E2E; load screen = ShellGameLoadScreen (polish later)
+- [x] Boot ≤20s: 8.7s local total; performance.mark marks + [BOOT] report permanent (re-measure on real hosting)
+- [x] QoL verified in browser: control groups (Ctrl+#/#/Shift/Alt), select-all, view-CC, stop/scatter, camera keys, pause key, force-attack/-move mod-holds (CommandMap.ini authored — was a 1-line stub, nothing was ever bound)
+  - [ ] Attack-move + guard as command-bar buttons (ATTACK_MOVE/GUARD CommandButtons in unit command sets); rally-point live check
+- [x] Pause menu / quit-to-menu flow: ESC pause (Return/Restart/Options/Abandon+confirm) → in-engine menu; match end → score → menu
+- [x] Fog-of-war start: classic black shroud (the "anomaly" was our own 450wu scripted home reveal; CC vision lights the base)
 - [ ] Later: LAN/relay multiplayer (wasm-generals parity)
 - Content track runs alongside (bar + per-class sourcing: docs/parity.md —
   generate / import CC0+CC-BY / community post-publish; music is solved by
@@ -50,19 +51,18 @@ Nothing ships or deploys until the user says go.
 - [x] Main menu: the web page is the menu (DEPLOY gates boot + doubles as the WebAudio unlock gesture)
 
 ## 6. Web hardening
-- [ ] Performance measurement (fps, load time) + budgets; boot 25-40s vs the ≤20s bar
+- [x] Boot time measured + instrumented (8.7s local; §0); fps budget pass still open
 - [x] Wasm logic-clock crawl under tab throttling fixed (catch-up: up to 10 updates/tick)
 - [x] Audio in the wasm build (two engine bugs found+fixed: zero-channel decode buffers, dead group routing; user-confirmed audible)
 - [x] Settings persistence (volume slider + faction choice, localStorage -> WP_VOLUME env)
 
 ## 6b. Polish debt (from playtesting/debugging)
 - [ ] Voice-limit tuning: GameSounds occasionally rejects select-barks
-- [ ] Silence W3DFS_MISS 'Locater01.w3d' spam (engine hunts a locater model in userdata)
+- [ ] Silence W3DFS_MISS spam: 'Locater01.w3d' (userdata hunt) + per-frame empty-name '.w3d' hunt (shell+game; suspect cursor model resolution)
 - [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
 - [x] EVA announcer live (Eva.ini + command-net voice: base under attack, structure/unit lost, low power, funds)
 - [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen
 - [ ] Victory screen live-confirm (same path as defeat; not yet witnessed)
-- [ ] Fog-of-war start: initial-reveal anomaly blocks MAP_SHROUD_ALL (engine dig)
 - [ ] Full-autotest retune (2-tank fleet now loses to the defended enemy base)
 - [ ] Balance pass after a real playthrough (incl. start-money discrepancy between maps)
 

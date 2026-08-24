@@ -273,11 +273,20 @@
       return files;
     });
 
+    // Menu-mode boot (D018 in-engine shell): no -file, the engine lands on its
+    // own main menu and matches start from the Deployment screen. ?map= or
+    // ?autotest= restores the direct-load path (autotests only act in-game).
+    function buildArgs() {
+      var base = ['-win', '-noshellmap'];
+      var directMap = params.get('map');
+      if (directMap) base = base.concat(['-file', directMap]);
+      return base.concat(
+        (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; }));
+    }
     var Module = {
       canvas: document.getElementById('canvas'),
       locateFile: function(path) { return path + '?' + bust; },
-      arguments: ['-win', '-noshellmap', '-file', 'Maps/WPTest.map'].concat(
-        (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; })),
+      arguments: buildArgs(),
       print: log,
       printErr: log,
       onAbort: function(w) { fail('The engine stopped unexpectedly. (' + w + ')'); },
@@ -291,20 +300,41 @@
           setPhase('Preparing engine…');
           return WebAssembly.instantiate(bytes, imports);
         }).then(function(result) {
+          performance.mark('wpBoot:engineReady');
           cb(result.instance, result.module);
         }).catch(function(err) { fail('Engine download failed. ' + err.message); });
         return {};
       },
       onEngineRunning: function() {
-        // First main-loop tick: the match is live.
+        // First main-loop tick: the shell (or match, in direct-load mode) is
+        // live. Boot budget (D018): deploy click -> here in <=20s.
         overlayEl.classList.add('hidden');
+        performance.mark('wpBoot:running');
+        try {
+          var m = function(a, b, name) {
+            performance.measure(name, a, b);
+            var e = performance.getEntriesByName(name).pop();
+            return Math.round(e.duration);
+          };
+          var report = {
+            engineDownloadMs: m('wpBoot:deploy', 'wpBoot:engineReady', 'wpBoot:engine'),
+            dataStageMs: m('wpBoot:engineReady', 'wpBoot:dataReady', 'wpBoot:data'),
+            engineInitMs: m('wpBoot:dataReady', 'wpBoot:running', 'wpBoot:init'),
+            totalMs: m('wpBoot:deploy', 'wpBoot:running', 'wpBoot:total')
+          };
+          window.wpBootReport = report;
+          log('[BOOT] engine ' + report.engineDownloadMs + 'ms, data ' +
+              report.dataStageMs + 'ms, init ' + report.engineInitMs +
+              'ms, total ' + report.totalMs + 'ms' +
+              (report.totalMs > 20000 ? ' (OVER 20s BUDGET)' : ''));
+        } catch (e) { /* marks missing on odd paths - report is best-effort */ }
       },
       onGameExit: function() {
         failed = false;
         meterEl.style.display = 'none';
         overlayEl.classList.remove('hidden');
         phaseEl.style.display = 'block';
-        setPhase('Match complete');
+        setPhase('Session ended — reload to redeploy');
       },
       preRun: [function() {
         setPhase('Staging battlefield data…');
@@ -341,6 +371,7 @@
           var pending = files.length + 1;
           function done() {
             if (--pending === 0) {
+              performance.mark('wpBoot:dataReady');
               setPhase('Starting engine…');
               // Let the overlay paint before main()'s synchronous load
               // freezes the tab for a moment.
@@ -394,10 +425,11 @@
       // The page is the main menu: the engine loads on DEPLOY. The click is
       // also the user gesture that unlocks the WebAudio context.
       document.getElementById('playBtn').addEventListener('click', function() {
-        // rebuild engine args now - the faction picker may have changed since load
-        Module.arguments = ['-win', '-noshellmap', '-file',
-          (window.wpFaction === 'jackal' ? 'Maps/WPTestJ.map' : 'Maps/WPTest.map')].concat(
-          (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; }));
+        // rebuild engine args now - the faction picker may have changed since
+        // load (it only matters for the ?autotest= direct-load path; normal
+        // play boots to the in-engine menu)
+        Module.arguments = buildArgs();
+        performance.mark('wpBoot:deploy');
         document.getElementById('menu').classList.add('hidden');
         meterEl.style.display = '';
         phase.style.display = '';

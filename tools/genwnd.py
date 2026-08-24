@@ -205,11 +205,15 @@ result_screen("LocalDefeat", "WP:Defeat", "200 70 70 255")
 
 # ---------- generic Menus/ layout writer ----------
 def menu_layout(fname, body, init="[None]", update="[None]", shutdown="[None]"):
+    # Layout callbacks are UNQUOTED: parseInit/parseUpdate/parseShutdown
+    # tokenize on whitespace only, so a quoted name never resolves in the
+    # function lexicon (window-level callbacks parse differently and accept
+    # quotes). Cost a full click-forensics session to find.
     content = ("FILE_VERSION = 2;\n"
                "STARTLAYOUTBLOCK\n"
-               f"  LAYOUTINIT = \"{init}\";\n"
-               f"  LAYOUTUPDATE = \"{update}\";\n"
-               f"  LAYOUTSHUTDOWN = \"{shutdown}\";\n"
+               f"  LAYOUTINIT = {init};\n"
+               f"  LAYOUTUPDATE = {update};\n"
+               f"  LAYOUTSHUTDOWN = {shutdown};\n"
                "ENDLAYOUTBLOCK\n") + body.replace(CB + ":", f"{fname}.wnd:")
     for t in targets:
         d = os.path.join(os.path.dirname(t), "Menus")
@@ -239,11 +243,12 @@ quit_children = [
            extra='  TEXT = "WP:PausedTitle";\n  STATICTEXTDATA = CENTERED: 1;\n'),
     menu_button("ButtonReturn",  (300, 244, 500, 276), "WP:ReturnToBattle"),
     menu_button("ButtonRestart", (300, 284, 500, 316), "GUI:RestartMission"),
-    menu_button("ButtonExit",    (300, 324, 500, 356), "GUI:ExitMission",
+    menu_button("ButtonOptions", (300, 324, 500, 356), "WP:Options"),
+    menu_button("ButtonExit",    (300, 364, 500, 396), "GUI:ExitMission",
                 accent="60 34 34 255"),
 ]
-QUIT = window("QuitMenuParent", (280, 180, 520, 380),
-              status="ENABLED+IMAGE+NOFOCUS", syscb="QuitMenuSystem",
+QUIT = window("QuitMenuParent", (280, 180, 520, 420),
+              status="ENABLED+NOFOCUS", syscb="QuitMenuSystem",
               bg=PANEL, border=GOLD, children=quit_children)
 menu_layout("QuitMenu", QUIT)
 
@@ -272,9 +277,97 @@ def message_box(fname, syscb):
                            extra=f'  TEXT = "{blabel}";\n'))
         bx += 68
     box = window("MessageBoxParent", (250, 224, 550, 366),
-                 status="ENABLED+IMAGE+NOFOCUS", syscb=syscb,
+                 status="ENABLED+NOFOCUS", syscb=syscb,
                  bg=PANEL, border=GOLD, children=kids)
     menu_layout(fname, box)
 
 message_box("MessageBox", "MessageBoxSystem")
 message_box("QuitMessageBox", "QuitMessageBoxSystem")
+
+
+# ---------- In-engine shell screens (WPShell.cpp callbacks) ----------
+# MainMenu.wnd is the layout the engine pushes at boot (Shell.cpp hardcodes
+# the filename); our LAYOUTINIT/SYSTEMCALLBACK names route it to WPShell.cpp
+# instead of the dormant EA MainMenu.cpp flyout code.
+
+def title_text(name, rect, label, size=28, color="215 180 90 255", bg=None):
+    return window(name, rect, wtype="STATICTEXT", status="ENABLED",
+                  bg=bg or PANEL, border=bg or PANEL, textcolor=color,
+                  fontsize=size, bold=1,
+                  extra=f'  TEXT = "{label}";\n  STATICTEXTDATA = CENTERED: 1;\n')
+
+SHELL_BG = "10 11 14 255"
+main_children = [
+    # Full-screen opaque backdrop: the parent's own fill does not repaint the
+    # whole frame, so without this the last game frame stays visible behind
+    # the menu after quit-to-menu (no shell map to cover it).
+    window("MenuBackdrop", (0, 0, 800, 600), status="ENABLED+NOFOCUS",
+           bg=SHELL_BG, border=SHELL_BG),
+    title_text("TitleWordmark", (150, 130, 650, 190), "WP:Title", size=34,
+               color="232 226 214 255", bg=SHELL_BG),
+    title_text("TitleTag", (150, 196, 650, 218), "WP:Tagline", size=11,
+               color="150 156 166 255", bg=SHELL_BG),
+    menu_button("ButtonEngage",  (300, 268, 500, 302), "WP:Engage"),
+    menu_button("ButtonOptions", (300, 312, 500, 346), "WP:Options"),
+    menu_button("ButtonQuit",    (300, 356, 500, 390), "WP:QuitGame",
+                accent="60 34 34 255"),
+    window("LabelVersion", (540, 574, 796, 594), wtype="STATICTEXT",
+           status="ENABLED", bg=SHELL_BG, border=SHELL_BG,
+           textcolor="110 114 122 255", fontsize=9,
+           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+]
+MAINMENU = window("MainMenuParent", (0, 0, 800, 600),
+                  status="ENABLED+NOFOCUS", syscb="WPMainMenuSystem",
+                  bg=SHELL_BG, border=SHELL_BG, children=main_children)
+menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit", update="WPMainMenuUpdate", shutdown="WPShellShutdown")
+
+# Deployment picker: choosing a front launches its map (no separate state).
+sk_children = [
+    title_text("TitleDeploy", (150, 150, 650, 195), "WP:Deployment", size=24),
+    menu_button("ButtonDeployMeridian", (240, 250, 560, 292), "WP:DeployMeridian",
+                accent="30 40 52 255"),
+    menu_button("ButtonDeployJackal",   (240, 302, 560, 344), "WP:DeployJackal",
+                accent="48 38 26 255"),
+    menu_button("ButtonBack", (330, 380, 470, 410), "WP:Back"),
+]
+SKIRMISH = window("SkirmishParent", (120, 120, 680, 440),
+                  status="ENABLED+NOFOCUS", syscb="WPSkirmishSystem",
+                  bg=PANEL, border=GOLD, children=sk_children)
+menu_layout("WPSkirmish", SKIRMISH, init="WPSkirmishInit", shutdown="WPShellShutdown")
+
+# Options: master volume slider + back. Stock filename so QuitMenu's Options
+# button and ToggleQuitMenu's close path work unchanged.
+opt_children = [
+    title_text("TitleOptions", (150, 150, 650, 190), "WP:OptionsTitle", size=22),
+    window("LabelVolume", (240, 230, 400, 252), wtype="STATICTEXT", status="ENABLED",
+           bg=PANEL, border=PANEL, fontsize=12,
+           extra='  TEXT = "WP:MasterVolume";\n  STATICTEXTDATA = CENTERED: 0;\n'),
+    window("SliderVolume", (240, 260, 560, 284), wtype="HORZSLIDER",
+           status="ENABLED", syscb="PassMessagesToParentSystem",
+           bg="30 34 40 255", border=GOLD,
+           extra="  SLIDERDATA = MINVALUE: 0, MAXVALUE: 100;\n"),
+    menu_button("ButtonBack", (330, 340, 470, 372), "WP:Back"),
+]
+OPTIONS = window("OptionsParent", (120, 120, 680, 420),
+                 status="ENABLED+NOFOCUS", syscb="WPOptionsSystem",
+                 bg=PANEL, border=GOLD, children=opt_children)
+menu_layout("OptionsMenu", OPTIONS, init="WPOptionsInit")
+
+# Post-match score screen (pushed over the main menu; WPScoreInit fills stats).
+score_children = [
+    window("ResultBanner", (200, 150, 600, 200), wtype="STATICTEXT", status="ENABLED",
+           bg=PANEL, border=PANEL, textcolor="215 180 90 255", fontsize=30, bold=1,
+           extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+]
+sy = 230
+for stat in ["StatUnits", "StatStructures", "StatMoney", "StatDuration"]:
+    score_children.append(
+        window(stat, (220, sy, 580, sy + 24), wtype="STATICTEXT", status="ENABLED",
+               bg=PANEL, border=PANEL, textcolor="196 202 210 255", fontsize=12,
+               extra="  STATICTEXTDATA = CENTERED: 1;\n"))
+    sy += 32
+score_children.append(menu_button("ButtonContinue", (330, 386, 470, 418), "WP:Continue"))
+SCORE = window("ScoreParent", (160, 120, 640, 450),
+               status="ENABLED+NOFOCUS", syscb="WPScoreSystem",
+               bg=PANEL, border=GOLD, children=score_children)
+menu_layout("WPScore", SCORE, init="WPScoreInit", shutdown="WPShellShutdown")

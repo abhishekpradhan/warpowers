@@ -417,3 +417,68 @@ END
 GUI:SelectedAcrossMap
 "Forces selected across the battlefield"
 END
+
+// In-engine shell (WPShell.cpp screens)
+WP:Title
+"WAR POWERS"
+END
+
+WP:Tagline
+"A FREE BROWSER RTS - BUILD, DEFEND, DESTROY"
+END
+
+WP:Engage
+"ENGAGE"
+END
+
+WP:Options
+"Options"
+END
+
+WP:OptionsTitle
+"OPTIONS"
+END
+
+WP:QuitGame
+"Stand Down"
+END
+
+WP:Deployment
+"DEPLOYMENT"
+END
+
+WP:DeployMeridian
+"Meridian Combine - Dune Clash"
+END
+
+WP:DeployJackal
+"Jackal League - Dune Clash (mirrored)"
+END
+
+WP:Back
+"Back"
+END
+
+WP:MasterVolume
+"Master volume"
+END
+
+WP:Continue
+"Continue"
+END
+
+WP:ScoreUnits
+"Units - built %d / lost %d / destroyed %d"
+END
+
+WP:ScoreStructures
+"Structures built - %d"
+END
+
+WP:ScoreMoney
+"Credits earned - %d"
+END
+
+WP:ScoreDuration
+"Duration - %d:%02d"
+END

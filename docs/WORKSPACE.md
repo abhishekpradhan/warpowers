@@ -36,9 +36,9 @@ Inside the engine submodule:
 | Repo | Local path | Branch | Purpose |
 |---|---|---|---|
 | `warpowers` | workspace root | `main` | primary repo (origin) |
-| `warpowers-engine` | `engine/` | `warpowers-web` | engine fork backup (remote name: `backup`) |
+| `warpowers-engine` | `engine/` | `main` | engine fork backup (remote name: `backup`) |
 | `warpowers-dvijoke` | `dvijoke/` | `main` | dvijoke fork backup (remote name: `backup`) |
-| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | (default) | DXVK fork backup (remote name: `backup`) |
+| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | `main` | DXVK fork backup (remote name: `backup`) |
 
 Upstreams (fetch-only in practice; **never push**): engine → `generalsxweb`
 (meerzulee/GeneralsXWeb), dvijoke → `origin` (meerzulee/dvijoke), dxvk →
@@ -48,7 +48,7 @@ fbraz3 lineage.
 
 ```
 git push origin main                                   # workspace
-git -C engine push backup warpowers-web:warpowers-web  # engine fork
+git -C engine push backup main:main                    # engine fork
 git -C dvijoke push backup main:main                   # dvijoke fork
 git -C engine/references/fbraz3-dxvk push backup       # dxvk fork (rarely changes)
 ```

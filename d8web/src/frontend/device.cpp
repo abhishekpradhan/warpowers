@@ -334,8 +334,11 @@ public:
         UINT w = std::max(1u, m_width >> level), h = std::max(1u, m_height >> level);
         std::vector<BYTE>& src = m_shadow[level];
 #ifdef __EMSCRIPTEN__
+        // WarPowers: probes are debug-only — they scan pixels and dump files
+        // per atlas bake. Enable with IG_TRACE (Module.ENV / window.IG_TRACE).
+        static const bool ig_trace = std::getenv("IG_TRACE") && *std::getenv("IG_TRACE") != '0';
         // Per-mip content probe for big 1555 textures (terrain atlas).
-        if (m_format == D3DFMT_A1R5G5B5 && level > 0 && (m_width >> 0) >= 512) {
+        if (ig_trace && m_format == D3DFMT_A1R5G5B5 && level > 0 && (m_width >> 0) >= 512) {
             const uint16_t* px = reinterpret_cast<const uint16_t*>(src.data());
             UINT colored = 0, total = 0;
             for (UINT i = 0; i < w * h; i += 7, ++total)
@@ -345,7 +348,7 @@ public:
         }
         // Terrain-atlas content probe: report how much of a big 1555 atlas is
         // actually colored after each bake, in 8 horizontal bands.
-        if (m_format == D3DFMT_A1R5G5B5 && level == 0 && w >= 512) {
+        if (ig_trace && m_format == D3DFMT_A1R5G5B5 && level == 0 && w >= 512) {
             const uint16_t* px = reinterpret_cast<const uint16_t*>(src.data());
             char bands[64]; int bp = 0;
             for (UINT band = 0; band < 8; ++band) {

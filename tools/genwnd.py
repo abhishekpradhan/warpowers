@@ -24,7 +24,7 @@ def drawdata(bg, border=None):
 def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
            syscb="[None]", bg="0 0 0 255", extra="", children=(),
            drawcb="[None]", inputcb="[None]", border=None, textcolor=None,
-           fontsize=10, bold=0):
+           fontsize=10, bold=0, hilitebg=None):
     x0, y0, x1, y1 = rect
     if textcolor is None:
         textcolor = "255 255 255 255"
@@ -46,7 +46,7 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
               HILITE: 255 255 128 255, HILITEBORDER: 255 255 255 255;
   ENABLEDDRAWDATA = {drawdata(bg, border)};
   DISABLEDDRAWDATA = {drawdata('26 28 32 255', border)};
-  HILITEDRAWDATA = {drawdata('58 64 74 255', border)};
+  HILITEDRAWDATA = {drawdata(hilitebg or '58 64 74 255', border)};
 """
     if children:
         body += "  CHILD\n"
@@ -223,62 +223,111 @@ def menu_layout(fname, body, init="[None]", update="[None]", shutdown="[None]"):
             f.write(content)
         print("wrote", p)
 
-GOLD = "120 104 60 255"
-PANEL = "15 17 21 250"
+# ---------- shell style system (matches the web page: web/index.html) ----------
+# Page palette: bg #0a0c10, panel #10141b, line #232a35, text #c7ceda,
+# dim #6b7686, accent #d7b45a, danger tint. WND color fills only draw when
+# WIN_STATUS_IMAGE is ABSENT (W3DGameWinDefaultDraw takes the image branch
+# and draws nothing for NoImage), so panels/backdrops use ENABLED+NOFOCUS.
+SHELL_BG   = "10 12 16 255"      # page --bg
+PANEL      = "16 20 27 250"      # page --panel
+LINE       = "35 42 53 255"      # page --line
+TEXT       = "199 206 218 255"   # page --text
+DIM        = "107 118 134 255"   # page --text-dim
+GOLD       = "215 180 90 255"    # page --accent
+GOLD_DARK  = "13 15 18 255"      # text on gold
+GOLD_HI    = "232 202 122 255"
+GOLD_LINE  = "150 126 66 255"
 
-def menu_button(name, rect, text, accent="34 38 44 255"):
+def backdrop(alpha=255, name="ScreenBackdrop"):
+    bg = f"10 12 16 {alpha}"
+    return window(name, (0, 0, 800, 600), status="ENABLED+NOFOCUS",
+                  bg=bg, border=bg)
+
+def label(name, rect, text_label, size=11, color=None, centered=1, bold=0,
+          bg=None):
+    fill = bg or "0 0 0 0"
+    # Empty TEXT is a native crash: parseText strtoks the value and calls
+    # strlen(NULL) on the missing token (wasm survives only because address
+    # 0 is readable there). Runtime-filled labels omit the field entirely.
+    text_line = f'  TEXT = "{text_label}";\n' if text_label else ""
+    return window(name, rect, wtype="STATICTEXT", status="ENABLED",
+                  bg=fill, border=fill, textcolor=color or TEXT,
+                  fontsize=size, bold=bold,
+                  extra=text_line + f'  STATICTEXTDATA = CENTERED: {centered};\n')
+
+def rule(name, rect, color=GOLD):
+    return window(name, rect, status="ENABLED+NOFOCUS", bg=color, border=color)
+
+def btn(name, rect, text_label, kind="ghost", size=12):
+    # Button faces are color fills; the gadget draw honors HILITEDRAWDATA on
+    # hover, so each kind carries its own hover shade.
+    kinds = {
+        "primary": dict(bg=GOLD, border=GOLD_LINE, textcolor=GOLD_DARK,
+                        hilitebg=GOLD_HI, bold=1),
+        "ghost":   dict(bg="26 30 38 255", border="58 66 80 255",
+                        textcolor=TEXT, hilitebg="38 44 55 255", bold=0),
+        "danger":  dict(bg="44 26 26 255", border="122 62 62 255",
+                        textcolor="216 162 162 255", hilitebg="60 34 34 255",
+                        bold=0),
+        "meridian": dict(bg="34 44 58 255", border="96 128 168 255",
+                         textcolor="208 220 236 255", hilitebg="44 57 75 255",
+                         bold=1),
+        "jackal":  dict(bg="50 39 26 255", border="168 128 78 255",
+                        textcolor="235 219 197 255", hilitebg="64 50 33 255",
+                        bold=1),
+    }
+    k = kinds[kind]
     return window(name, rect, wtype="PUSHBUTTON", status="ENABLED",
-                  syscb="PassSelectedButtonsToParentSystem", bg=accent,
-                  border=GOLD, fontsize=12,
-                  extra=f'  TEXT = "{text}";\n')
+                  syscb="PassSelectedButtonsToParentSystem", bg=k["bg"],
+                  border=k["border"], textcolor=k["textcolor"],
+                  hilitebg=k["hilitebg"], fontsize=size, bold=k["bold"],
+                  extra=f'  TEXT = "{text_label}";\n')
 
 # ---------- QuitMenu.wnd (ESC pause menu; stock QuitMenuSystem callback) ----------
 # Engine contract (QuitMenu.cpp): ButtonReturn/ButtonRestart/ButtonExit are
-# dereferenced unguarded; ButtonSaveLoad/ButtonOptions lookups are guarded
-# (Options added with the in-engine shell round). Restart/Exit text is set at
-# runtime (GUI:RestartMission / GUI:ExitMission).
+# dereferenced unguarded; ButtonSaveLoad/ButtonOptions lookups are guarded.
+# Restart/Exit text is set at runtime (GUI:RestartMission / GUI:ExitMission).
 quit_children = [
-    window("PausedTitle", (300, 200, 500, 228), wtype="STATICTEXT", status="ENABLED",
-           bg=PANEL, border=PANEL, textcolor="215 180 90 255", fontsize=16, bold=1,
-           extra='  TEXT = "WP:PausedTitle";\n  STATICTEXTDATA = CENTERED: 1;\n'),
-    menu_button("ButtonReturn",  (300, 244, 500, 276), "WP:ReturnToBattle"),
-    menu_button("ButtonRestart", (300, 284, 500, 316), "GUI:RestartMission"),
-    menu_button("ButtonOptions", (300, 324, 500, 356), "WP:Options"),
-    menu_button("ButtonExit",    (300, 364, 500, 396), "GUI:ExitMission",
-                accent="60 34 34 255"),
+    backdrop(alpha=150, name="PauseDim"),
+    window("PausePanel", (288, 172, 512, 432), status="ENABLED+NOFOCUS",
+           bg=PANEL, border=LINE),
+    rule("PauseRule", (352, 214, 448, 216)),
+    label("PausedTitle", (300, 188, 500, 210), "WP:PausedTitle", size=15,
+          color=GOLD, bold=1),
+    btn("ButtonReturn",  (312, 236, 488, 270), "WP:ReturnToBattle", "primary"),
+    btn("ButtonRestart", (312, 280, 488, 312), "GUI:RestartMission", "ghost"),
+    btn("ButtonOptions", (312, 322, 488, 354), "WP:Options", "ghost"),
+    btn("ButtonExit",    (312, 372, 488, 406), "GUI:ExitMission", "danger"),
 ]
-QUIT = window("QuitMenuParent", (280, 180, 520, 420),
+QUIT = window("QuitMenuParent", (0, 0, 800, 600),
               status="ENABLED+NOFOCUS", syscb="QuitMenuSystem",
-              bg=PANEL, border=GOLD, children=quit_children)
+              bg="0 0 0 0", border="0 0 0 0", children=quit_children)
 menu_layout("QuitMenu", QUIT)
 
 # ---------- MessageBox.wnd / QuitMessageBox.wnd (yes/no/ok confirm dialogs) ----------
 # Engine contract (gogoMessageBox): all four buttons must exist (ButtonOk's
-# position is read unguarded even in yes/no boxes); engine unhides the flagged
-# ones, so buttons are authored HIDDEN. StaticTextTitle/StaticTextMessage get
-# runtime text.
+# position is read unguarded even in yes/no boxes); engine unhides the
+# flagged ones, so buttons are authored HIDDEN. StaticTextTitle/
+# StaticTextMessage get runtime text.
 def message_box(fname, syscb):
     kids = [
-        window("StaticTextTitle", (260, 236, 540, 260), wtype="STATICTEXT",
-               status="ENABLED", bg=PANEL, border=PANEL,
-               textcolor="215 180 90 255", fontsize=13, bold=1,
-               extra="  STATICTEXTDATA = CENTERED: 1;\n"),
-        window("StaticTextMessage", (264, 268, 536, 316), wtype="STATICTEXT",
-               status="ENABLED", bg=PANEL, border=PANEL,
-               extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+        window("BoxPanel", (250, 224, 550, 372), status="ENABLED+NOFOCUS",
+               bg=PANEL, border=LINE),
+        label("StaticTextTitle", (260, 238, 540, 262), "", size=13,
+              color=GOLD, bold=1),
+        label("StaticTextMessage", (264, 270, 536, 318), "", size=11,
+              color=TEXT),
     ]
     bx = 270
     for bname, blabel in [("ButtonOk", "GUI:Ok"), ("ButtonYes", "GUI:Yes"),
                           ("ButtonNo", "GUI:No"), ("ButtonCancel", "GUI:Cancel")]:
-        kids.append(window(bname, (bx, 326, bx + 60, 354), wtype="PUSHBUTTON",
-                           status="ENABLED+HIDDEN",
-                           syscb="PassSelectedButtonsToParentSystem",
-                           bg="34 38 44 255", border=GOLD, fontsize=11,
-                           extra=f'  TEXT = "{blabel}";\n'))
+        b = btn(bname, (bx, 328, bx + 60, 358), blabel, "ghost", size=11)
+        b = b.replace("STATUS = ENABLED;", "STATUS = ENABLED+HIDDEN;")
+        kids.append(b)
         bx += 68
-    box = window("MessageBoxParent", (250, 224, 550, 366),
+    box = window("MessageBoxParent", (250, 224, 550, 372),
                  status="ENABLED+NOFOCUS", syscb=syscb,
-                 bg=PANEL, border=GOLD, children=kids)
+                 bg="0 0 0 0", border="0 0 0 0", children=kids)
     menu_layout(fname, box)
 
 message_box("MessageBox", "MessageBoxSystem")
@@ -286,88 +335,87 @@ message_box("QuitMessageBox", "QuitMessageBoxSystem")
 
 
 # ---------- In-engine shell screens (WPShell.cpp callbacks) ----------
-# MainMenu.wnd is the layout the engine pushes at boot (Shell.cpp hardcodes
-# the filename); our LAYOUTINIT/SYSTEMCALLBACK names route it to WPShell.cpp
-# instead of the dormant EA MainMenu.cpp flyout code.
+# The engine shell is the BETWEEN-MATCHES hub (post-match score, redeploy,
+# stand down). At boot the web page is the menu: its DEPLOY boots straight
+# into the picked faction's map via WP_BOOT_MAP. Styled to match the page.
 
-def title_text(name, rect, label, size=28, color="215 180 90 255", bg=None):
-    return window(name, rect, wtype="STATICTEXT", status="ENABLED",
-                  bg=bg or PANEL, border=bg or PANEL, textcolor=color,
-                  fontsize=size, bold=1,
-                  extra=f'  TEXT = "{label}";\n  STATICTEXTDATA = CENTERED: 1;\n')
-
-SHELL_BG = "10 11 14 255"
 main_children = [
-    # Full-screen opaque backdrop: the parent's own fill does not repaint the
-    # whole frame, so without this the last game frame stays visible behind
-    # the menu after quit-to-menu (no shell map to cover it).
-    window("MenuBackdrop", (0, 0, 800, 600), status="ENABLED+NOFOCUS",
-           bg=SHELL_BG, border=SHELL_BG),
-    title_text("TitleWordmark", (150, 130, 650, 190), "WP:Title", size=34,
-               color="232 226 214 255", bg=SHELL_BG),
-    title_text("TitleTag", (150, 196, 650, 218), "WP:Tagline", size=11,
-               color="150 156 166 255", bg=SHELL_BG),
-    menu_button("ButtonEngage",  (300, 268, 500, 302), "WP:Engage"),
-    menu_button("ButtonOptions", (300, 312, 500, 346), "WP:Options"),
-    menu_button("ButtonQuit",    (300, 356, 500, 390), "WP:QuitGame",
-                accent="60 34 34 255"),
-    window("LabelVersion", (540, 574, 796, 594), wtype="STATICTEXT",
-           status="ENABLED", bg=SHELL_BG, border=SHELL_BG,
-           textcolor="110 114 122 255", fontsize=9,
-           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+    backdrop(),
+    label("TitleWordmark", (100, 158, 700, 210), "WP:Title", size=36,
+          color="232 226 214 255", bold=1),
+    rule("TitleRule", (352, 218, 448, 221)),
+    label("TitleTag", (100, 232, 700, 252), "WP:Tagline", size=10, color=DIM),
+    btn("ButtonEngage",  (290, 300, 510, 340), "WP:Engage", "primary", size=13),
+    btn("ButtonOptions", (290, 352, 510, 386), "WP:Options", "ghost"),
+    btn("ButtonQuit",    (290, 398, 510, 432), "WP:QuitGame", "danger"),
+    label("LabelVersion", (540, 576, 792, 594), "", size=9, color=DIM,
+          centered=0),
 ]
 MAINMENU = window("MainMenuParent", (0, 0, 800, 600),
                   status="ENABLED+NOFOCUS", syscb="WPMainMenuSystem",
                   bg=SHELL_BG, border=SHELL_BG, children=main_children)
-menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit", update="WPMainMenuUpdate", shutdown="WPShellShutdown")
+menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit",
+            update="WPMainMenuUpdate", shutdown="WPShellShutdown")
 
 # Deployment picker: choosing a front launches its map (no separate state).
 sk_children = [
-    title_text("TitleDeploy", (150, 150, 650, 195), "WP:Deployment", size=24),
-    menu_button("ButtonDeployMeridian", (240, 250, 560, 292), "WP:DeployMeridian",
-                accent="30 40 52 255"),
-    menu_button("ButtonDeployJackal",   (240, 302, 560, 344), "WP:DeployJackal",
-                accent="48 38 26 255"),
-    menu_button("ButtonBack", (330, 380, 470, 410), "WP:Back"),
+    backdrop(),
+    label("TitleDeploy", (100, 168, 700, 204), "WP:Deployment", size=22,
+          color="232 226 214 255", bold=1),
+    rule("DeployRule", (368, 212, 432, 214)),
+    label("DeployHint", (100, 226, 700, 244), "WP:DeployHint", size=10,
+          color=DIM),
+    btn("ButtonDeployMeridian", (240, 272, 560, 320), "WP:DeployMeridian",
+        "meridian", size=13),
+    btn("ButtonDeployJackal",   (240, 332, 560, 380), "WP:DeployJackal",
+        "jackal", size=13),
+    btn("ButtonBack", (330, 412, 470, 444), "WP:Back", "ghost"),
 ]
-SKIRMISH = window("SkirmishParent", (120, 120, 680, 440),
+SKIRMISH = window("SkirmishParent", (0, 0, 800, 600),
                   status="ENABLED+NOFOCUS", syscb="WPSkirmishSystem",
-                  bg=PANEL, border=GOLD, children=sk_children)
-menu_layout("WPSkirmish", SKIRMISH, init="WPSkirmishInit", shutdown="WPShellShutdown")
+                  bg="0 0 0 0", border="0 0 0 0", children=sk_children)
+menu_layout("WPSkirmish", SKIRMISH, init="WPSkirmishInit",
+            shutdown="WPShellShutdown")
 
 # Options: master volume slider + back. Stock filename so QuitMenu's Options
-# button and ToggleQuitMenu's close path work unchanged.
+# button and ToggleQuitMenu's close path work unchanged. The dim underlay
+# covers whatever it opened over (pause menu, main menu).
 opt_children = [
-    title_text("TitleOptions", (150, 150, 650, 190), "WP:OptionsTitle", size=22),
-    window("LabelVolume", (240, 230, 400, 252), wtype="STATICTEXT", status="ENABLED",
-           bg=PANEL, border=PANEL, fontsize=12,
-           extra='  TEXT = "WP:MasterVolume";\n  STATICTEXTDATA = CENTERED: 0;\n'),
-    window("SliderVolume", (240, 260, 560, 284), wtype="HORZSLIDER",
+    backdrop(alpha=210, name="OptionsDim"),
+    window("OptionsPanel", (250, 190, 550, 410), status="ENABLED+NOFOCUS",
+           bg=PANEL, border=LINE),
+    label("TitleOptions", (260, 206, 540, 232), "WP:OptionsTitle", size=16,
+          color=GOLD, bold=1),
+    rule("OptionsRule", (368, 240, 432, 242)),
+    label("LabelVolume", (280, 264, 520, 284), "WP:MasterVolume", size=11,
+          color=TEXT, centered=0),
+    window("SliderVolume", (280, 292, 520, 314), wtype="HORZSLIDER",
            status="ENABLED", syscb="PassMessagesToParentSystem",
-           bg="30 34 40 255", border=GOLD,
+           bg="30 34 42 255", border="58 66 80 255",
            extra="  SLIDERDATA = MINVALUE: 0, MAXVALUE: 100;\n"),
-    menu_button("ButtonBack", (330, 340, 470, 372), "WP:Back"),
+    btn("ButtonBack", (330, 350, 470, 384), "WP:Back", "primary"),
 ]
-OPTIONS = window("OptionsParent", (120, 120, 680, 420),
+OPTIONS = window("OptionsParent", (0, 0, 800, 600),
                  status="ENABLED+NOFOCUS", syscb="WPOptionsSystem",
-                 bg=PANEL, border=GOLD, children=opt_children)
+                 bg="0 0 0 0", border="0 0 0 0", children=opt_children)
 menu_layout("OptionsMenu", OPTIONS, init="WPOptionsInit")
 
-# Post-match score screen (pushed over the main menu; WPScoreInit fills stats).
+# Post-match score screen (pushed over the main menu; WPScoreInit fills
+# stats and recolors the banner on defeat).
 score_children = [
-    window("ResultBanner", (200, 150, 600, 200), wtype="STATICTEXT", status="ENABLED",
-           bg=PANEL, border=PANEL, textcolor="215 180 90 255", fontsize=30, bold=1,
-           extra="  STATICTEXTDATA = CENTERED: 1;\n"),
+    backdrop(),
+    label("ResultBanner", (150, 150, 650, 200), "", size=32, color=GOLD,
+          bold=1),
+    rule("ScoreRule", (352, 212, 448, 214)),
 ]
-sy = 230
+sy = 240
 for stat in ["StatUnits", "StatStructures", "StatMoney", "StatDuration"]:
-    score_children.append(
-        window(stat, (220, sy, 580, sy + 24), wtype="STATICTEXT", status="ENABLED",
-               bg=PANEL, border=PANEL, textcolor="196 202 210 255", fontsize=12,
-               extra="  STATICTEXTDATA = CENTERED: 1;\n"))
-    sy += 32
-score_children.append(menu_button("ButtonContinue", (330, 386, 470, 418), "WP:Continue"))
-SCORE = window("ScoreParent", (160, 120, 640, 450),
+    score_children.append(label(stat, (200, sy, 600, sy + 22), "", size=12,
+                                color=TEXT))
+    sy += 30
+score_children.append(btn("ButtonContinue", (310, 386, 490, 422),
+                          "WP:Continue", "primary", size=13))
+SCORE = window("ScoreParent", (0, 0, 800, 600),
                status="ENABLED+NOFOCUS", syscb="WPScoreSystem",
-               bg=PANEL, border=GOLD, children=score_children)
+               bg="0 0 0 0", border="0 0 0 0", children=score_children)
 menu_layout("WPScore", SCORE, init="WPScoreInit", shutdown="WPShellShutdown")

@@ -420,7 +420,7 @@ END
 
 // In-engine shell (WPShell.cpp screens)
 WP:Title
-"WAR POWERS"
+"W A R   P O W E R S"
 END
 
 WP:Tagline
@@ -445,6 +445,10 @@ END
 
 WP:Deployment
 "DEPLOYMENT"
+END
+
+WP:DeployHint
+"Choose your front - the battle begins immediately"
 END
 
 WP:DeployMeridian

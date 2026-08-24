@@ -334,7 +334,13 @@
         meterEl.style.display = 'none';
         overlayEl.classList.remove('hidden');
         phaseEl.style.display = 'block';
-        setPhase('Session ended — reload to redeploy');
+        setPhase('Standing down.');
+        // The wasm runtime can't restart in-place — offer a one-click
+        // redeploy (page reload) instead of a dead-end message.
+        var eb = document.getElementById('errorBox');
+        document.getElementById('errorMsg').textContent = '';
+        eb.querySelector('button').textContent = 'REDEPLOY';
+        eb.style.display = 'block';
       },
       preRun: [function() {
         setPhase('Staging battlefield data…');
@@ -344,6 +350,14 @@
         if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
         // WarPowers @debug forward autotest/diagnostic env knobs from the URL
         ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
+        // DEPLOY = straight into the picked faction's match; the in-engine
+        // shell is the between-matches hub (score screen, redeploy). ?map=
+        // keeps the -file quit-after-match path for the autotest harness,
+        // and ?shell=1 boots to the in-engine menu instead.
+        if (!params.get('map') && params.get('shell') !== '1') {
+          ENV.WP_BOOT_MAP = (window.wpFaction === 'jackal')
+            ? 'Maps\\WPTestJ\\WPTestJ.map' : 'Maps\\WPTest\\WPTest.map';
+        }
         if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
         if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
         FS.mkdir('/game');

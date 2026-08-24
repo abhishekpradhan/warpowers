@@ -208,6 +208,22 @@ def rocket(seed):
         x[i] += 0.4 * math.sin(2 * math.pi * f * t) * math.exp(-t * 4.0)
     return softclip(x, 1.6)
 
+def uiclick(seed, freq=1900.0, dur=0.05):
+    rng = random.Random(seed)
+    n = int(SR * dur)
+    x = [0.0] * n
+    for i in range(n):
+        t = i / SR
+        env = math.exp(-t * 90.0)
+        x[i] = (0.7 * math.sin(2 * math.pi * freq * t) + 0.3 * rng.uniform(-1, 1)) * env
+    return x
+
+out('wp_ui_click', uiclick(11))
+out('wp_ui_hover', uiclick(23, freq=1400.0, dur=0.035))
+
+out('wp_impact_03', impact(151))
+out('wp_impact_04', impact(163))
+
 out('wp_rocket_01', rocket(311))
 out('wp_rocket_02', rocket(347))
 
@@ -248,9 +264,9 @@ def barks(prefix, lines, base_seed):
                       base_seed + i * 7 + hash(key) % 97, style['grit']))
 
 barks('wp_vec', {
-    'sel': ['Vector online.', 'Standing by.'],
-    'mov': ['Moving out.', 'Course set.'],
-    'atk': ['Engaging.', 'Target locked.'],
+    'sel': ['Vector online.', 'Standing by.', 'Crew reports green.'],
+    'mov': ['Moving out.', 'Course set.', 'Treads turning.'],
+    'atk': ['Engaging.', 'Target locked.', 'Main gun hot.'],
     'rdy': ['Vector ready.'],
 }, 100)
 
@@ -275,9 +291,9 @@ barks('wp_fab', {
 }, 500)
 
 barks('wp_mon', {
-    'sel': ['Mongrel here.', 'Talk to me.'],
-    'mov': ['Rolling.', 'Yeah yeah, going.'],
-    'atk': ['Light them up!', 'Chew them down!'],
+    'sel': ['Mongrel here.', 'Talk to me.', 'Still running, barely.'],
+    'mov': ['Rolling.', 'Yeah yeah, going.', 'Kicking gravel.'],
+    'atk': ['Light them up!', 'Chew them down!', 'Bite time!'],
     'rdy': ['Mongrel loose.'],
 }, 200)
 
@@ -289,16 +305,16 @@ barks('wp_vul', {
 }, 600)
 
 barks('wp_war', {
-    'sel': ['Warden reporting.', 'Rifle ready.'],
-    'mov': ['Boots moving.', 'On the double.'],
-    'atk': ['Open fire!', 'Suppressing!'],
+    'sel': ['Warden reporting.', 'Rifle ready.', 'Standing to.'],
+    'mov': ['Boots moving.', 'On the double.', 'Covering ground.'],
+    'atk': ['Open fire!', 'Suppressing!', 'Targets marked!'],
     'rdy': ['Warden ready.'],
 }, 750)
 
 barks('wp_scr', {
-    'sel': ['Scrapper!', 'Yeah boss?'],
-    'mov': ['Leggin it.', 'Going going.'],
-    'atk': ['Perforate them!', 'Eat pellets!'],
+    'sel': ['Scrapper!', 'Yeah boss?', 'What now?'],
+    'mov': ['Leggin it.', 'Going going.', 'Dust up!'],
+    'atk': ['Perforate them!', 'Eat pellets!', 'Scrap fight!'],
     'rdy': ['Scrapper on the yard.'],
 }, 780)
 

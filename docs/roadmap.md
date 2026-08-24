@@ -37,8 +37,10 @@ per-class sourcing live in docs/parity.md):
       of the 10/faction bar)
 - [x] Maps: 3 layouts × 2 factions with the in-shell battlefield picker;
       biome tint variety + 2 more layouts remain for the 8-10 bar
-- [ ] SFX bulk toward ~40 (now ~14 effects; ambient/UI/impact variety)
-- [ ] VO to 8+ lines/unit (now 4-7 across 13 sets)
+- [ ] SFX bulk toward ~40 (now ~18: +UI clicks, +impact variants;
+      ambient beds and per-weapon variety remain)
+- [ ] VO to 8+ lines/unit (4 core combat units now at 10 lines; the other
+      9 sets remain at 4-7)
 - [ ] Music: 6-8 track rotation via CC-BY import (needs a download go-ahead)
 - [ ] Remaining: 2nd aircraft, scout/heavy infantry, structures to 10/faction,
       AA turret variants, enemy waves using the new classes

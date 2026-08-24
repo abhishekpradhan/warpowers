@@ -191,6 +191,26 @@ def bodyfall(seed):
     dust = [d * math.exp(-i / (SR * 0.12)) for i, d in enumerate(dust)]
     return softclip([1.2 * t + 0.7 * d for t, d in zip(thud, dust)], 1.4)
 
+def rocket(seed):
+    """launch whoosh: broadband ignition crack into a falling roar tail"""
+    rng = random.Random(seed)
+    n = int(SR * 0.85)
+    x = [0.0] * n
+    for i in range(n):
+        t = i / SR
+        env = math.exp(-t * 5.5) * (1.0 if t > 0.015 else t / 0.015)
+        x[i] = (rng.uniform(-1, 1)) * env
+    x = bandpass(x, 300, 5200)
+    # descending motor tone under the noise
+    for i in range(n):
+        t = i / SR
+        f = 900 * math.exp(-t * 2.2) + 90
+        x[i] += 0.4 * math.sin(2 * math.pi * f * t) * math.exp(-t * 4.0)
+    return softclip(x, 1.6)
+
+out('wp_rocket_01', rocket(311))
+out('wp_rocket_02', rocket(347))
+
 out('wp_rifle_01', rifle(71))
 out('wp_rifle_02', rifle(83))
 out('wp_bodyfall_01', bodyfall(91))
@@ -213,6 +233,8 @@ UNIT_STYLES = {
     'wp_rig': dict(voice='en-us+m1', pitch=24, speed=148, grit=1.3),    # Rigger: gruff foreman
     'wp_war': dict(voice='en-gb+m3', pitch=48, speed=168, grit=0.95),   # Warden rifleman: crisp drill
     'wp_scr': dict(voice='en-us+m7', pitch=40, speed=192, grit=1.45),   # Scrapper: jumpy scrapyard kid
+    'wp_lan': dict(voice='en-gb+m1', pitch=38, speed=150, grit=1.0),    # Lancer: calm AT professional
+    'wp_stg': dict(voice='en-us+m2', pitch=52, speed=176, grit=1.4),    # Sting: cackling rocketeer
 }
 
 def barks(prefix, lines, base_seed):
@@ -277,6 +299,20 @@ barks('wp_scr', {
     'atk': ['Perforate them!', 'Eat pellets!'],
     'rdy': ['Scrapper on the yard.'],
 }, 780)
+
+barks('wp_lan', {
+    'sel': ['Lancer set.', 'Launcher shouldered.'],
+    'mov': ['Repositioning.', 'Finding an angle.'],
+    'atk': ['Rocket out!', 'Backblast clear!'],
+    'rdy': ['Lancer ready to hunt.'],
+}, 810)
+
+barks('wp_stg', {
+    'sel': ['Sting here!', 'Rack is hot!'],
+    'mov': ['Dragging the rack.', 'Yeah, moving!'],
+    'atk': ['Send it screaming!', 'Big one away!'],
+    'rdy': ['Sting is loaded!'],
+}, 840)
 
 barks('wp_rig', {
     'sel': ['Rigger.', 'Wrench is ready.'],

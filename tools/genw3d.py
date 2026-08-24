@@ -204,6 +204,14 @@ MODELS = {
         part("DISC", "GOLD", 0, 0, 0.5, 3.4, 3.4, 0.6),
         part("CORE", (30, 32, 36), 0, 0, 0.85, 1.6, 1.6, 0.5),
     ],
+    # Rocket projectile (WP_Rocket object): slim body + exhaust flare + fins.
+    "WPROCK01": [
+        part("BODY", (200, 204, 210), 0, 0, -0.3, 2.6, 0.6, 0.6),
+        part("NOSE", (198, 74, 60), 1.6, 0, -0.25, 0.7, 0.5, 0.5),
+        part("FINT", (90, 96, 104), -1.2, 0, -0.45, 0.8, 0.2, 1.0),
+        part("FINS", (90, 96, 104), -1.2, 0, -0.3, 0.8, 1.0, 0.2),
+        part("EXH", (245, 216, 150), -1.9, 0, -0.2, 0.8, 0.4, 0.4),
+    ],
     "LOCATER02": [
         part("SHAFT", "GOLD", -2, 0, 0.4, 10, 2.0, 0.5),
         part("HEADC", "GOLD", 4.6, 0, 0.4, 3.2, 5.0, 0.5, ty=0.1, ox=1.6),
@@ -249,12 +257,16 @@ def trooper(uniform, trim, skin=(214, 178, 148)):
 MODELS["MERINF01"] = trooper((225, 229, 234), (120, 128, 138))     # Meridian Warden: white/steel
 MODELS["JAKINF01"] = trooper((196, 170, 128), (138, 90, 60))       # Jackal Scrapper: sand/rust
 
-out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
-os.makedirs(out_dir, exist_ok=True)
-for model, parts in MODELS.items():
-    path = os.path.join(out_dir, model.lower() + ".w3d")
-    data = build_w3d(model, parts)
-    with open(path, "wb") as f:
-        f.write(data)
-    tris = sum(len(g[2]) for _, _, g in parts)
-    print(f"wrote {path} ({len(data)} bytes, {len(parts)} parts, {tris} tris)")
+def main():
+    out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
+    os.makedirs(out_dir, exist_ok=True)
+    for model, parts in MODELS.items():
+        path = os.path.join(out_dir, model.lower() + ".w3d")
+        data = build_w3d(model, parts)
+        with open(path, "wb") as f:
+            f.write(data)
+        tris = sum(len(g[2]) for _, _, g in parts)
+        print(f"wrote {path} ({len(data)} bytes, {len(parts)} parts, {tris} tris)")
+
+if __name__ == "__main__":
+    main()

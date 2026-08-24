@@ -553,3 +553,31 @@ END
 GUI:RallyPointSet
 "Rally point set: %ls."
 END
+
+WP:Lancer
+"Lancer"
+END
+
+WP:DescLancer
+"Anti-armor rocket specialist. Effective against vehicles, structures and aircraft; slow against infantry."
+END
+
+WP:BuildLancer
+"Train Lancer"
+END
+
+WP:Sting
+"Sting"
+END
+
+WP:DescSting
+"Salvaged rocket rack on legs. Hits hard and slow - keep rifles nearby."
+END
+
+WP:BuildSting
+"Train Sting"
+END
+
+WP:Rocket
+"Rocket"
+END

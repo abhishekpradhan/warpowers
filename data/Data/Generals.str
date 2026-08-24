@@ -456,15 +456,15 @@ WP:Deployment
 END
 
 WP:DeployHint
-"Choose your front - the battle begins immediately"
+"Pick a battlefield, then deploy your faction - the battle begins at once."
 END
 
 WP:DeployMeridian
-"Meridian Combine - Dune Clash"
+"DEPLOY  MERIDIAN COMBINE"
 END
 
 WP:DeployJackal
-"Jackal League - Dune Clash (mirrored)"
+"DEPLOY  JACKAL LEAGUE"
 END
 
 WP:Back
@@ -659,13 +659,41 @@ GUI:AddCash
 END
 
 WP:MapFlats
-"BATTLEFIELD: THE FLATS"
+"THE FLATS"
 END
 
 WP:MapRidge
-"BATTLEFIELD: THE RIDGE"
+"THE RIDGE"
 END
 
 WP:MapScrap
-"BATTLEFIELD: THE SCRAPYARD"
+"THE SCRAPYARD"
+END
+
+WP:BattlefieldLabel
+"B A T T L E F I E L D"
+END
+
+WP:ChooseFront
+"F A C T I O N"
+END
+
+WP:MapFlatsDesc
+"Open dunes across a wide diagonal. The classic front."
+END
+
+WP:MapRidgeDesc
+"A mountain wall split by two passes. Fight for the lanes."
+END
+
+WP:MapScrapDesc
+"Close quarters and no cover. The brawl starts immediately."
+END
+
+WP:ArrowLeft
+"<"
+END
+
+WP:ArrowRight
+">"
 END

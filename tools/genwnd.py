@@ -382,21 +382,32 @@ MAINMENU = window("MainMenuParent", (0, 0, 800, 600),
 menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit",
             update="WPMainMenuUpdate", shutdown="WPShellShutdown")
 
-# Deployment picker: choosing a front launches its map (no separate state).
+# Deployment picker, two sections: battlefield selector (arrow buttons
+# flanking the runtime-set name, description beneath), then the faction
+# deploy buttons. MapName/MapDesc text is filled by WPSkirmishInit /
+# the arrow handlers (winSetText / GadgetStaticTextSetText).
 sk_children = [
     backdrop(),
     frame_border(),
-    label("TitleDeploy", (100, 168, 700, 204), "WP:Deployment", size=22,
+    label("TitleDeploy", (100, 140, 700, 176), "WP:Deployment", size=22,
           color="232 226 214 255", bold=1),
-    rule("DeployRule", (368, 212, 432, 214)),
-    label("DeployHint", (100, 226, 700, 244), "WP:DeployHint", size=10,
+    rule("DeployRule", (368, 184, 432, 186)),
+    label("DeployHint", (100, 196, 700, 212), "WP:DeployHint", size=10,
           color=DIM),
-    btn("ButtonMap", (270, 252, 530, 282), "WP:MapFlats", "ghost", size=11),
-    btn("ButtonDeployMeridian", (240, 292, 560, 340), "WP:DeployMeridian",
+    label("BattlefieldLabel", (100, 238, 700, 252), "WP:BattlefieldLabel",
+          size=9, color=DIM),
+    btn("ButtonMapPrev", (252, 258, 288, 292), "WP:ArrowLeft", "ghost", size=13),
+    label("MapName", (296, 262, 504, 288), "", size=14, color=GOLD, bold=1,
+          bg="20 24 31 255"),
+    btn("ButtonMapNext", (512, 258, 548, 292), "WP:ArrowRight", "ghost", size=13),
+    label("MapDesc", (100, 298, 700, 314), "", size=9, color=DIM),
+    label("FrontLabel", (100, 340, 700, 354), "WP:ChooseFront",
+          size=9, color=DIM),
+    btn("ButtonDeployMeridian", (240, 360, 560, 404), "WP:DeployMeridian",
         "meridian", size=13),
-    btn("ButtonDeployJackal",   (240, 352, 560, 400), "WP:DeployJackal",
+    btn("ButtonDeployJackal",   (240, 414, 560, 458), "WP:DeployJackal",
         "jackal", size=13),
-    btn("ButtonBack", (330, 424, 470, 456), "WP:Back", "ghost"),
+    btn("ButtonBack", (330, 480, 470, 512), "WP:Back", "ghost"),
 ]
 SKIRMISH = window("SkirmishParent", (0, 0, 800, 600),
                   status="ENABLED+NOFOCUS", syscb="WPSkirmishSystem",

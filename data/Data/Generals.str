@@ -494,3 +494,29 @@ END
 WP:ScoreDuration
 "Duration - %d:%02d"
 END
+
+// Control-bar hover tooltips (ControlBarPopupDescription.cpp hardcodes
+// these lookups for the money/power/exp windows)
+CONTROLBAR:Money
+"Credits"
+END
+
+CONTROLBAR:MoneyDescription
+"Funds available for construction and production."
+END
+
+CONTROLBAR:Power
+"Power"
+END
+
+CONTROLBAR:PowerDescription
+"Producing %d units of power - consuming %d."
+END
+
+CONTROLBAR:GeneralsExp
+"Command Experience"
+END
+
+CONTROLBAR:GeneralsExpDescription
+"Not in service yet."
+END

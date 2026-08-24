@@ -149,17 +149,21 @@ for t in targets:
 # description row is measured with word-wrap and BOTH desc + parent grow by the
 # overflow while the parent slides UP by the same amount — so the panel is
 # bottom-anchored: author the fixed look, long descriptions extend upward.
-PBG = "15 17 21 255"
-POPUP = window("PopupParent", (210, 352, 500, 454), status="ENABLED+IMAGE+NOFOCUS",
-               bg=PBG, border="120 104 60 255", children=[
+PBG = "16 20 27 250"
+# Parent drops WIN_STATUS_IMAGE so its fill actually paints (the default draw
+# only color-fills without the flag) - otherwise the text rows float as bare
+# strips when the popup opens for money/power hovers.
+POPUP = window("PopupParent", (210, 352, 500, 454), status="ENABLED+NOFOCUS",
+               bg=PBG, border="58 66 80 255", children=[
     window("StaticTextName", (218, 358, 492, 376), wtype="STATICTEXT", status="ENABLED",
-           bg=PBG, border=PBG, fontsize=12, bold=1,
+           bg="0 0 0 0", border="0 0 0 0", textcolor="215 180 90 255",
+           fontsize=12, bold=1,
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
     window("StaticTextCost", (218, 380, 492, 396), wtype="STATICTEXT", status="ENABLED",
-           bg=PBG, border=PBG, textcolor="215 180 90 255",
+           bg="0 0 0 0", border="0 0 0 0", textcolor="215 180 90 255",
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
     window("StaticTextDescription", (218, 400, 492, 448), wtype="STATICTEXT", status="ENABLED",
-           bg=PBG, border=PBG, textcolor="196 202 210 255",
+           bg="0 0 0 0", border="0 0 0 0", textcolor="199 206 218 255",
            extra="  STATICTEXTDATA = CENTERED: 0;\n"),
 ])
 popup_content = ("FILE_VERSION = 2;\n"

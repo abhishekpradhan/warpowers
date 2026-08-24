@@ -697,3 +697,19 @@ END
 WP:ArrowRight
 ">"
 END
+
+GUI:NotEnoughMoneyToBuild
+"Insufficient funds."
+END
+
+GUI:ProductionQueueFull
+"Production queue is full."
+END
+
+GUI:ParkingPlacesFull
+"No open landing pads."
+END
+
+GUI:UnitMaxedOut
+"Unit limit reached for this type."
+END

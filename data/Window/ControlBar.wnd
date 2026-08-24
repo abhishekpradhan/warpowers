@@ -11,7 +11,7 @@ WINDOW
   STATUS = ENABLED+IMAGE+NOFOCUS;
   STYLE = USER;
   SYSTEMCALLBACK = "ControlBarSystem";
-  INPUTCALLBACK = "[None]";
+  INPUTCALLBACK = "WPHudSwallowInput";
   TOOLTIPCALLBACK = "[None]";
   DRAWCALLBACK = "[None]";
   FONT = NAME: "Arial", SIZE: 10, BOLD: 0;

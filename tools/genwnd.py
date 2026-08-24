@@ -132,8 +132,12 @@ children.append(window("LeftHUD", (648, 456, 788, 596), bg="10 12 14 255",
                        border="120 104 60 255",
                        drawcb="W3DLeftHUDDraw", inputcb="LeftHUDInput"))
 
+# WPHudSwallowInput: the opaque bar consumes every click that no child
+# handled (disabled buttons, panel gaps) - without it those fall through
+# to the world as rally/move orders behind the HUD.
 parent = window("ControlBarParent", (0, 420, 800, 600),
                 status="ENABLED+IMAGE+NOFOCUS", syscb="ControlBarSystem",
+                inputcb="WPHudSwallowInput",
                 bg="10 11 13 255", border="10 11 13 255", children=children)
 
 content = """FILE_VERSION = 2;

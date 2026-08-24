@@ -220,6 +220,7 @@ def uiclick(seed, freq=1900.0, dur=0.05):
 
 out('wp_ui_click', uiclick(11))
 out('wp_ui_hover', uiclick(23, freq=1400.0, dur=0.035))
+out('wp_ui_deny', uiclick(37, freq=520.0, dur=0.09))
 
 out('wp_impact_03', impact(151))
 out('wp_impact_04', impact(163))

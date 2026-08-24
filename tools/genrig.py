@@ -168,11 +168,48 @@ def rocket_body(uniform, trim, skin=(214, 178, 148)):
         rpart("GUN", "TIP", DARK, 3.0, 1.1, 6.1, 0.6, 0.8, 0.8),
     ]
 
+def scout_body(uniform, trim, visor=(80, 140, 170)):
+    """recon: slim frame, wide sensor visor instead of a helmet brim,
+    sidearm only - reads fast and fragile."""
+    GUNC = (70, 74, 80)
+    return [
+        rpart("LEGL", "LEGL", trim, -0.4, -0.75, 0, 1.1, 0.9, 2.6),
+        rpart("LEGR", "LEGR", trim, -0.4, 0.75, 0, 1.1, 0.9, 2.6),
+        rpart("TORSO", "TORS", uniform, 0, 0, 2.6, 1.8, 2.4, 2.8),
+        rpart("ARML", "ARML", uniform, 0.7, -1.4, 3.3, 2.0, 0.8, 0.9),
+        rpart("ARMR", "ARMR", uniform, 0.7, 1.4, 3.3, 2.0, 0.8, 0.9),
+        rpart("HEAD", "HEAD", (214, 178, 148), 0, 0, 5.6, 1.5, 1.5, 1.4),
+        rpart("HEAD", "VISR", visor, 0.7, 0, 6.2, 0.6, 1.9, 0.7),
+        rpart("HEAD", "ANTN", trim, -0.7, 0.6, 6.9, 0.3, 0.3, 1.8),
+        rpart("GUN", "PSTL", GUNC, 1.6, 0.6, 3.5, 1.6, 0.4, 0.6),
+    ]
+
+def heavy_body(uniform, trim, skin=(214, 178, 148)):
+    """heavy gunner: wide pauldrons, braced two-hand cannon, thick legs."""
+    GUNC = (58, 62, 68)
+    return [
+        rpart("LEGL", "LEGL", trim, -0.4, -0.85, 0, 1.7, 1.3, 2.6),
+        rpart("LEGR", "LEGR", trim, -0.4, 0.85, 0, 1.7, 1.3, 2.6),
+        rpart("TORSO", "TORS", uniform, 0, 0, 2.6, 2.6, 3.4, 2.9),
+        rpart("TORSO", "PDL", trim, -0.2, -2.0, 4.9, 1.9, 1.7, 1.2),
+        rpart("TORSO", "PDR", trim, -0.2, 2.0, 4.9, 1.9, 1.7, 1.2),
+        rpart("ARML", "ARML", uniform, 0.9, -1.8, 3.1, 2.7, 1.0, 1.1),
+        rpart("ARMR", "ARMR", uniform, 0.9, 1.8, 3.1, 2.7, 1.0, 1.1),
+        rpart("HEAD", "HEAD", skin, 0, 0, 5.7, 1.6, 1.6, 1.4),
+        rpart("HEAD", "HELM", trim, -0.1, 0, 6.8, 2.1, 2.1, 0.8),
+        rpart("GUN", "CANN", GUNC, 2.3, 0.3, 3.3, 3.8, 0.9, 0.9),
+        rpart("GUN", "MAG", trim, 1.2, 0.3, 2.7, 1.2, 0.7, 0.7),
+    ]
+
 RIGGED = {
     "MERINF02": rifle_body((225, 229, 234), (120, 128, 138)),   # Meridian Warden
     "JAKINF02": rifle_body((196, 170, 128), (138, 90, 60)),     # Jackal Scrapper
     "MERROC01": rocket_body((225, 229, 234), (215, 180, 90)),   # Meridian Lancer
     "JAKROC01": rocket_body((196, 170, 128), (111, 143, 90)),   # Jackal Sting
+    "MERSCT01": scout_body((225, 229, 234), (120, 128, 138)),   # Meridian Vigil
+    "JAKSCT01": scout_body((196, 170, 128), (138, 90, 60), visor=(170, 120, 60)),  # Jackal Prowler
+    "MERHVY01": heavy_body((225, 229, 234), (215, 180, 90)),    # Meridian Bastion
+    "JAKHVY01": heavy_body((196, 170, 128), (111, 143, 90)),    # Jackal Bruiser
 }
 
 def rigged_w3d(model, parts):

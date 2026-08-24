@@ -713,3 +713,203 @@ END
 GUI:UnitMaxedOut
 "Unit limit reached for this type."
 END
+
+WP:Vigil
+"Vigil"
+END
+
+WP:DescVigil
+"Recon trooper. Fastest boots in the Combine, huge sight radius, sidearm only."
+END
+
+WP:BuildVigil
+"Train Vigil"
+END
+
+WP:Prowler
+"Prowler"
+END
+
+WP:DescProwler
+"Scrapyard scout. Sees far, runs fast, shoots last."
+END
+
+WP:BuildProwler
+"Train Prowler"
+END
+
+WP:Bastion
+"Bastion"
+END
+
+WP:DescBastion
+"Heavy gunner. Slow and armored; the cannon shreds infantry. Requires a Directorate."
+END
+
+WP:BuildBastion
+"Train Bastion"
+END
+
+WP:Bruiser
+"Bruiser"
+END
+
+WP:DescBruiser
+"Walking scrap-cannon. Slow, mean, and very hard to put down. Requires a Den."
+END
+
+WP:BuildBruiser
+"Train Bruiser"
+END
+
+WP:Shrike
+"Shrike"
+END
+
+WP:DescShrike
+"Strafing VTOL. Rapid fire that chews infantry; keep it away from flak. Requires a Directorate."
+END
+
+WP:BuildShrike
+"Deploy Shrike"
+END
+
+WP:Gnat
+"Gnat"
+END
+
+WP:DescGnat
+"Cheap flying pest with a scrap gun. Annoying in numbers. Requires a Den."
+END
+
+WP:BuildGnat
+"Rig up a Gnat"
+END
+
+WP:Skyspear
+"Skyspear"
+END
+
+WP:DescSkyspear
+"Anti-air battery. Long-reach flak; cannot target ground units."
+END
+
+WP:BuildSkyspear
+"Construct Skyspear"
+END
+
+WP:Flakhut
+"Flakhut"
+END
+
+WP:DescFlakhut
+"Sandbagged quad-flak. Shreds aircraft; blind to ground threats."
+END
+
+WP:BuildFlakhut
+"Pile up a Flakhut"
+END
+
+WP:Directorate
+"Directorate"
+END
+
+WP:DescDirectorate
+"Meridian technology center. Unlocks the Bastion and the Shrike."
+END
+
+WP:BuildDirectorate
+"Construct Directorate"
+END
+
+WP:Den
+"Den"
+END
+
+WP:DescDen
+"Jackal think-tank, such as it is. Unlocks the Bruiser and the Gnat."
+END
+
+WP:BuildDen
+"Dig out a Den"
+END
+
+WP:Rampart
+"Rampart"
+END
+
+WP:DescRampart
+"Hardened pillbox. Anti-infantry ground defense."
+END
+
+WP:BuildRampart
+"Construct Rampart"
+END
+
+WP:Nest
+"Nest"
+END
+
+WP:DescNest
+"Gun nest behind scrap plate. Chews up infantry."
+END
+
+WP:BuildNest
+"Pile up a Nest"
+END
+
+WP:Dynamo
+"Dynamo"
+END
+
+WP:DescDynamo
+"Jackal generator. Loud, leaky, and it keeps the lights on."
+END
+
+WP:BuildDynamo
+"Wire up a Dynamo"
+END
+
+WP:MapBasin
+"THE BASIN"
+END
+
+WP:MapBasinDesc
+"A sunken bowl ringed by a high rim. Hold the floor or rain fire from the edge."
+END
+
+WP:MapRange
+"THE RANGE"
+END
+
+WP:MapRangeDesc
+"A long field crossed by two trench walls. Push the gaps, lane by lane."
+END
+
+GUI:CantBuildThere
+"Cannot build there."
+END
+
+GUI:CantBuildRestrictedTerrain
+"The ground there won't take a foundation."
+END
+
+GUI:CantBuildNotFlatEnough
+"The ground there is too uneven to build on."
+END
+
+GUI:CantBuildObjectsInTheWay
+"Something is in the way."
+END
+
+GUI:CantBuildTooCloseToSupplies
+"Too close to a supply source."
+END
+
+GUI:CantBuildNoClearPath
+"The builder can't reach that spot."
+END
+
+GUI:CantBuildShroud
+"Cannot build into the unexplored shroud."
+END

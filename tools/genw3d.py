@@ -290,6 +290,82 @@ MODELS["JAKEX01"] = [                                      # Racket (income)
     part("CRT2", "RUST", 5, -12, 0, 4, 4, 2.8),
 ]
 
+# Phase 3 close-out: second airframes + defense/tech/power structures.
+MODELS["MERJET02"] = [                                     # Shrike strafer
+    part("HULL", "WHITE", 0, 0, 2.4, 11.0, 3.6, 2.0, tx=0.5, ty=0.55),
+    part("NOSE", "GOLD", 5.0, 0, 2.5, 2.6, 2.0, 1.4, tx=0.35, ty=0.5),
+    part("CANO", (58, 76, 96), 1.6, 0, 4.2, 3.0, 1.8, 1.0, tx=0.55),
+    part("WNGL", "STEEL", -0.8, -5.2, 2.9, 4.4, 5.4, 0.6, tx=0.45),
+    part("WNGR", "STEEL", -0.8, 5.2, 2.9, 4.4, 5.4, 0.6, tx=0.45),
+    part("GUNL", "GUN", 2.0, -3.6, 2.3, 3.0, 0.8, 0.8),
+    part("GUNR", "GUN", 2.0, 3.6, 2.3, 3.0, 0.8, 0.8),
+    part("TAIL", "GOLD", -5.4, 0, 3.2, 2.0, 1.0, 2.2, tx=0.45),
+]
+MODELS["JAKJET02"] = [                                     # Gnat harasser
+    part("POD", "SAND", 0, 0, 2.0, 6.0, 4.0, 2.6, tx=0.75, ty=0.8),
+    part("SNOUT", "RUST", 3.4, 0, 2.3, 1.8, 2.2, 1.6),
+    part("FAN", "GRAPHITE", -0.4, 0, 4.8, 7.4, 1.6, 0.6),
+    part("FANB", "OXIDE", -0.4, 0, 4.2, 2.2, 2.2, 0.7),
+    part("SKIDL", "GUN", 0, -2.0, 0.9, 4.0, 0.5, 0.5),
+    part("SKIDR", "GUN", 0, 2.0, 0.9, 4.0, 0.5, 0.5),
+    part("STING", "GUN", 2.6, 0, 1.4, 2.6, 0.7, 0.7),
+]
+MODELS["MERAA01"] = [                                      # Skyspear AA
+    part("BASE", "STEEL", 0, 0, 0, 18, 18, 3.0),
+    part("MAST", "WHITE", 0, 0, 3.0, 5, 5, 12, tx=0.8, ty=0.8),
+    part("HEAD", "GOLD", 0, 0, 15.0, 7, 5, 2.4),
+    part("RAILL", "GUN", 2.0, -2.0, 17.0, 9, 1.1, 1.1, ox=2.6),
+    part("RAILR", "GUN", 2.0, 2.0, 17.0, 9, 1.1, 1.1, ox=2.6),
+    part("DISH", "GOLD", -3.0, 0, 17.6, 3.2, 3.2, 1.0),
+]
+MODELS["JAKAA01"] = [                                      # Flakhut AA
+    part("HUT", "RUST", 0, 0, 0, 16, 14, 6.0, tx=0.9, ty=0.9),
+    part("BAGS", "SAND", 0, 0, 0, 20, 18, 2.2),
+    part("MNT", "GRAPHITE", 0, 0, 6.0, 6, 6, 2.6),
+    part("QUADA", "GUN", 1.5, -1.4, 8.6, 7, 0.9, 0.9, ox=2.0),
+    part("QUADB", "GUN", 1.5, 1.4, 8.6, 7, 0.9, 0.9, ox=2.0),
+    part("QUADC", "GUN", 1.5, -1.4, 9.7, 7, 0.9, 0.9, ox=2.0),
+    part("QUADD", "GUN", 1.5, 1.4, 9.7, 7, 0.9, 0.9, ox=2.0),
+]
+MODELS["MERTECH01"] = [                                    # Directorate tech
+    part("SLAB", "WHITE", 0, 0, 0, 24, 18, 14, tx=0.9, ty=0.9),
+    part("BAND", "GOLD", 0, 0, 9.0, 24.6, 18.6, 1.2),
+    part("ANT1", "STEEL", -7, -5, 14, 1.0, 1.0, 9),
+    part("ANT2", "STEEL", 7, 4, 14, 1.0, 1.0, 7),
+    part("ORB", "GOLD", -7, -5, 23.4, 2.0, 2.0, 1.6),
+    part("WING", "STEEL", 14, 0, 0, 6, 12, 6),
+]
+MODELS["JAKTECH01"] = [                                    # Den tech
+    part("DOME", "SAND", 0, 0, 0, 20, 20, 9, tx=0.55, ty=0.55),
+    part("PIPE1", "RUST", 10, -5, 0, 2.2, 2.2, 12),
+    part("PIPE2", "RUST", -9, 6, 0, 2.0, 2.0, 10),
+    part("ELB1", "RUST", 10, -5, 11.2, 5.0, 2.0, 2.0),
+    part("DISH", "OXIDE", 0, 0, 9.4, 6.0, 6.0, 2.0, tx=1.4, ty=1.4),
+    part("CRT", "GRAPHITE", 12, 8, 0, 5, 5, 3.4),
+]
+MODELS["MERPILL01"] = [                                    # Rampart pillbox
+    part("BUNK", "STEEL", 0, 0, 0, 16, 14, 6.5, tx=0.85, ty=0.85),
+    part("CAP", "WHITE", 0, 0, 6.5, 12, 10, 2.0, tx=0.7, ty=0.7),
+    part("SLIT", "CHARCOAL", 7.4, 0, 3.4, 1.6, 8.0, 1.6),
+    part("GUNB", "GUN", 9.0, 0, 3.6, 3.6, 1.0, 1.0),
+    part("TRIM", "GOLD", 0, 0, 8.5, 5, 5, 0.8),
+]
+MODELS["JAKPILL01"] = [                                    # Nest barricade
+    part("RING", "RUST", 0, 0, 0, 17, 15, 4.5, tx=0.8, ty=0.8),
+    part("PLATE", "SAND", 0, 0, 4.5, 12, 10, 1.4),
+    part("GUNA", "GUN", 7.5, -2.0, 3.2, 4.2, 0.9, 0.9),
+    part("GUNB2", "GUN", 7.5, 2.0, 3.2, 4.2, 0.9, 0.9),
+    part("JUNK", "OXIDE", -6, 5, 4.5, 4, 4, 2.6),
+]
+MODELS["JAKPWR01"] = [                                     # Dynamo power
+    part("GEN", "SAND", 0, 0, 0, 22, 16, 9, tx=0.9, ty=0.9),
+    part("STACK", "RUST", -6, -4, 9, 4.4, 4.4, 12, tx=0.7, ty=0.7),
+    part("STK2", "RUST", 2, -4, 9, 3.6, 3.6, 9, tx=0.7, ty=0.7),
+    part("COIL", "GRAPHITE", 6, 4, 9, 6, 6, 4, tx=0.6, ty=0.6),
+    part("BOLT", "GOLD", 6, 4, 13.2, 2.2, 2.2, 2.6),
+    part("PIPE", "GUN", 11, 0, 2.0, 6, 1.6, 1.6),
+]
+
 MODELS["WPSCAF01"] = scaffold(11, 11, 12)
 MODELS["WPSCAF02"] = scaffold(19, 17, 18)
 

@@ -7,7 +7,7 @@ import math
 import os
 import struct
 
-CELL, GRID = 128, 4
+CELL, GRID = 128, 5
 SIZE = CELL * GRID
 MER = (46, 52, 60)
 JAK = (56, 46, 38)
@@ -100,6 +100,66 @@ def bank_icon(ix, plate_c, body, trim):
     disc(ox, oy + 24, 8, trim)                              # coin
     rect(ox - 2, oy + 18, ox + 2, oy + 30, DARK)
 
+def trooper_icon(ix, plate_c, uni, trim, heavy=False, scout=False):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 74
+    w = 26 if heavy else (16 if scout else 22)
+    rect(ox - w, oy - 6, ox + w, oy + 42, uni)
+    disc(ox, oy - 24, 14 if scout else 15, (214, 178, 148))
+    if scout:
+        rect(ox - 16, oy - 30, ox + 16, oy - 20, (80, 140, 170))   # visor band
+        rect(ox + 12, oy - 52, ox + 15, oy - 30, trim)             # antenna
+    else:
+        rect(ox - 19, oy - 44, ox + 19, oy - 30, trim)
+        rect(ox - 24, oy - 34, ox + 24, oy - 28, trim)
+    if heavy:
+        rect(ox - 34, oy - 12, ox - w, oy + 2, trim)               # pauldrons
+        rect(ox + w, oy - 12, ox + 34, oy + 2, trim)
+        rect(ox - 8, oy + 6, ox + 46, oy + 18, (58, 62, 68))       # cannon
+        disc(ox + 46, oy + 12, 7, DARK)
+    else:
+        rect(ox - (w+8), oy - 2, ox - w, oy + 30, uni)
+        rect(ox + w, oy - 2, ox + (w+8), oy + 30, uni)
+
+def aa_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 64
+    rect(ox - 30, oy + 24, ox + 30, oy + 42, body)                  # base
+    rect(ox - 7, oy - 14, ox + 7, oy + 24, body)                    # mast
+    for k, dx in ((0, -12), (1, 2)):
+        tri((ox + dx, oy - 16), (ox + dx + 26, oy - 44), (ox + dx + 12, oy - 8), (58, 62, 68))
+    disc(ox - 14, oy - 20, 7, trim)                                 # sensor
+    tri((ox - 40, oy - 34), (ox - 30, oy - 44), (ox - 30, oy - 24), trim)  # sky chevron
+
+def tech_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 64
+    rect(ox - 28, oy - 18, ox + 28, oy + 38, body)                  # slab
+    rect(ox - 30, oy + 2, ox + 30, oy + 10, trim)                   # band
+    rect(ox - 18, oy - 44, ox - 14, oy - 18, (120, 128, 138))       # antennas
+    rect(ox + 10, oy - 36, ox + 14, oy - 18, (120, 128, 138))
+    disc(ox - 16, oy - 48, 5, trim)
+    disc(ox, oy + 24, 9, DARK)                                      # emblem
+    disc(ox, oy + 24, 5, trim)
+
+def pill_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 70
+    rect(ox - 36, oy + 8, ox + 36, oy + 30, body)                   # low bunker
+    tri((ox - 36, oy + 8), (ox + 36, oy + 8), (ox, oy - 18), body)  # slope
+    rect(ox - 20, oy + 2, ox + 20, oy + 8, DARK)                    # slit
+    rect(ox + 20, oy - 2, ox + 44, oy + 6, (58, 62, 68))            # barrel
+    rect(ox - 30, oy + 30, ox + 30, oy + 36, trim)
+
+def power_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 64
+    rect(ox - 30, oy, ox + 30, oy + 36, body)                        # generator
+    rect(ox - 22, oy - 34, ox - 10, oy, (138, 90, 60))               # stacks
+    rect(ox + 2, oy - 24, ox + 12, oy, (138, 90, 60))
+    tri((ox + 18, oy - 34), (ox + 30, oy - 10), (ox + 20, oy - 10), trim)   # bolt
+    tri((ox + 28, oy - 14), (ox + 16, oy + 10), (ox + 24, oy - 12), trim)
+
 SLOTS = [
     ("WPIcoLancer", lambda i: rocket_trooper(i, MER, (225, 229, 234), GOLD)),
     ("WPIcoSting", lambda i: rocket_trooper(i, JAK, (196, 170, 128), (111, 143, 90))),
@@ -109,6 +169,19 @@ SLOTS = [
     ("WPIcoRoost", lambda i: pad_icon(i, JAK, SAND, (138, 90, 60))),
     ("WPIcoExchange", lambda i: bank_icon(i, MER, STEEL, GOLD)),
     ("WPIcoRacket", lambda i: bank_icon(i, JAK, SAND, (111, 143, 90))),
+    ("WPIcoVigil", lambda i: trooper_icon(i, MER, (225, 229, 234), (120, 128, 138), scout=True)),
+    ("WPIcoProwler", lambda i: trooper_icon(i, JAK, (196, 170, 128), (138, 90, 60), scout=True)),
+    ("WPIcoBastion", lambda i: trooper_icon(i, MER, (225, 229, 234), GOLD, heavy=True)),
+    ("WPIcoBruiser", lambda i: trooper_icon(i, JAK, (196, 170, 128), (111, 143, 90), heavy=True)),
+    ("WPIcoShrike", lambda i: jet(i, MER, (225, 229, 234), (120, 128, 138))),
+    ("WPIcoGnat", lambda i: jet(i, JAK, (170, 150, 110), (111, 143, 90))),
+    ("WPIcoSkyspear", lambda i: aa_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoFlakhut", lambda i: aa_icon(i, JAK, SAND, (138, 90, 60))),
+    ("WPIcoDirectorate", lambda i: tech_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoDen", lambda i: tech_icon(i, JAK, SAND, (111, 143, 90))),
+    ("WPIcoRampart", lambda i: pill_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoNest", lambda i: pill_icon(i, JAK, SAND, (138, 90, 60))),
+    ("WPIcoDynamo", lambda i: power_icon(i, JAK, SAND, GOLD)),
 ]
 
 for i, (_, draw) in enumerate(SLOTS):

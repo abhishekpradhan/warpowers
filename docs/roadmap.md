@@ -26,24 +26,24 @@ Nothing ships or deploys until the user says go.
 
 **Phase 3 — Content to the parity bar (CURRENT)** (its own phase; the plan and
 per-class sourcing live in docs/parity.md):
-- [x] Skeletal animation unlocked — procedural W3D rigs (tools/genrig.py,
-      shared WPINF1 skeleton, walk/idle/fire), no external assets needed;
-      KayKit import remains an optional fidelity upgrade
-- [x] Infantry to 2/faction: rifle (animated re-body) + rocket trooper
-      (AA-capable); bar is 4/faction — scout/heavy classes remain
-- [x] Aircraft class: VTOL hover gunships (Kestrel/Buzzard) + airpads;
-      bar is 2/faction — second airframe remains
-- [x] Structures: airpads + passive-income Exchange/Racket (MER 6 / JAK 5
-      of the 10/faction bar)
-- [x] Maps: 3 layouts × 2 factions with the in-shell battlefield picker;
-      biome tint variety + 2 more layouts remain for the 8-10 bar
-- [ ] SFX bulk toward ~40 (now ~18: +UI clicks, +impact variants;
-      ambient beds and per-weapon variety remain)
-- [ ] VO to 8+ lines/unit (4 core combat units now at 10 lines; the other
-      9 sets remain at 4-7)
-- [ ] Music: 6-8 track rotation via CC-BY import (needs a download go-ahead)
-- [ ] Remaining: 2nd aircraft, scout/heavy infantry, structures to 10/faction,
-      AA turret variants, enemy waves using the new classes
+- [x] Skeletal animation unlocked — procedural W3D rigs (shared skeleton,
+      walk/idle/fire); KayKit import remains an optional fidelity upgrade
+- [x] Infantry to 4/faction: rifle, rocket (AA), scout (Vigil/Prowler),
+      heavy gunner (Bastion/Bruiser, tech-gated) — BAR MET
+- [x] Aircraft to 2/faction: Kestrel/Buzzard + Shrike/Gnat strafers
+      (tech-gated) — BAR MET (Buzzard/Gnat share the verified hover recipe
+      but haven't been individually flown)
+- [x] Structures to 9/faction: +AA (Skyspear/Flakhut), +tech
+      (Directorate/Den), +pillbox (Rampart/Nest), +Jackal power (Dynamo);
+      one shy of the 10 bar
+- [x] Maps: 5 layouts × 2 factions (flats/ridge/scrap/basin/range) with
+      the picker; biome tinting still pending
+- [x] Enemy waves upgraded: rocket infantry in assaults + a 10-minute air
+      wave; enemy bases carry AA and real power
+- [ ] SFX toward ~40 (now ~22: +chaingun, +flak, +deny/click UI)
+- [ ] VO depth (19 voice sets; 4 at 10 lines, rest at 4-7)
+- [ ] Music: 6-8 track CC-BY rotation (needs a download go-ahead)
+- [ ] Biome tinting, 10th structure per side, ambient sound beds
 
 **Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
 lists + auto-reinforce teams + minimal .scb) replacing timer waves.

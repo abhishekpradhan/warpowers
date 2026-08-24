@@ -20,8 +20,9 @@ if '--faction=jackal' in sys.argv:
              guard='WP_Tank',
              wave_raider='WP_Tank', wave_pack_a='WP_Outrider', wave_pack_b='WP_Tank',
              enemy_factory='WP_VehiclePlant', enemy_tower='WP_Bulwark',
-             enemy_power='WP_PowerArray',
+             enemy_power='WP_PowerArray', enemy_aa='WP_Skyspear',
              assault_a='WP_Tank', assault_b='WP_Zenith',
+             assault_c='WP_Lancer', wave_air='WP_Kestrel',
              defender='WP_Tank', defender_scout='WP_Outrider')
 else:
     F = dict(map_name=None,
@@ -30,8 +31,9 @@ else:
              guard='WPJ_Mongrel',
              wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel',
              enemy_factory='WPJ_ChopShop', enemy_tower='WPJ_Watchpost',
-             enemy_power='WP_PowerArray',
+             enemy_power='WPJ_Dynamo', enemy_aa='WPJ_Flakhut',
              assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
+             assault_c='WPJ_Sting', wave_air='WPJ_Buzzard',
              defender='WPJ_Mongrel', defender_scout='WPJ_Vulture')
 
 # ---------- layouts ----------
@@ -49,6 +51,15 @@ LAYOUTS = {
     # tight brawl: close bases, no cover - rush tempo
     "scrap": dict(play=120, player=(300.0, 600.0), enemy=(900.0, 600.0),
                   ridge=None, name="WPScrap", jname="WPScrapJ"),
+    # sunken center bowl ringed by a rim - whoever holds the basin sees all
+    "basin": dict(play=170, player=(380.0, 850.0), enemy=(1320.0, 850.0),
+                  ridge=None, basin=dict(r=330.0, rim=26.0, depth=6.0),
+                  name="WPBasin", jname="WPBasinJ"),
+    # long north-south field crossed by two offset ridge walls - trench lines
+    "range": dict(play=200, player=(1000.0, 320.0), enemy=(1000.0, 1680.0),
+                  ridge=dict(gap1=0.22, gap2=0.80, halfw=46.0, h=30.0),
+                  ridge2=dict(gap1=0.55, gap2=0.90, halfw=46.0, h=30.0),
+                  name="WPRange", jname="WPRangeJ"),
 }
 _layout_name = "flats"
 for _a in list(sys.argv):
@@ -121,24 +132,51 @@ import math
 BASES = [PLAYER_BASE, ENEMY_BASE]   # world coords
 FLAT_R, FLAT_FADE = 320.0, 160.0             # flat radius, blend band (wide enough to actually build a base)
 
-def ridge_height(wx, wy):
-    """impassable diagonal wall from NW edge to SE edge of the playfield,
-    broken by two pass gaps; returns extra height (0 where no ridge)."""
-    r = LAY.get("ridge")
-    if not r:
-        return 0.0
+def _wall(wx, wy, r, frac):
+    """one wall: a band at 'frac' of the way from player to enemy along the
+    base axis, spanning the crosswise direction, broken by two gaps."""
     ext = PLAY * 10.0
-    # distance from the anti-diagonal line x + y = ext (separates the bases)
-    d = abs((wx + wy) - ext) / 1.4142136
+    px, py = PLAYER_BASE
+    ex, ey = ENEMY_BASE
+    axx, axy = ex - px, ey - py
+    L = (axx * axx + axy * axy) ** 0.5
+    axx, axy = axx / L, axy / L
+    # distance of this point from the wall line (perp to base axis at frac)
+    cxw = px + (ex - px) * frac
+    cyw = py + (ey - py) * frac
+    d = abs((wx - cxw) * axx + (wy - cyw) * axy)
     if d > r["halfw"]:
         return 0.0
-    # position ALONG the wall (0..1) for the gaps
-    t = (wx - wy + ext) / (2.0 * ext)
+    # crosswise position 0..1 for the gaps
+    t = ((wx - cxw) * (-axy) + (wy - cyw) * axx + ext / 2.0) / ext
     for g in (r["gap1"], r["gap2"]):
         if abs(t - g) < 0.055:
             return 0.0
     prof = 1.0 - (d / r["halfw"]) ** 2
     return r["h"] * prof
+
+def ridge_height(wx, wy):
+    """layout terrain features: ridge walls (perpendicular to the base
+    axis at 45%% / 62%% of the way) and the basin bowl."""
+    h = 0.0
+    r = LAY.get("ridge")
+    if r:
+        h += _wall(wx, wy, r, 0.5)
+    r2 = LAY.get("ridge2")
+    if r2:
+        h += _wall(wx, wy, r2, 0.68)
+    b = LAY.get("basin")
+    if b:
+        ext = PLAY * 10.0
+        cx = cy = ext / 2.0
+        dist = ((wx - cx) ** 2 + (wy - cy) ** 2) ** 0.5
+        if dist < b["r"]:
+            edge = (b["r"] - dist) / b["r"]
+            h -= b["depth"] * min(1.0, edge * 3.0)          # sunken floor
+        elif dist < b["r"] + 60.0:
+            t = 1.0 - (dist - b["r"]) / 60.0
+            h += b["rim"] * (t * t)                          # rim wall
+    return h
 
 def dune_height(wx, wy):
     d = (math.sin(wx * 0.0071 + 1.3) + math.sin(wy * 0.0063 + 4.1)
@@ -256,18 +294,23 @@ sides_payload += side([
     ("playerStartMoney", D_INT, 10000),
     ("multiplayerStartIndex", D_INT, 1),
 ])
-sides_payload += struct.pack("<i", 6)
-sides_payload += dict_pairs([("teamName", D_ASCII, "team"),
+# team dicts are collected first so the COUNT is derived, never hand-kept
+# (a stale hardcoded count silently desyncs every chunk after the team
+# list - the zero-objects-in-world failure).
+_team_dicts = []
+def team(pairs):
+    _team_dicts.append(dict_pairs(pairs))
+team([("teamName", D_ASCII, "team"),
                              ("teamOwner", D_ASCII, ""),
                              ("teamIsSingleton", D_BOOL, True)])
-sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerA"),
+team([("teamName", D_ASCII, "teamPlayerA"),
                              ("teamOwner", D_ASCII, "PlayerA"),
                              ("teamIsSingleton", D_BOOL, True)])
-sides_payload += dict_pairs([("teamName", D_ASCII, "teamPlayerB"),
+team([("teamName", D_ASCII, "teamPlayerB"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, True)])
 # attack-wave team: 2 Mongrels, spawned by script, attacks on creation
-sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveRaiders"),
+team([("teamName", D_ASCII, "teamWaveRaiders"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, False),
                              ("teamHome", D_ASCII, "WaveSpawn"),
@@ -275,7 +318,7 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveRaiders"),
                              ("teamUnitMinCount1", D_INT, 2),
                              ("teamUnitMaxCount1", D_INT, 2),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
-sides_payload += dict_pairs([("teamName", D_ASCII, "teamWavePack"),
+team([("teamName", D_ASCII, "teamWavePack"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, False),
                              ("teamHome", D_ASCII, "WaveSpawn"),
@@ -286,7 +329,7 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWavePack"),
                              ("teamUnitMinCount2", D_INT, 1),
                              ("teamUnitMaxCount2", D_INT, 1),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
-sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveAssault"),
+team([("teamName", D_ASCII, "teamWaveAssault"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, False),
                              ("teamHome", D_ASCII, "WaveSpawn"),
@@ -296,7 +339,21 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveAssault"),
                              ("teamUnitType2", D_ASCII, F["assault_b"]),
                              ("teamUnitMinCount2", D_INT, 2),
                              ("teamUnitMaxCount2", D_INT, 2),
+                             ("teamUnitType3", D_ASCII, F["assault_c"]),
+                             ("teamUnitMinCount3", D_INT, 2),
+                             ("teamUnitMaxCount3", D_INT, 2),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
+# late air wave: a pair of enemy gunships, once, then a slow repeat
+team([("teamName", D_ASCII, "teamWaveAir"),
+                             ("teamOwner", D_ASCII, "PlayerB"),
+                             ("teamIsSingleton", D_BOOL, False),
+                             ("teamHome", D_ASCII, "WaveSpawn"),
+                             ("teamUnitType1", D_ASCII, F["wave_air"]),
+                             ("teamUnitMinCount1", D_INT, 2),
+                             ("teamUnitMaxCount1", D_INT, 2),
+                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
+sides_payload += struct.pack("<i", len(_team_dicts))
+sides_payload += b"".join(_team_dicts)
 # nested PlayerScriptsList appended below (win/lose scripts), after its
 # helper definitions
 
@@ -344,6 +401,7 @@ _df1 = _off(-50.0, -50.0)
 _df2 = _off(40.0, -40.0)
 _df3 = _off(-5.0, -80.0)
 _wsp = _off(-50.0, -100.0)
+_aa = _off(-30.0, 60.0)
 objects_payload = b"".join(preview + [
     obj(PX, PY, 0.0, F["player_cc"],
         [("originalOwner", D_ASCII, "teamPlayerA"),
@@ -366,6 +424,8 @@ objects_payload = b"".join(preview + [
     obj(_df2[0], _df2[1], 3.2, F["defender"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(_df3[0], _df3[1], 2.8, F["defender_scout"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(_aa[0], _aa[1], 3.0, F["enemy_aa"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(PX, PY + 50.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
@@ -486,6 +546,17 @@ scripts_b = (
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
                    [parameter(P_COUNTER, s="AssaultTimer"), parameter(P_REAL, r=480.0)])])
+    + script("WP_AirWaveArm",
+           [condition("CONDITION_TRUE", [])],
+           [action("SET_MILLISECOND_TIMER",
+                   [parameter(P_COUNTER, s="AirWaveTimer"), parameter(P_REAL, r=600.0)])])
+    + script("WP_AirWaveSpawn",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AirWaveTimer")])],
+             [action("CREATE_REINFORCEMENT_TEAM",
+                     [parameter(P_TEAM, s="teamWaveAir"), parameter(P_WAYPOINT, s="WaveSpawn")]),
+              action("SET_MILLISECOND_TIMER",
+                     [parameter(P_COUNTER, s="AirWaveTimer"), parameter(P_REAL, r=360.0)])],
+             one_shot=False)
     + script("WP_AssaultSpawn",
              [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AssaultTimer")])],
              [action("CREATE_REINFORCEMENT_TEAM",

@@ -225,6 +225,45 @@ out('wp_ui_deny', uiclick(37, freq=520.0, dur=0.09))
 out('wp_impact_03', impact(151))
 out('wp_impact_04', impact(163))
 
+def chaingun(seed):
+    """three-round small-arms burst for heavy gunners / strafers"""
+    rng = random.Random(seed)
+    n = int(SR * 0.22)
+    x = [0.0] * n
+    for shot in range(3):
+        s0 = int(shot * SR * 0.065)
+        for i in range(int(SR * 0.045)):
+            t = i / SR
+            env = math.exp(-t * 160.0)
+            if s0 + i < n:
+                x[s0 + i] += rng.uniform(-1, 1) * env
+    x = bandpass(x, 500, 6500)
+    return softclip(x, 1.9)
+
+def flak(seed):
+    """AA burst: sharp crack then a hollow air-burst bloom"""
+    rng = random.Random(seed)
+    n = int(SR * 0.5)
+    x = [0.0] * n
+    for i in range(int(SR * 0.03)):
+        t = i / SR
+        x[i] += rng.uniform(-1, 1) * math.exp(-t * 220.0)
+    d0 = int(SR * 0.10)
+    for i in range(n - d0):
+        t = i / SR
+        env = math.exp(-t * 9.0)
+        x[d0 + i] += 0.7 * rng.uniform(-1, 1) * env
+    x = bandpass(x, 240, 4200)
+    for i in range(n):
+        t = i / SR
+        x[i] += 0.25 * math.sin(2 * math.pi * 170 * t) * math.exp(-t * 7.0)
+    return softclip(x, 1.7)
+
+out('wp_chain_01', chaingun(411))
+out('wp_chain_02', chaingun(437))
+out('wp_flak_01', flak(521))
+out('wp_flak_02', flak(547))
+
 out('wp_rocket_01', rocket(311))
 out('wp_rocket_02', rocket(347))
 
@@ -254,6 +293,12 @@ UNIT_STYLES = {
     'wp_stg': dict(voice='en-us+m2', pitch=52, speed=176, grit=1.4),    # Sting: cackling rocketeer
     'wp_kes': dict(voice='en-gb+m4', pitch=54, speed=172, grit=0.75),   # Kestrel pilot: cool flier
     'wp_buz': dict(voice='en-us+m6', pitch=34, speed=170, grit=1.5),    # Buzzard pilot: airborne junker
+    'wp_vig': dict(voice='en-gb+m5', pitch=58, speed=190, grit=0.7),    # Vigil scout: quick, quiet
+    'wp_prw': dict(voice='en-us+m4', pitch=50, speed=196, grit=1.35),   # Prowler: sneaky yardcat
+    'wp_bas': dict(voice='en-gb+m2', pitch=26, speed=126, grit=1.1),    # Bastion: slab of a man
+    'wp_bru': dict(voice='en-us+m1', pitch=20, speed=118, grit=1.5),    # Bruiser: gravel pit
+    'wp_shr': dict(voice='en-gb+f3', pitch=52, speed=178, grit=0.8),    # Shrike pilot: crisp aviator
+    'wp_gnt': dict(voice='en-us+m5', pitch=66, speed=210, grit=1.45),   # Gnat pilot: buzzing menace
 }
 
 def barks(prefix, lines, base_seed):
@@ -346,6 +391,48 @@ barks('wp_buz', {
     'atk': ['Dump the rack!', 'Rain scrap on them!'],
     'rdy': ['Buzzard off the roost!'],
 }, 890)
+
+barks('wp_vig', {
+    'sel': ['Vigil here.', 'Eyes open.'],
+    'mov': ['Ghosting ahead.', 'Scouting.'],
+    'atk': ['Spotting fire!', 'Marking them!'],
+    'rdy': ['Vigil on watch.'],
+}, 910)
+
+barks('wp_prw', {
+    'sel': ['Prowler.', 'What you need?'],
+    'mov': ['Sliding out.', 'Quick look.'],
+    'atk': ['Pop pop!', 'Tagging them!'],
+    'rdy': ['Prowler loose.'],
+}, 930)
+
+barks('wp_bas', {
+    'sel': ['Bastion.', 'Wall is here.'],
+    'mov': ['Advancing.', 'One pace at a time.'],
+    'atk': ['Cutting them down.', 'Sweep and clear.'],
+    'rdy': ['Bastion deployed.'],
+}, 950)
+
+barks('wp_bru', {
+    'sel': ['Bruiser here.', 'Point me at it.'],
+    'mov': ['Stomping over.', 'Yeah, yeah, walking.'],
+    'atk': ['Grind them up!', 'Chew! Chew!'],
+    'rdy': ['Bruiser is up.'],
+}, 970)
+
+barks('wp_shr', {
+    'sel': ['Shrike on station.', 'Guns are warm.'],
+    'mov': ['Repositioning.', 'On the deck.'],
+    'atk': ['Strafing run!', 'Walking the line!'],
+    'rdy': ['Shrike airborne.'],
+}, 990)
+
+barks('wp_gnt', {
+    'sel': ['Gnat! Bzzt!', 'Still buzzing!'],
+    'mov': ['Zip zip zip!', 'Going going!'],
+    'atk': ['Sting them up!', 'Annoy and destroy!'],
+    'rdy': ['Gnat off the roost!'],
+}, 1010)
 
 barks('wp_rig', {
     'sel': ['Rigger.', 'Wrench is ready.'],

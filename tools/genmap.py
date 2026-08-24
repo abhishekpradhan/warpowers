@@ -197,7 +197,7 @@ sides_payload += side([
     ("playerEnemies", D_ASCII, "PlayerB"),
     ("playerColor", D_INT, 0x2882FF),
     ("playerNightColor", D_INT, 0x2882FF),
-    ("playerStartMoney", D_INT, 5000),
+    ("playerStartMoney", D_INT, 10000),
     ("multiplayerStartIndex", D_INT, 0),
 ])
 sides_payload += side([
@@ -209,7 +209,7 @@ sides_payload += side([
     ("playerEnemies", D_ASCII, "PlayerA"),
     ("playerColor", D_INT, 0xFF3C28),
     ("playerNightColor", D_INT, 0xFF3C28),
-    ("playerStartMoney", D_INT, 5000),
+    ("playerStartMoney", D_INT, 10000),
     ("multiplayerStartIndex", D_INT, 1),
 ])
 sides_payload += struct.pack("<i", 6)

@@ -114,8 +114,11 @@ children.append(window("RightHUD", (600, 560, 636, 596), bg=DARK, border=DARK,
 children.append(window("MoneyDisplay", (612, 426, 788, 442), wtype="STATICTEXT",
                        status="ENABLED", bg="16 18 21 255", border="120 104 60 255",
                        extra="  STATICTEXTDATA = CENTERED: 1;\n"))
-children.append(window("PowerWindow", (612, 446, 788, 452), bg="22 30 46 255",
-                       border="22 30 46 255"))
+# Power meter strip: must NOT carry WIN_STATUS_IMAGE or its fill never
+# paints - it then hit-tests for the hover tooltip while showing nothing
+# (an invisible window answering "Power" reads as a haunted tooltip).
+children.append(window("PowerWindow", (612, 446, 788, 455), status="ENABLED+NOFOCUS",
+                       bg="30 40 58 255", border="120 104 60 255"))
 # radar draws into this window (engine hardcodes the name ControlBar.wnd:LeftHUD).
 # Square, so the square map fills it edge to edge.
 children.append(window("LeftHUD", (648, 456, 788, 596), bg="10 12 14 255",

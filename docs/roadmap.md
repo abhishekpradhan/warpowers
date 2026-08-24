@@ -6,25 +6,31 @@ wasm-generals surface with zero player-supplied files, current content as
 the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
-## Next up (ordered, 2026-08-24 — port surface is done)
-1. **Playability pass on the one match we have**: user playthrough drives a
-   balance/feel round (fix the WPTest $10000 vs WPTestJ $5000 start-money
-   mismatch in genmap first); victory path witnessed live (defeat is).
-2. **Close the QoL tail**: attack-move/guard/stop as command-bar buttons
-   (needs icon-sheet expansion — first non-portrait icons), rally-point live
-   check; retune WP_AUTOTEST=full so the regression gate is all-green.
-3. **Polish debt quickies** (§6b): W3DFS_MISS spam (Locater01 + empty-name
-   per-frame hunt), voice-limit tuning.
-4. **Content to the parity bar** (docs/parity.md): infantry via KayKit CC0
-   rigs (unlocks skeletal animation — the #1 asset gap), aircraft class,
-   structures to 10/faction, genmap biome/layout variety toward 8-10 maps,
-   SFX bulk via CC0 packs; music unpark = cheap CC-BY import when wanted.
-5. **The real opponent**: AISkirmishPlayer path (base build lists in genmap
-   + auto-reinforce teams + minimal .scb) — replaces timer waves with an AI
-   that builds and reacts; biggest "feels like a game" jump after content.
-6. **Hardening + publish prep** (gated on explicit go): fps budget pass,
-   Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;
-   LAN/relay multiplayer after (wasm-generals parity).
+## Phases (2026-08-24 — the port surface is done; user-defined structure)
+
+**Phase 2 — Playability (CURRENT):** make the one match we have feel right.
+- [ ] User playthrough → balance/feel round with real notes
+- [x] Start-money mismatch fixed (both maps deploy with $10000)
+- [ ] Victory path witnessed live (defeat is; same code path)
+- [ ] QoL tail: attack-move/guard/stop as command-bar buttons (icon-sheet
+      expansion — first non-portrait glyphs); rally-point live check
+- [ ] WP_AUTOTEST=full retune → regression gate all-green
+- [ ] Polish debt: W3DFS_MISS spam (Locater01 + per-frame empty-name hunt),
+      voice-limit tuning, invisible-hoverable window sweep (power meter now
+      paints)
+
+**Phase 3 — Content to the parity bar** (its own phase; the plan and
+per-class sourcing live in docs/parity.md): infantry via KayKit CC0 rigs
+(unlocks skeletal animation), aircraft class, structures to ~10/faction,
+genmap biome/layout variety toward 8-10 maps, SFX bulk, VO expansion; music
+unpark via CC-BY import when wanted.
+
+**Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
+lists + auto-reinforce teams + minimal .scb) replacing timer waves.
+
+**Phase 5 — Hardening + publish prep** (gated on explicit go): fps budget
+pass, Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;
+LAN/relay multiplayer after (wasm-generals parity).
 
 ## 0. Port parity (the working plan — D018)
 - [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon

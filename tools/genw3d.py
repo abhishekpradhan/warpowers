@@ -179,6 +179,16 @@ MODELS = {
         part("BR4A", "GOLD", 9, 10, 0.4, 6, 1.2, 0.5),
         part("BR4B", "GOLD", 10, 9, 0.4, 1.2, 6, 0.5),
     ],
+    # Move-destination hint (GameData MoveHintName): a small gold diamond
+    # ring shown for ~1.3s at each move order's target point. Its absence
+    # (empty name) made drawMoveHints hunt for '.w3d' every frame.
+    "WPMOVE01": [
+        part("N", "GOLD", 0, -6.5, 0.4, 5.0, 1.1, 0.4),
+        part("S", "GOLD", 0, 6.5, 0.4, 5.0, 1.1, 0.4),
+        part("W", "GOLD", -6.5, 0, 0.4, 1.1, 5.0, 0.4),
+        part("E", "GOLD", 6.5, 0, 0.4, 1.1, 5.0, 0.4),
+        part("C", "GOLD", 0, 0, 0.4, 1.8, 1.8, 0.5),
+    ],
     "LOCATER02": [
         part("SHAFT", "GOLD", -2, 0, 0.4, 10, 2.0, 0.5),
         part("HEADC", "GOLD", 4.6, 0, 0.4, 3.2, 5.0, 0.5, ty=0.1, ox=1.6),

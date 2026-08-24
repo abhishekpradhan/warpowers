@@ -25,10 +25,23 @@ Nothing ships or deploys until the user says go.
       popup panels opaque)
 
 **Phase 3 — Content to the parity bar (CURRENT)** (its own phase; the plan and
-per-class sourcing live in docs/parity.md): infantry via KayKit CC0 rigs
-(unlocks skeletal animation), aircraft class, structures to ~10/faction,
-genmap biome/layout variety toward 8-10 maps, SFX bulk, VO expansion; music
-unpark via CC-BY import when wanted.
+per-class sourcing live in docs/parity.md):
+- [x] Skeletal animation unlocked — procedural W3D rigs (tools/genrig.py,
+      shared WPINF1 skeleton, walk/idle/fire), no external assets needed;
+      KayKit import remains an optional fidelity upgrade
+- [x] Infantry to 2/faction: rifle (animated re-body) + rocket trooper
+      (AA-capable); bar is 4/faction — scout/heavy classes remain
+- [x] Aircraft class: VTOL hover gunships (Kestrel/Buzzard) + airpads;
+      bar is 2/faction — second airframe remains
+- [x] Structures: airpads + passive-income Exchange/Racket (MER 6 / JAK 5
+      of the 10/faction bar)
+- [x] Maps: 3 layouts × 2 factions with the in-shell battlefield picker;
+      biome tint variety + 2 more layouts remain for the 8-10 bar
+- [ ] SFX bulk toward ~40 (now ~14 effects; ambient/UI/impact variety)
+- [ ] VO to 8+ lines/unit (now 4-7 across 13 sets)
+- [ ] Music: 6-8 track rotation via CC-BY import (needs a download go-ahead)
+- [ ] Remaining: 2nd aircraft, scout/heavy infantry, structures to 10/faction,
+      AA turret variants, enemy waves using the new classes
 
 **Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
 lists + auto-reinforce teams + minimal .scb) replacing timer waves.

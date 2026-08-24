@@ -17,15 +17,15 @@ do not have to generate everything ourselves.
 
 ## The matrix
 
-| Class | ZH (approx) | Pack today | Parity bar (2 factions) | Source |
+| Class | ZH (approx) | Pack today (2026-08-24) | Parity bar (2 factions) | Source |
 |---|---|---|---|---|
 | Vehicles | ~12/faction ×3 | 7 total | 8/faction | A + B (military CC0 packs via conversion pipeline) |
-| Infantry | ~7/faction | 2 total | 4/faction | B first (KayKit rigs → animation pipeline), then A |
-| Aircraft | ~5/faction | 0 | 2/faction | A + B |
-| Structures | ~13/faction | 7 total | 10/faction | A (Blender kit is strong here) |
-| Unit animations | walk/attack/build/turret | turrets only | walk cycles, buildups | B (rigged CC0 chars) + Blender |
-| Maps | ~40 MP | 2 (mirrored) | 8–10 varied | A (genmap: cheap; needs biome/layout variety) |
-| Unit VO | ~10 lines/unit, acted | 4–7 lines/unit, synth | keep synth (D014), 8+ lines/unit | A (gensfx scales) |
+| Infantry | ~7/faction | 4 total (2/faction: rifle + rocket, **animated**) | 4/faction | A shipped the rig pipeline (tools/genrig.py); B upgrade path open |
+| Aircraft | ~5/faction | 2 total (1/faction VTOL) | 2/faction | A (hover class shipped; 2nd airframe pending) |
+| Structures | ~13/faction | 11 total (MER 6 / JAK 5: +airpads, +income) | 10/faction | A (Blender kit is strong here) |
+| Unit animations | walk/attack/build/turret | walk/idle/fire (shared infantry rig) + turrets | walk cycles, buildups | A (procedural W3D hierarchy anims landed) |
+| Maps | ~40 MP | 6 (3 layouts × 2 factions, in-shell picker) | 8–10 varied | A (genmap --layout; biome tint still pending) |
+| Unit VO | ~10 lines/unit, acted | 13 voice sets, 4–7 lines each, synth | keep synth (D014), 8+ lines/unit | A (gensfx scales) |
 | EVA/announcer | full set | 6 events | +unit-ready, +superweapon set later | A |
 | Music | ~30 tracks | 1 stub loop | 6–8 track rotation | **C (CC-BY solves this)** |
 | SFX | hundreds | ~12 | ~40 | A + B (Kenney audio CC0, freesound CC0) |

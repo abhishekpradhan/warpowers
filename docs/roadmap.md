@@ -1,9 +1,19 @@
 # War Powers — road to publish readiness
 
 Working roadmap; tick items as they land. Decisions referenced live in
-decisions.md. Publish bar: polished modern experience, ZH-level nostalgia,
-2 playable factions (Meridian vs Jackal; Iron Pact internal — D017).
+decisions.md. **Direction (D018): port-parity first** — publish bar: the
+wasm-generals surface with zero player-supplied files, current content as
+the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
+
+## 0. Port parity (the working plan — D018)
+- [ ] In-engine shell: main menu (in engine, replacing page-as-menu or behind it), skirmish setup (map/faction/color), options screen, score screen, load screens
+- [ ] Boot ≤20s: chunked/streamed init behind the menu; performance.mark instrumentation
+- [ ] Verify native engine QoL in the browser: control groups, rally points, attack-move, stances, hotkeys (engine features — likely work, never tested)
+- [ ] Pause menu / quit-to-menu flow (game-exit currently just returns to the page)
+- [ ] Fog-of-war start (initial-reveal anomaly — engine dig)
+- [ ] Later: LAN/relay multiplayer (wasm-generals parity)
+- Parked until parity (game depth): economy loop, general powers, superweapons, real skirmish AI, music
 
 ## 1. Combat juice — fights feel like Generals
 - [x] Real projectile on WP_TankGun (visible, dodgeable shells; ProjectileDetonationFX fires)

@@ -1,5 +1,11 @@
 # Vision
 
+> **Direction (D018, 2026-08-23): port-parity first.** The product is the
+> browser port — wasm-generals' surface without the game-files requirement.
+> Everything below the Pillars describes the *bundled asset pack* and its
+> long-term ambitions, not the near-term plan; the working plan lives in
+> roadmap.md.
+
 **Open a link, and 90 seconds later you're plopping down a base, hearing radio chatter, and dreading a superweapon timer.** War Powers is a free, browser-playable RTS in the *Command & Conquer: Generals / Zero Hour* idiom — built on the GPL-released engine lineage with fully original, freely licensed assets, so players need no game files, no install, no launcher, no account.
 
 **Positioning:** every other browser project in this space is a preservation port requiring players to import ~1.9GB of game files they already own. War Powers is the first assets-included, link-to-play entry — the lane nobody else occupies.

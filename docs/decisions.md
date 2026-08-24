@@ -125,3 +125,23 @@ Production path: **Blender pipeline, everything self-produced** (user decision: 
 ## D017 — Publish faction scope: 2 playable, no tease (2026-08-22, user decision)
 
 Meridian Command vs Jackal Front are the publish bar; **Iron Pact stays fully internal** — no roster, no teaser presence, nothing on public surfaces until after launch. All overnight/roster work targets the two factions only.
+
+## D018 — Direction: port-parity first; content is the bundled pack (2026-08-23, user decision)
+
+Drift review against the founding goal ("generals.wasm.ltd / wasm-generals,
+without needing the game files") found the project had grown a new-game
+ambition beyond the port objective. User chose **port-parity first**: the
+product is the browser port with zero player-supplied files; today's
+Meridian/Jackal content is the **bundled default asset pack** riding a
+deliberately swappable data layer — not a new game under active design.
+
+Consequences:
+- Next milestones are the port surface wasm-generals is judged by: in-engine
+  shell (main menu, skirmish setup, options, score screen, load screens),
+  boot ≤20s, verification that native engine QoL (control groups, rally
+  points, attack-move, stances, hotkeys) works in the browser build, and
+  eventually multiplayer.
+- Game-depth work (economy loop, general powers, superweapons, real AI,
+  music) is parked until the port surface matches the reference project.
+- vision.md is trimmed to reflect this framing; the nostalgia checklist
+  survives as the asset-pack ambition backlog, not the near-term plan.

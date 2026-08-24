@@ -581,3 +581,79 @@ END
 WP:Rocket
 "Rocket"
 END
+
+WP:Kestrel
+"Kestrel"
+END
+
+WP:DescKestrel
+"VTOL strike craft. Fast precision missiles; fragile against massed rockets."
+END
+
+WP:BuildKestrel
+"Deploy Kestrel"
+END
+
+WP:Buzzard
+"Buzzard"
+END
+
+WP:DescBuzzard
+"Junk-built rocket rig. Slow, loud, and devastating in a volley."
+END
+
+WP:BuildBuzzard
+"Rig up a Buzzard"
+END
+
+WP:LaunchPad
+"Launch Pad"
+END
+
+WP:DescLaunchPad
+"Airfield platform. Deploys and reinforces Kestrel strike craft."
+END
+
+WP:BuildLaunchPad
+"Construct Launch Pad"
+END
+
+WP:Roost
+"Roost"
+END
+
+WP:DescRoost
+"Scrap perch for Buzzard rigs."
+END
+
+WP:BuildRoost
+"Hammer up a Roost"
+END
+
+WP:Exchange
+"Exchange"
+END
+
+WP:DescExchange
+"Trade hub. Generates a steady stream of credits."
+END
+
+WP:BuildExchange
+"Construct Exchange"
+END
+
+WP:Racket
+"Racket"
+END
+
+WP:DescRacket
+"Off-the-books income. Nobody asks where it comes from."
+END
+
+WP:BuildRacket
+"Set up the Racket"
+END
+
+GUI:AddCash
+"+%d"
+END

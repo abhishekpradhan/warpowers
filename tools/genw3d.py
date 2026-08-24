@@ -236,6 +236,60 @@ def scaffold(hx, hy, h):
     ps.append(part("CRT2", "GOLD", hx * 0.35, hy * 0.3, 0.4, 3.5, 3.5, 2.4))
     return ps
 
+# Aircraft (VTOL hover gunships) + airpads + income structures (Phase 3).
+MODELS["MERJET01"] = [                                     # Kestrel strike VTOL
+    part("HULL", "WHITE", 0, 0, 2.2, 14.0, 5.0, 2.6, tx=0.55, ty=0.6),
+    part("NOSE", "STEEL", 6.4, 0, 2.4, 3.2, 2.6, 1.8, tx=0.4, ty=0.5),
+    part("CANO", (58, 76, 96), 2.4, 0, 4.6, 3.6, 2.2, 1.2, tx=0.6, ty=0.6),
+    part("WINL", "WHITE", -1.2, -6.4, 2.8, 6.0, 7.0, 0.8, tx=0.5),
+    part("WINR", "WHITE", -1.2, 6.4, 2.8, 6.0, 7.0, 0.8, tx=0.5),
+    part("FANL", "GOLD", -0.8, -7.6, 3.6, 3.4, 3.4, 0.8),
+    part("FANR", "GOLD", -0.8, 7.6, 3.6, 3.4, 3.4, 0.8),
+    part("TAIL", "GOLD", -6.6, 0, 3.4, 2.6, 1.2, 2.6, tx=0.5),
+]
+MODELS["JAKJET01"] = [                                     # Buzzard rocket rig
+    part("POD", "SAND", 0.6, 0, 2.0, 9.0, 5.4, 3.0, tx=0.7, ty=0.75),
+    part("SNUB", "RUST", 5.2, 0, 2.4, 2.6, 3.0, 2.0),
+    part("BOOML", "RUST", -4.6, -3.2, 2.8, 7.0, 1.4, 1.2),
+    part("BOOMR", "RUST", -4.6, 3.2, 2.8, 7.0, 1.4, 1.2),
+    part("ROTOR", "GRAPHITE", 0, 0, 5.6, 11.0, 2.2, 0.7),
+    part("ROTB", "OXIDE", 0, 0, 4.9, 3.0, 3.0, 0.9),
+    part("RACKL", "GUN", 1.4, -3.4, 1.2, 3.4, 1.2, 1.2),
+    part("RACKR", "GUN", 1.4, 3.4, 1.2, 3.4, 1.2, 1.2),
+]
+MODELS["MERPAD01"] = [                                     # Launch Pad
+    part("PAD", "STEEL", 0, 0, 0, 40, 34, 2.2),
+    part("RING", "GOLD", 0, 0, 2.2, 24, 24, 0.5),
+    part("CORE", "CHARCOAL", 0, 0, 2.7, 17, 17, 0.4),
+    part("MAST", "WHITE", -16, -12, 2.2, 5, 5, 16, tx=0.7, ty=0.7),
+    part("DISH", "GOLD", -16, -12, 18.2, 4.4, 4.4, 1.2),
+    part("LTA", "GOLD", 16, 13, 2.2, 1.4, 1.4, 3.2),
+    part("LTB", "GOLD", 16, -13, 2.2, 1.4, 1.4, 3.2),
+]
+MODELS["JAKPAD01"] = [                                     # Roost
+    part("DECK", "RUST", 0, 0, 0, 38, 32, 3.0, tx=0.92, ty=0.92),
+    part("PLNK", "SAND", 0, 0, 3.0, 26, 22, 0.6),
+    part("TOWR", "GRAPHITE", -14, 11, 3.0, 6, 6, 13, tx=0.8, ty=0.8),
+    part("PERCH", "RUST", -14, 11, 16.0, 10, 2.2, 1.0),
+    part("BARL", "OXIDE", 14, -11, 3.0, 4.4, 4.4, 3.6),
+    part("BARL2", "OXIDE", 10, -13, 3.0, 4.0, 4.0, 3.2),
+]
+MODELS["MEREX01"] = [                                      # Exchange (income)
+    part("BASE", "STEEL", 0, 0, 0, 26, 22, 4.0),
+    part("VAULT", "WHITE", 0, 0, 4.0, 20, 16, 9.0, tx=0.85, ty=0.85),
+    part("BAND", "GOLD", 0, 0, 8.4, 20.6, 16.6, 1.4),
+    part("CAP", "GOLD", 0, 0, 13.0, 10, 8, 1.6, tx=0.6, ty=0.6),
+    part("KIOSK", "CHARCOAL", 11, 8, 4.0, 5, 4, 4.4),
+]
+MODELS["JAKEX01"] = [                                      # Racket (income)
+    part("SHACK", "SAND", 0, 0, 0, 22, 18, 7.0, tx=0.9, ty=0.9),
+    part("ROOF", "RUST", 0, 0, 7.0, 24, 20, 1.2),
+    part("SIGN", "GOLD", 9, 0, 8.2, 1.2, 10, 4.2),
+    part("ANT", "GRAPHITE", -8, -6, 8.2, 1.0, 1.0, 9.0),
+    part("CRATE", "OXIDE", 10, -10, 0, 5, 5, 3.6),
+    part("CRT2", "RUST", 5, -12, 0, 4, 4, 2.8),
+]
+
 MODELS["WPSCAF01"] = scaffold(11, 11, 12)
 MODELS["WPSCAF02"] = scaffold(19, 17, 18)
 

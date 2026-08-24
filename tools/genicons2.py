@@ -80,11 +80,35 @@ def jet(ix, plate_c, body, trim):
     rect(ox - 46, oy + 18, ox - 34, oy + 26, trim)                      # wing pods
     rect(ox + 34, oy + 18, ox + 46, oy + 26, trim)
 
+def pad_icon(ix, plate_c, deck, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 66
+    rect(ox - 44, oy + 6, ox + 44, oy + 34, deck)           # platform slab
+    rect(ox - 30, oy + 10, ox + 30, oy + 30, DARK)          # pad core
+    disc(ox, oy + 20, 12, trim)                             # landing ring
+    disc(ox, oy + 20, 7, DARK)
+    rect(ox - 44, oy - 26, ox - 32, oy + 6, deck)           # tower
+    rect(ox - 48, oy - 34, ox - 28, oy - 26, trim)          # tower cap
+
+def bank_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 64
+    rect(ox - 34, oy + 12, ox + 34, oy + 38, body)          # base
+    rect(ox - 26, oy - 22, ox + 26, oy + 12, body)          # vault
+    rect(ox - 28, oy - 4, ox + 28, oy + 4, trim)            # band
+    rect(ox - 12, oy - 32, ox + 12, oy - 22, trim)          # cap
+    disc(ox, oy + 24, 8, trim)                              # coin
+    rect(ox - 2, oy + 18, ox + 2, oy + 30, DARK)
+
 SLOTS = [
     ("WPIcoLancer", lambda i: rocket_trooper(i, MER, (225, 229, 234), GOLD)),
     ("WPIcoSting", lambda i: rocket_trooper(i, JAK, (196, 170, 128), (111, 143, 90))),
     ("WPIcoKestrel", lambda i: jet(i, MER, STEEL, GOLD)),
     ("WPIcoBuzzard", lambda i: jet(i, JAK, SAND, (138, 90, 60))),
+    ("WPIcoLaunchPad", lambda i: pad_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoRoost", lambda i: pad_icon(i, JAK, SAND, (138, 90, 60))),
+    ("WPIcoExchange", lambda i: bank_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoRacket", lambda i: bank_icon(i, JAK, SAND, (111, 143, 90))),
 ]
 
 for i, (_, draw) in enumerate(SLOTS):

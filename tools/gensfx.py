@@ -235,6 +235,8 @@ UNIT_STYLES = {
     'wp_scr': dict(voice='en-us+m7', pitch=40, speed=192, grit=1.45),   # Scrapper: jumpy scrapyard kid
     'wp_lan': dict(voice='en-gb+m1', pitch=38, speed=150, grit=1.0),    # Lancer: calm AT professional
     'wp_stg': dict(voice='en-us+m2', pitch=52, speed=176, grit=1.4),    # Sting: cackling rocketeer
+    'wp_kes': dict(voice='en-gb+m4', pitch=54, speed=172, grit=0.75),   # Kestrel pilot: cool flier
+    'wp_buz': dict(voice='en-us+m6', pitch=34, speed=170, grit=1.5),    # Buzzard pilot: airborne junker
 }
 
 def barks(prefix, lines, base_seed):
@@ -313,6 +315,20 @@ barks('wp_stg', {
     'atk': ['Send it screaming!', 'Big one away!'],
     'rdy': ['Sting is loaded!'],
 }, 840)
+
+barks('wp_kes', {
+    'sel': ['Kestrel airborne.', 'Skies are mine.'],
+    'mov': ['Vectoring.', 'On the wind.'],
+    'atk': ['Talons out!', 'Diving in!'],
+    'rdy': ['Kestrel off the pad.'],
+}, 870)
+
+barks('wp_buz', {
+    'sel': ['Buzzard up!', 'Still flying, somehow!'],
+    'mov': ['Rattling over.', 'Hold together, girl!'],
+    'atk': ['Dump the rack!', 'Rain scrap on them!'],
+    'rdy': ['Buzzard off the roost!'],
+}, 890)
 
 barks('wp_rig', {
     'sel': ['Rigger.', 'Wrench is ready.'],

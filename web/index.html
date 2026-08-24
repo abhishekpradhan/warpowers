@@ -105,6 +105,8 @@
     }
     #playBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(215,180,90,.35); }
     #menu.hidden { display: none; }
+    .factionBtn { opacity: 0.55; }
+    .factionBtn.sel { opacity: 1; outline: 1px solid var(--accent, #d7b45a); }
     .wordmark {
       font-size: clamp(26px, 4.4vw, 40px);
       font-weight: 750;
@@ -166,6 +168,10 @@
         <div class="wordmark">WAR<span class="accent">POWERS</span></div>
         <div id="menu">
           <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
+          <div id="factionRow" style="display:flex; gap:10px;">
+            <button class="factionBtn sel" data-faction="meridian" style="font-size:12px; letter-spacing:1px;">MERIDIAN COMBINE</button>
+            <button class="factionBtn" data-faction="jackal" style="font-size:12px; letter-spacing:1px;">JACKAL LEAGUE</button>
+          </div>
           <button id="playBtn">DEPLOY</button>
         </div>
         <div id="meter"><div id="meterFill"></div></div>
@@ -266,7 +272,7 @@
     var Module = {
       canvas: document.getElementById('canvas'),
       locateFile: function(path) { return path + '?' + bust; },
-      arguments: ['-win', '-noshellmap', '-file', 'Maps/WPTest.map'].concat(
+      arguments: ['-win', '-noshellmap', '-file', (window.wpFaction === 'jackal' ? 'Maps/WPTestJ.map' : 'Maps/WPTest.map')].concat(
         (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; })),
       print: log,
       printErr: log,
@@ -359,6 +365,18 @@
       var phase = document.getElementById('phase');
       meterEl.style.display = 'none';
       phase.style.display = 'none';
+      // Faction picker: highlighted selection, remembered across visits.
+      window.wpFaction = localStorage.getItem('wpFaction') || 'meridian';
+      Array.prototype.forEach.call(document.querySelectorAll('.factionBtn'), function(b) {
+        b.classList.toggle('sel', b.dataset.faction === window.wpFaction);
+        b.addEventListener('click', function() {
+          window.wpFaction = b.dataset.faction;
+          localStorage.setItem('wpFaction', window.wpFaction);
+          Array.prototype.forEach.call(document.querySelectorAll('.factionBtn'), function(x) {
+            x.classList.toggle('sel', x === b);
+          });
+        });
+      });
       // The page is the main menu: the engine loads on DEPLOY. The click is
       // also the user gesture that unlocks the WebAudio context.
       document.getElementById('playBtn').addEventListener('click', function() {

@@ -10,6 +10,22 @@ import os
 import struct
 import sys
 
+# --faction=jackal writes the mirrored WPTestJ map: the player starts as the
+# Jackal League and the scripted opponent is the Meridian Combine.
+if '--faction=jackal' in sys.argv:
+    sys.argv = [a for a in sys.argv if a != '--faction=jackal']
+    F = dict(map_name='WPTestJ',
+             player_cc='WPJ_CommandPost', player_faction='FactionWPJ',
+             enemy_cc='WP_CommandCenter', enemy_faction='FactionWP',
+             guard='WP_Tank',
+             wave_raider='WP_Tank', wave_pack_a='WP_Outrider', wave_pack_b='WP_Tank')
+else:
+    F = dict(map_name='WPTest',
+             player_cc='WP_CommandCenter', player_faction='FactionWP',
+             enemy_cc='WPJ_CommandPost', enemy_faction='FactionWPJ',
+             guard='WPJ_Mongrel',
+             wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel')
+
 # ---------- geometry ----------
 BORDER = 10
 PLAY = 160
@@ -147,7 +163,7 @@ blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
 
 # ---------- WorldInfo v1 ----------
 world_payload = dict_pairs([
-    ("mapName", D_ASCII, "WPTest"),
+    ("mapName", D_ASCII, F["map_name"]),
     ("weather", D_INT, 0),
 ])
 
@@ -168,7 +184,7 @@ sides_payload += side([
     ("playerName", D_ASCII, "PlayerA"),
     ("playerIsHuman", D_BOOL, True),
     ("playerDisplayName", D_UNI, "Player A"),
-    ("playerFaction", D_ASCII, "FactionWP"),
+    ("playerFaction", D_ASCII, F["player_faction"]),
     ("playerAllies", D_ASCII, ""),
     ("playerEnemies", D_ASCII, "PlayerB"),
     ("playerColor", D_INT, 0x2882FF),
@@ -180,7 +196,7 @@ sides_payload += side([
     ("playerName", D_ASCII, "PlayerB"),
     ("playerIsHuman", D_BOOL, False),
     ("playerDisplayName", D_UNI, "Player B"),
-    ("playerFaction", D_ASCII, "FactionWP"),
+    ("playerFaction", D_ASCII, F["enemy_faction"]),
     ("playerAllies", D_ASCII, ""),
     ("playerEnemies", D_ASCII, "PlayerA"),
     ("playerColor", D_INT, 0xFF3C28),
@@ -203,7 +219,7 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWaveRaiders"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, False),
                              ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, "WPJ_Mongrel"),
+                             ("teamUnitType1", D_ASCII, F["wave_raider"]),
                              ("teamUnitMinCount1", D_INT, 2),
                              ("teamUnitMaxCount1", D_INT, 2),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
@@ -211,10 +227,10 @@ sides_payload += dict_pairs([("teamName", D_ASCII, "teamWavePack"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, False),
                              ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, "WPJ_Vulture"),
+                             ("teamUnitType1", D_ASCII, F["wave_pack_a"]),
                              ("teamUnitMinCount1", D_INT, 2),
                              ("teamUnitMaxCount1", D_INT, 2),
-                             ("teamUnitType2", D_ASCII, "WPJ_Mongrel"),
+                             ("teamUnitType2", D_ASCII, F["wave_pack_b"]),
                              ("teamUnitMinCount2", D_INT, 1),
                              ("teamUnitMaxCount2", D_INT, 1),
                              ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
@@ -244,12 +260,12 @@ if os.environ.get("WP_PREVIEW"):
                              "teamPlayerB" if tmpl.startswith("WPJ") else "teamPlayerA")]))
 
 objects_payload = b"".join(preview + [
-    obj(400.0, 400.0, 0.0, "WP_CommandCenter",
+    obj(400.0, 400.0, 0.0, F["player_cc"],
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),
-    obj(720.0, 560.0, 2.4, "WPJ_Mongrel",
+    obj(720.0, 560.0, 2.4, F["guard"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
-    obj(1200.0, 1200.0, 3.14159265, "WPJ_CommandPost",
+    obj(1200.0, 1200.0, 3.14159265, F["enemy_cc"],
         [("originalOwner", D_ASCII, "teamPlayerB"),
          ("objectName", D_ASCII, "EnemyCC")]),
     obj(400.0, 450.0, 0.0, "*Waypoints/Waypoint",
@@ -326,6 +342,21 @@ scripts_a = (
              [action("DEFEAT")])
 )
 P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
+P_TEXT, P_SIDE = 10, 11
+P_INT = 0
+
+# Fog-of-war start: the engine default leaves most of the map bright; force
+# classic C&C black shroud, then punch a permanent reveal around home.
+scripts_a += (
+    script("WP_FogStart",
+           [condition("CONDITION_TRUE", [])],
+           [action("MAP_SHROUD_ALL", [parameter(P_SIDE, s="")]),   # all human players
+            action("MAP_REVEAL_PERMANENTLY_AT_WAYPOINT",
+                   [parameter(P_WAYPOINT, s="Player_1_Start"),
+                    parameter(P_REAL, r=450.0),
+                    parameter(P_SIDE, s="PlayerA"),
+                    parameter(P_TEXT, s="WPHomeReveal")])])
+)
 
 # Attack waves: after a 90s grace, 2 Mongrels spawn at WaveSpawn every 75s
 # and attack the player CC (team on-create script drives the attack so
@@ -381,7 +412,7 @@ chunks = (
 )
 
 out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
-    "~/GeneralsX/GeneralsZH/Maps/WPTest/WPTest.map")
+    "~/GeneralsX/GeneralsZH/Maps/%s/%s.map" % (F["map_name"], F["map_name"]))
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 with open(out_path, "wb") as f:
     f.write(toc.emit() + chunks)

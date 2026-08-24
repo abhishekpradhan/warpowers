@@ -185,6 +185,27 @@ MODELS = {
     ],
 }
 
+# Construction scaffolds: steel frame boxes shown while a structure is a site
+# (AWAITING/PARTIALLY/ACTIVELY_BEING_CONSTRUCTED condition states). Two sizes.
+def scaffold(hx, hy, h):
+    STEEL = (168, 172, 178)
+    DARKS = (118, 122, 128)
+    ps = []
+    for i, (px, py) in enumerate([(-hx, -hy), (hx, -hy), (-hx, hy), (hx, hy)]):
+        ps.append(part(f"P{i}", STEEL, px, py, 0, 1.4, 1.4, h))
+    for lvl, z in enumerate([h * 0.5, h - 1.2]):
+        ps += [part(f"BA{lvl}", DARKS, 0, -hy, z, hx * 2, 1.0, 1.0),
+               part(f"BB{lvl}", DARKS, 0, hy, z, hx * 2, 1.0, 1.0),
+               part(f"BC{lvl}", DARKS, -hx, 0, z, 1.0, hy * 2, 1.0),
+               part(f"BD{lvl}", DARKS, hx, 0, z, 1.0, hy * 2, 1.0)]
+    ps.append(part("PAD", DARKS, 0, 0, 0.0, hx * 2 + 2, hy * 2 + 2, 0.4))
+    ps.append(part("CRT1", "GOLD", -hx * 0.4, -hy * 0.4, 0.4, 4.5, 4.5, 3.0))
+    ps.append(part("CRT2", "GOLD", hx * 0.35, hy * 0.3, 0.4, 3.5, 3.5, 2.4))
+    return ps
+
+MODELS["WPSCAF01"] = scaffold(11, 11, 12)
+MODELS["WPSCAF02"] = scaffold(19, 17, 18)
+
 out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
 os.makedirs(out_dir, exist_ok=True)
 for model, parts in MODELS.items():

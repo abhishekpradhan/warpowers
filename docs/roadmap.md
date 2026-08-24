@@ -69,7 +69,7 @@ Nothing ships or deploys until the user says go.
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
-- [x] LICENSE-ASSETS.md (CC BY-SA 4.0) + ledger + credits current (engine GPL file present upstream)
+- [x] LICENSE-ASSETS.md (MIT code / CC BY 4.0 content / per-file imports, D019) + ledger + credits current
 - [x] README.draft.md for the workspace repo (engine/dvijoke fork READMEs at D012 time)
 - [x] Fresh-clone reproducibility verified (clone --recursive + genmap/genwnd/Blender-from-clone; blender scripts de-absolutized; gentex single-arg mode quirk noted)
 - [x] D012 execution runbook written (docs/publish-checklist.md)

@@ -8,7 +8,8 @@ runbook for taking War Powers public.
       strings, README, repo names/descriptions) for EA marks. Engine GPL file
       headers keep their legal notices (lineage, not product surface).
 - [ ] Asset audit: every file in `data/` has an ASSETS.md row; licenses are
-      CC BY-SA 4.0 (ours), CC0/CC-BY (third party), or SIL OFL (font).
+      CC BY 4.0 (ours) or a D019-acceptable upstream license (CC0/CC-BY/
+      CC-BY-SA/GPL art/OFL — per-file, tracked in ASSETS.md).
 - [ ] Fresh-clone reproducibility on a second machine/user: clone --recursive,
       run every tools/ pipeline, build native + wasm, BASE_LOOP_OK.
 

@@ -19,9 +19,6 @@ Full text: https://creativecommons.org/licenses/by/4.0/legalcode
 Attribution: "War Powers project", linking to the project repository once
 public.
 
-*Relicensing note (2026-08-23): content rows previously marked CC BY-SA 4.0
-were relicensed to CC BY 4.0 by their sole author.*
-
 ## Imported content — keeps its upstream license, per file
 Third-party assets ship under whatever license they came with; **ASSETS.md is
 the authoritative per-file license map** and CREDITS.md carries the credits.

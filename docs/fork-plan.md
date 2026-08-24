@@ -1,5 +1,10 @@
 # Fork Plan — Base Choice & Staged Roadmap
 
+> **Historical planning document.** Licensing has since been revised:
+> code MIT / content CC BY 4.0 / per-file imports — see LICENSE-ASSETS.md
+> (decisions D018/D019 set the current direction and license policy).
+
+
 Written 2026-08-21 after the user redirected: **desktop-only, much lighter than 3–6 months, start from "ZH free in a browser, no files needed" and evolve from there.** The game this builds toward is defined in [vision.md](vision.md); earlier greenfield-era documents were removed in the D011 cleanup (git history keeps them).
 
 ---

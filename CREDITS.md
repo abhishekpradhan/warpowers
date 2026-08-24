@@ -4,7 +4,8 @@ War Powers is built on the shoulders of open work. Everything listed here is
 used within its license terms; the full per-file ledger lives in ASSETS.md.
 
 ## Engine
-- **GeneralsX** (GPL v2+) — the community source port this project forks.
+- **GeneralsX** (GPL-3.0, from EA's source release) — the community source
+  port this project forks.
 - **dvijoke** (MIT) — D3D8→WebGL2 translation layer for the browser build.
 
 ## Art

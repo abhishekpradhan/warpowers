@@ -2,8 +2,11 @@
 
 Every asset file that enters the project gets a row **when it is added, not later**. This ledger is what lets us ship legally and publicly without an audit crisis.
 
+**License note (2026-08-23):** rows below marked "CC BY-SA 4.0 (ours)" are
+now **CC BY 4.0** — relicensed by the sole author; see LICENSE-ASSETS.md.
+
 **Acceptance rules (from decisions D007/D009):**
-- ✅ Original work (ours) — licensed CC BY-SA 4.0 on release
+- ✅ Original work (ours) — licensed CC BY 4.0 on release (relicensed from BY-SA 2026-08-23; see LICENSE-ASSETS.md)
 - ✅ CC0 / public domain
 - ✅ CC-BY / CC-BY-SA (attribution tracked here, credited in-game)
 - ❌ Anything EA-derived, anything NC/ND-encumbered, anything unlicensed

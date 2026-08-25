@@ -98,6 +98,10 @@ class RefCounted8 {
 public:
     ULONG addRef() { return ++m_ref; }
     ULONG release() {
+        if (m_ref == 0) {  // WarPowers @debug WPSURF: over-release forensics
+            std::fprintf(stderr, "[WPSURF] OVER-RELEASE this=%p\n", (void*)this);
+            return 0;
+        }
         ULONG r = --m_ref;
         if (r == 0) delete this;
         return r;

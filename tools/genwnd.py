@@ -116,9 +116,11 @@ children.append(window("MoneyDisplay", (612, 426, 788, 442), wtype="STATICTEXT",
                        status="ENABLED", bg="16 18 21 255", border="120 104 60 255",
                        extra="  STATICTEXTDATA = CENTERED: 1;\n"))
 # Idle-worker jump button (engine-wired: ControlBarSystem's
-# buttonIdleWorker branch calls selectNextIdleWorker; InGameUI hides it
-# when no worker idles). Lives on the empty left panel strip.
-children.append(window("ButtonIdleWorker", (12, 476, 56, 520),
+# buttonIdleWorker branch calls selectNextIdleWorker; InGameUI enables/
+# disables it with the idle count). Bottom-left corner BELOW the cameo —
+# it must not intrude on CameoWindow (10,475)-(90,565) or the portrait
+# renders with the glyph stamped on its corner.
+children.append(window("ButtonIdleWorker", (10, 567, 46, 597),
                        wtype="PUSHBUTTON", status="ENABLED+IMAGE",
                        syscb="PassSelectedButtonsToParentSystem",
                        bg="26 30 38 255", border="58 66 80 255",

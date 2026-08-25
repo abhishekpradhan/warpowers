@@ -327,6 +327,27 @@ MODELS["JAKAA01"] = [                                      # Flakhut AA
     part("QUADC", "GUN", 1.5, -1.4, 9.7, 7, 0.9, 0.9, ox=2.0),
     part("QUADD", "GUN", 1.5, 1.4, 9.7, 7, 0.9, 0.9, ox=2.0),
 ]
+MODELS["MERART01"] = [                                     # Longbow siege gun
+    part("PLATE", "STEEL", 0, 0, 0, 20, 20, 2.4),
+    part("TURN", "WHITE", 0, 0, 2.4, 11, 11, 2.2, tx=0.9, ty=0.9),
+    part("CRDL", "GRAPHITE", -1.0, 0, 4.6, 7, 6, 3.0),
+    part("BARL1", "GUN", 4.0, 0, 6.2, 9, 1.6, 1.6, ox=2.0),
+    part("BARL2", "GUN", 10.5, 0, 7.6, 9, 1.3, 1.3, ox=2.4),
+    part("MUZZ", "GOLD", 15.5, 0, 8.6, 2.4, 1.7, 1.7),
+    part("CWT", "STEEL", -6.5, 0, 5.0, 5, 5.5, 4.2),
+    part("JACKL", "GRAPHITE", -7, -8.5, 0, 3.2, 2.0, 4.5),
+    part("JACKR", "GRAPHITE", -7, 8.5, 0, 3.2, 2.0, 4.5),
+]
+MODELS["JAKART01"] = [                                     # Lobber junk mortar
+    part("BAGS", "SAND", 0, 0, 0, 19, 19, 2.4),
+    part("PIT", "RUST", 0, 0, 0.4, 13, 13, 1.6),
+    part("BED", "GRAPHITE", -1, 0, 2.0, 8, 8, 2.0),
+    part("TUBE1", "GUN", 1.0, 0, 4.0, 4.2, 4.2, 6.5, tx=0.85, ty=0.85),
+    part("TUBE2", "GUN", 2.2, 0, 10.2, 3.4, 3.4, 4.0, tx=0.85, ty=0.85),
+    part("RING", "OXIDE", 2.6, 0, 13.9, 3.8, 3.8, 0.8),
+    part("BRACE", "RUST", -3.5, 0, 2.4, 1.4, 1.4, 9.0),
+    part("AMMO", "RUST", 6.5, -6.5, 0.4, 4.5, 3.2, 2.6),
+]
 MODELS["MERTECH01"] = [                                    # Directorate tech
     part("SLAB", "WHITE", 0, 0, 0, 24, 18, 14, tx=0.9, ty=0.9),
     part("BAND", "GOLD", 0, 0, 9.0, 24.6, 18.6, 1.2),

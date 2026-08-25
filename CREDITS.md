@@ -20,3 +20,10 @@ used within its license terms; the full per-file ledger lives in ASSETS.md.
 - **OpenSAGE.BlenderPlugin** — W3D export for Blender.
 - **Blender** — all War Powers models and textures are produced through
   scripted, reproducible Blender pipelines (tools/blender/).
+
+## Music
+
+Music by Kevin MacLeod (incompetech.com):
+"Volatile Reaction", "Interloper", "Crypto", "Rites", "Mechanolith", "Stormfront"
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/

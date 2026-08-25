@@ -40,10 +40,11 @@ per-class sourcing live in docs/parity.md):
       the picker; biome tinting still pending
 - [x] Enemy waves upgraded: rocket infantry in assaults + a 10-minute air
       wave; enemy bases carry AA and real power
-- [ ] SFX toward ~40 (now ~22: +chaingun, +flak, +deny/click UI)
-- [ ] VO depth (19 voice sets; 4 at 10 lines, rest at 4-7)
-- [ ] Music: 6-8 track CC-BY rotation (needs a download go-ahead)
-- [ ] Biome tinting, 10th structure per side, ambient sound beds
+- [x] SFX toward ~40 (now ~26: +chaingun, +flak, +deny/click UI, +arty boom)
+- [x] VO depth (19 voice sets; newest 6 deepened to 3-deep sel/mov/atk = ~10 lines each)
+- [x] Music: 6-track CC-BY rotation (Kevin MacLeod, ~15MB re-encoded; engine rotation in GameEngine::update; native-verified, browser audibility = user ears)
+- [x] Biome tinting (ash on Scrapyard/Range) and 10th structure (Longbow/Lobber artillery, firing untested)
+- [ ] Ambient sound beds
 
 **Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
 lists + auto-reinforce teams + minimal .scb) replacing timer waves.

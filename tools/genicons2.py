@@ -160,6 +160,19 @@ def power_icon(ix, plate_c, body, trim):
     tri((ox + 18, oy - 34), (ox + 30, oy - 10), (ox + 20, oy - 10), trim)   # bolt
     tri((ox + 28, oy - 14), (ox + 16, oy + 10), (ox + 24, oy - 12), trim)
 
+def arty_icon(ix, plate_c, body, trim):
+    cx, cy = plate(ix, plate_c)
+    ox, oy = cx + 64, cy + 64
+    rect(ox - 34, oy + 26, ox + 34, oy + 42, body)                  # platform
+    rect(ox - 14, oy + 10, ox + 14, oy + 26, body)                  # cradle
+    # long barrel raked up-right
+    for k in range(5):
+        rect(ox - 4 + k * 10, oy + 2 - k * 8, ox + 14 + k * 10, oy + 12 - k * 8, (58, 62, 68))
+    disc(ox + 50, oy - 32, 8, trim)                                 # muzzle bloom
+    rect(ox - 30, oy - 2, ox - 16, oy + 26, trim)                   # counterweight
+    for fx in (-26, 22):
+        rect(ox + fx, oy + 42, ox + fx + 8, oy + 50, (40, 42, 46))  # jacks
+
 SLOTS = [
     ("WPIcoLancer", lambda i: rocket_trooper(i, MER, (225, 229, 234), GOLD)),
     ("WPIcoSting", lambda i: rocket_trooper(i, JAK, (196, 170, 128), (111, 143, 90))),
@@ -181,6 +194,8 @@ SLOTS = [
     ("WPIcoDen", lambda i: tech_icon(i, JAK, SAND, (111, 143, 90))),
     ("WPIcoRampart", lambda i: pill_icon(i, MER, STEEL, GOLD)),
     ("WPIcoNest", lambda i: pill_icon(i, JAK, SAND, (138, 90, 60))),
+    ("WPIcoLongbow", lambda i: arty_icon(i, MER, STEEL, GOLD)),
+    ("WPIcoLobber", lambda i: arty_icon(i, JAK, SAND, (138, 90, 60))),
     ("WPIcoDynamo", lambda i: power_icon(i, JAK, SAND, GOLD)),
 ]
 

@@ -913,3 +913,34 @@ END
 GUI:CantBuildShroud
 "Cannot build into the unexplored shroud."
 END
+WP:Longbow
+"Longbow Battery"
+END
+
+WP:BuildLongbow
+"Construct Longbow Battery"
+END
+
+WP:DescLongbow
+"Long-range siege cannon. Devastating against structures and packed armor, but blind up close.\nRequires a Directorate. Drains 3 power."
+END
+
+WP:Lobber
+"Lobber Pit"
+END
+
+WP:BuildLobber
+"Construct Lobber Pit"
+END
+
+WP:DescLobber
+"Junk mortar with a huge blast radius. Shorter reach than the Longbow, but the shrapnel spread is wider.\nRequires a Den. Drains 3 power."
+END
+
+WP:IdleWorker
+"Idle Builder"
+END
+
+WP:DescIdleWorker
+"Select the next idle construction unit. Keep every builder working."
+END

@@ -14,17 +14,18 @@ import sys
 
 CB = "ControlBar.wnd"
 
-def drawdata(bg, border=None):
+def drawdata(bg, border=None, image=None):
     if border is None:
         border = "70 76 84 255"          # subtle steel; pass bg to hide entirely
-    rows = [f"IMAGE: NoImage, COLOR: {bg}, BORDERCOLOR: {border}"]
-    rows += [f"IMAGE: NoImage, COLOR: {bg}, BORDERCOLOR: {border}"] * 8
+    img = image or "NoImage"
+    rows = [f"IMAGE: {img}, COLOR: {bg}, BORDERCOLOR: {border}"]
+    rows += [f"IMAGE: {img}, COLOR: {bg}, BORDERCOLOR: {border}"] * 8
     return ",\n                    ".join(rows)
 
 def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
            syscb="[None]", bg="0 0 0 255", extra="", children=(),
            drawcb="[None]", inputcb="[None]", border=None, textcolor=None,
-           fontsize=10, bold=0, hilitebg=None):
+           fontsize=10, bold=0, hilitebg=None, image=None):
     x0, y0, x1, y1 = rect
     if textcolor is None:
         textcolor = "255 255 255 255"
@@ -44,9 +45,9 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
 {extra}  TEXTCOLOR = ENABLED: {textcolor}, ENABLEDBORDER: {textcolor},
               DISABLED: 128 128 128 255, DISABLEDBORDER: 128 128 128 255,
               HILITE: 255 255 128 255, HILITEBORDER: 255 255 255 255;
-  ENABLEDDRAWDATA = {drawdata(bg, border)};
-  DISABLEDDRAWDATA = {drawdata('26 28 32 255', border)};
-  HILITEDRAWDATA = {drawdata(hilitebg or '58 64 74 255', border)};
+  ENABLEDDRAWDATA = {drawdata(bg, border, image)};
+  DISABLEDDRAWDATA = {drawdata('26 28 32 255', border, image)};
+  HILITEDRAWDATA = {drawdata(hilitebg or '58 64 74 255', border, image)};
 """
     if children:
         body += "  CHILD\n"
@@ -114,6 +115,15 @@ children.append(window("RightHUD", (600, 560, 636, 596), bg=DARK, border=DARK,
 children.append(window("MoneyDisplay", (612, 426, 788, 442), wtype="STATICTEXT",
                        status="ENABLED", bg="16 18 21 255", border="120 104 60 255",
                        extra="  STATICTEXTDATA = CENTERED: 1;\n"))
+# Idle-worker jump button (engine-wired: ControlBarSystem's
+# buttonIdleWorker branch calls selectNextIdleWorker; InGameUI hides it
+# when no worker idles). Lives on the empty left panel strip.
+children.append(window("ButtonIdleWorker", (12, 476, 56, 520),
+                       wtype="PUSHBUTTON", status="ENABLED+IMAGE",
+                       syscb="PassSelectedButtonsToParentSystem",
+                       bg="26 30 38 255", border="58 66 80 255",
+                       image="WPGlyIdleWorker"))
+
 # Power meter: a decorative trough frame with the live meter as its child.
 # The child carries DRAWCALLBACK W3DPowerDraw (engine draw: log-scale tick
 # bar green/yellow/red by margin + consumption needle - images PowerPointG/

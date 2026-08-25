@@ -93,6 +93,22 @@ def write_tga(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path} ({len(hdr) + len(body)} bytes)")
 
+def write_tga_ash(path):
+    """same ground detail, desaturated to a cold ash/graphite biome tint"""
+    hdr = bytearray(18)
+    hdr[2] = 2
+    struct.pack_into("<HH", hdr, 12, SIZE, SIZE)
+    hdr[16] = 24
+    hdr[17] = 0x20
+    body = bytearray()
+    for row in img:
+        for (r, g, b) in row:
+            L = 0.3 * r + 0.5 * g + 0.2 * b
+            body += bytes((clamp(L * 0.90), clamp(L * 0.92), clamp(L * 0.91)))
+    with open(path, "wb") as f:
+        f.write(bytes(hdr) + bytes(body))
+    print(f"wrote {path}")
+
 def write_shadow(path):
     """64x64 multiplicative blob: white field, soft dark ellipse."""
     n = 64
@@ -341,6 +357,7 @@ targets = sys.argv[1:] or [
 ]
 for t in targets:
     write_tga(t)
+    write_tga_ash(os.path.join(os.path.dirname(t), "wp_ground_ash.tga"))
     texdir = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures")
     write_shadow(os.path.join(texdir, "shadow.tga"))
     write_glow(os.path.join(texdir, "wp_glow.tga"))

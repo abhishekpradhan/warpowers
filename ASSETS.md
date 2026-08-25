@@ -31,3 +31,14 @@ Every asset file that enters the project gets a row **when it is added, not late
 | data/Art/W3D/wpshell01.w3d | Tank shell tracer model | Original — tools/genw3d.py | War Powers project | CC BY 4.0 (ours) | 2026-08-23 | Projectile for WP_TankGun |
 | data/Art/Textures/EXScorch01.tga | Terrain scorch atlas (4 marks) | Original — tools/gentex.py | War Powers project | CC BY 4.0 (ours) | 2026-08-23 | Filename hardcoded by engine; art is ours |
 | data/Data/Audio/Sounds/*.wav (20 files) | SFX (cannon/impact/boom) + unit VO radio barks | Original — tools/gensfx.py (DSP + eSpeak NG synthesis) | War Powers project | CC BY 4.0 (ours) | 2026-08-23 | eSpeak NG output is unencumbered; D014 processed-radio direction |
+
+## Music (imported, CC BY 4.0)
+
+| File | Track | Author | Source | License | Modifications |
+|---|---|---|---|---|---|
+| Data/Audio/Tracks/volatile_reaction.mp3 | "Volatile Reaction" | Kevin MacLeod | incompetech.com | CC BY 4.0 | re-encoded 96kbps |
+| Data/Audio/Tracks/interloper.mp3 | "Interloper" | Kevin MacLeod | incompetech.com | CC BY 4.0 | re-encoded 96kbps |
+| Data/Audio/Tracks/crypto.mp3 | "Crypto" | Kevin MacLeod | incompetech.com | CC BY 4.0 | re-encoded 96kbps |
+| Data/Audio/Tracks/rites.mp3 | "Rites" | Kevin MacLeod | incompetech.com | CC BY 4.0 | re-encoded 96kbps |
+| Data/Audio/Tracks/mechanolith.mp3 | "Mechanolith" | Kevin MacLeod | incompetech.com | CC BY 4.0 | re-encoded 96kbps |
+| Data/Audio/Tracks/stormfront.mp3 | "Stormfront" | Kevin MacLeod | incompetech.com | CC BY 4.0 | trimmed to 4:30 + fade, re-encoded 96kbps |

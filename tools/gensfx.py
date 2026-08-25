@@ -259,6 +259,23 @@ def flak(seed):
         x[i] += 0.25 * math.sin(2 * math.pi * 170 * t) * math.exp(-t * 7.0)
     return softclip(x, 1.7)
 
+def artyfire(seed):
+    """Siege gun: deep concussive report with a long rolling tail"""
+    rng = random.Random(seed)
+    n = int(SR * 1.1)
+    x = [0.0] * n
+    for i in range(n):
+        t = i / SR
+        x[i] += 1.4 * math.sin(2 * math.pi * (52 + 34 * math.exp(-t * 16)) * t) * math.exp(-t * 5.2)
+        x[i] += 0.8 * rng.uniform(-1, 1) * math.exp(-t * 11.0)
+        x[i] += 0.22 * rng.uniform(-1, 1) * math.exp(-t * 2.1)
+    x = lowpass(x, 2400, passes=2)
+    for i in range(int(SR * 0.02)):
+        x[i] += rng.uniform(-1, 1) * math.exp(-i / SR * 300.0)
+    return softclip(x, 1.9)
+
+out('wp_arty_01', artyfire(611))
+out('wp_arty_02', artyfire(641))
 out('wp_chain_01', chaingun(411))
 out('wp_chain_02', chaingun(437))
 out('wp_flak_01', flak(521))
@@ -393,44 +410,44 @@ barks('wp_buz', {
 }, 890)
 
 barks('wp_vig', {
-    'sel': ['Vigil here.', 'Eyes open.'],
-    'mov': ['Ghosting ahead.', 'Scouting.'],
-    'atk': ['Spotting fire!', 'Marking them!'],
+    'sel': ['Vigil here.', 'Eyes open.', 'Watching everything.'],
+    'mov': ['Ghosting ahead.', 'Scouting.', 'No one sees me.'],
+    'atk': ['Spotting fire!', 'Marking them!', 'Contact, engaging light!'],
     'rdy': ['Vigil on watch.'],
 }, 910)
 
 barks('wp_prw', {
-    'sel': ['Prowler.', 'What you need?'],
-    'mov': ['Sliding out.', 'Quick look.'],
-    'atk': ['Pop pop!', 'Tagging them!'],
+    'sel': ['Prowler.', 'What you need?', 'Keep it quick.'],
+    'mov': ['Sliding out.', 'Quick look.', 'Back alleys, got it.'],
+    'atk': ['Pop pop!', 'Tagging them!', 'Say goodnight!'],
     'rdy': ['Prowler loose.'],
 }, 930)
 
 barks('wp_bas', {
-    'sel': ['Bastion.', 'Wall is here.'],
-    'mov': ['Advancing.', 'One pace at a time.'],
-    'atk': ['Cutting them down.', 'Sweep and clear.'],
+    'sel': ['Bastion.', 'Wall is here.', 'Nothing gets past.'],
+    'mov': ['Advancing.', 'One pace at a time.', 'Ground taken is kept.'],
+    'atk': ['Cutting them down.', 'Sweep and clear.', 'Suppressing!'],
     'rdy': ['Bastion deployed.'],
 }, 950)
 
 barks('wp_bru', {
-    'sel': ['Bruiser here.', 'Point me at it.'],
-    'mov': ['Stomping over.', 'Yeah, yeah, walking.'],
-    'atk': ['Grind them up!', 'Chew! Chew!'],
+    'sel': ['Bruiser here.', 'Point me at it.', 'Who needs flattening?'],
+    'mov': ['Stomping over.', 'Yeah, yeah, walking.', 'Heavy coming through.'],
+    'atk': ['Grind them up!', 'Chew! Chew!', 'Big gun says hello!'],
     'rdy': ['Bruiser is up.'],
 }, 970)
 
 barks('wp_shr', {
-    'sel': ['Shrike on station.', 'Guns are warm.'],
-    'mov': ['Repositioning.', 'On the deck.'],
-    'atk': ['Strafing run!', 'Walking the line!'],
+    'sel': ['Shrike on station.', 'Guns are warm.', 'Skies are mine.'],
+    'mov': ['Repositioning.', 'On the deck.', 'Vectoring in.'],
+    'atk': ['Strafing run!', 'Walking the line!', 'Guns guns guns!'],
     'rdy': ['Shrike airborne.'],
 }, 990)
 
 barks('wp_gnt', {
-    'sel': ['Gnat! Bzzt!', 'Still buzzing!'],
-    'mov': ['Zip zip zip!', 'Going going!'],
-    'atk': ['Sting them up!', 'Annoy and destroy!'],
+    'sel': ['Gnat! Bzzt!', 'Still buzzing!', 'Swat me if you can!'],
+    'mov': ['Zip zip zip!', 'Going going!', 'Wheee-hee-hee!'],
+    'atk': ['Sting them up!', 'Annoy and destroy!', 'Bite bite bite!'],
     'rdy': ['Gnat off the roost!'],
 }, 1010)
 

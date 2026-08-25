@@ -89,6 +89,15 @@ tick_cell(200, PAMBER)    # PowerPointY
 tick_cell(208, PRED)      # PowerPointR
 needle_cell(216)          # PowerBarSlider
 
+# cell 3 lower area: the idle-worker button glyph (hard hat + wrench)
+O3 = CELL * 3
+blob(O3 + 26, 34, 9, DIM)                      # head
+blob(O3 + 26, 34, 6, (214, 178, 148))
+poly_fill(O3, [(14, 28), (38, 28), (36, 22), (16, 22)], GOLD)   # hat brim
+poly_fill(O3, [(18, 22), (34, 22), (32, 15), (20, 15)], GOLD)   # hat crown
+line(O3 + 40, 44, O3 + 52, 32, GOLD, 2)        # wrench shaft
+blob(O3 + 53, 30, 4, GOLD); blob(O3 + 55, 28, 2, FACE)          # wrench jaw
+
 def write(path):
     hdr = bytearray(18)
     hdr[2] = 2

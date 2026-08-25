@@ -50,7 +50,8 @@ LAYOUTS = {
                   name="WPRidge", jname="WPRidgeJ"),
     # tight brawl: close bases, no cover - rush tempo
     "scrap": dict(play=120, player=(300.0, 600.0), enemy=(900.0, 600.0),
-                  ridge=None, name="WPScrap", jname="WPScrapJ"),
+                  ridge=None, ground="WPGroundAsh",
+                  name="WPScrap", jname="WPScrapJ"),
     # sunken center bowl ringed by a rim - whoever holds the basin sees all
     "basin": dict(play=170, player=(380.0, 850.0), enemy=(1320.0, 850.0),
                   ridge=None, basin=dict(r=330.0, rim=26.0, depth=6.0),
@@ -59,6 +60,7 @@ LAYOUTS = {
     "range": dict(play=200, player=(1000.0, 320.0), enemy=(1000.0, 1680.0),
                   ridge=dict(gap1=0.22, gap2=0.80, halfw=46.0, h=30.0),
                   ridge2=dict(gap1=0.55, gap2=0.90, halfw=46.0, h=30.0),
+                  ground="WPGroundAsh",
                   name="WPRange", jname="WPRangeJ"),
 }
 _layout_name = "flats"
@@ -247,7 +249,7 @@ blend_payload += zeros16                  # extraBlendTileNdxes
 blend_payload += zeros16                  # cliffInfoNdxes
 blend_payload += bytes(H * FSW)           # cellCliffState
 blend_payload += struct.pack("<iiii", NUM_TILES + CONCRETE_NUM, 1, 1, 2)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
-blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s("WPGround")
+blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s(LAY.get("ground", "WPGround"))
 blend_payload += struct.pack("<iiii", CONCRETE_FIRST, CONCRETE_NUM, 4, 0) + ascii_s("WPConcrete")
 blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
 

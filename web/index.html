@@ -396,6 +396,7 @@
         // WarPowers @debug forward autotest/diagnostic env knobs from the URL
         ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
         if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
+        if (params.get('doztrace')) ENV.WP_DOZER_TRACE = '1';
         if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
         FS.mkdir('/game');
         FS.mkdir('/game-base');

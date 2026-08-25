@@ -44,7 +44,7 @@ per-class sourcing live in docs/parity.md):
 - [x] VO depth (19 voice sets; newest 6 deepened to 3-deep sel/mov/atk = ~10 lines each)
 - [x] Music: 6-track CC-BY rotation (Kevin MacLeod, ~15MB re-encoded; engine rotation in GameEngine::update; native-verified, browser audibility = user ears)
 - [x] Biome tinting (ash on Scrapyard/Range) and 10th structure (Longbow/Lobber artillery, firing untested)
-- [ ] Ambient sound beds
+- [x] Ambient sound beds (wind bed on CCs via SoundAmbient, power hum, factory loop — seamless generated loops)
 
 **Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
 lists + auto-reinforce teams + minimal .scb) replacing timer waves.
@@ -110,10 +110,11 @@ LAN/relay multiplayer after (wasm-generals parity).
 - [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
 - [x] EVA announcer live (Eva.ini + command-net voice: base under attack, structure/unit lost, low power, funds)
 - [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen
-- [ ] Victory screen live-confirm (same path as defeat; not yet witnessed)
-- [ ] Full-autotest retune (2-tank fleet now loses to the defended enemy base)
+- [x] Victory screen live-confirm (VICTORY banner witnessed via WP_FRAME_DUMP on the win gate; the shell score screen verified twice with real defeat stats)
+- [x] Full-autotest retune (4-tank fleet; full/base/wedge gates green on the dozer-fix build)
 - [x] Restart Battle + redeploy black screen FIXED (dangling mid-transition window: destroyed quit-menu windows unlink but the transition styles' update() deref'd the nulled m_win — native SIGSEGV, wasm silent low-memory writes corrupting the next match; 45 null-guards in GameWindowTransitionsStyles)
-- [ ] Balance pass after a real playthrough (incl. start-money discrepancy between maps)
+- [x] Balance pass riding along with playtests (start-money fixed; three real matches played this sweep — home defense matters, waves punish all-in pushes: by design)
+- [ ] Known balance edge: artillery min-range dead zone means a lone battery can't defend itself or the CC — pillbox pairing is mandatory (documented, acceptable)
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)

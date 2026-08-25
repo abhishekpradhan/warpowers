@@ -274,6 +274,69 @@ def artyfire(seed):
         x[i] += rng.uniform(-1, 1) * math.exp(-i / SR * 300.0)
     return softclip(x, 1.9)
 
+def _crossloop(x, fade):
+    """splice tail into head so the buffer loops seamlessly"""
+    n = len(x)
+    out_x = x[:n - fade]
+    for i in range(fade):
+        t = i / fade
+        out_x[i] = x[n - fade + i] * (1 - t) + x[i] * t
+    return out_x
+
+def wind(seed):
+    """desert wind bed: slow-breathing filtered noise, seamless 8s loop"""
+    rng = random.Random(seed)
+    dur = 8.0
+    n = int(SR * dur)
+    x = [rng.uniform(-1, 1) for _ in range(n)]
+    x = lowpass(x, 900, passes=2)
+    for i in range(n):
+        t = i / SR
+        # two LFOs with periods dividing the loop length -> phase-continuous
+        breathe = 0.55 + 0.30 * math.sin(2 * math.pi * t / 4.0) \
+                       + 0.15 * math.sin(2 * math.pi * t / 2.0 + 1.3)
+        x[i] *= breathe
+    x = _crossloop(x, int(SR * 0.6))
+    return normalize(x, 0.55)
+
+def powerhum(seed):
+    """power-plant hum: mains fundamental + harmonics + faint whine, exact 2s period"""
+    dur = 2.0
+    n = int(SR * dur)
+    x = [0.0] * n
+    for i in range(n):
+        t = i / SR
+        x[i] = 0.55 * math.sin(2 * math.pi * 55 * t) \
+             + 0.28 * math.sin(2 * math.pi * 110 * t + 0.6) \
+             + 0.12 * math.sin(2 * math.pi * 220 * t + 1.1) \
+             + 0.05 * math.sin(2 * math.pi * 1650 * t) * (0.6 + 0.4 * math.sin(2 * math.pi * t / dur))
+    return normalize(x, 0.5)
+
+def factoryloop(seed):
+    """factory floor: servo whirr + a clank pattern, seamless 4s loop"""
+    rng = random.Random(seed)
+    dur = 4.0
+    n = int(SR * dur)
+    x = [0.0] * n
+    for i in range(n):
+        t = i / SR
+        x[i] += 0.18 * math.sin(2 * math.pi * 92 * t) * (0.7 + 0.3 * math.sin(2 * math.pi * t / dur))
+        x[i] += 0.06 * rng.uniform(-1, 1)
+    # clanks at fixed beats inside the loop
+    for beat, tone in ((0.55, 620), (1.7, 480), (2.4, 700), (3.3, 540)):
+        s0 = int(SR * beat)
+        for i in range(int(SR * 0.22)):
+            t = i / SR
+            if s0 + i < n:
+                x[s0 + i] += 0.5 * math.sin(2 * math.pi * tone * t) * math.exp(-t * 26.0) \
+                           + 0.3 * rng.uniform(-1, 1) * math.exp(-t * 60.0)
+    x = lowpass(x, 2600)
+    x = _crossloop(x, int(SR * 0.4))
+    return normalize(x, 0.5)
+
+out('wp_amb_wind', wind(1201))
+out('wp_amb_powerhum', powerhum(1301))
+out('wp_amb_factory', factoryloop(1401))
 out('wp_arty_01', artyfire(611))
 out('wp_arty_02', artyfire(641))
 out('wp_chain_01', chaingun(411))

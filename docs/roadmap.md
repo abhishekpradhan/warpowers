@@ -54,8 +54,12 @@ economy counterplay: killing its income starves the waves). Timer-spawned
 waves are gone. v2a (2026-08-26): OPPOSITION
 difficulty row on the deployment screen — SKIRMISH/STANDARD/BRUTAL, persisted,
 pure data via difficulty-flagged timer-arm scripts (easy never fields
-assault/air; brutal escalates at 1/2.5/5/7 minutes). Still open: the
-AISkirmishPlayer/.scb path, counterattack/eco-raid behaviors.
+assault/air; brutal escalates at 1/2.5/5/7 minutes). v2b (2026-08-26): reactive
+behaviors — trained defense patrol (regarrisons when killed), punish squad
+(unlocked the moment the player destroys an enemy structure; the stock
+script condition was a stub, now implemented via ScoreKeeper), and an
+eco-raid tier that hunts the player's income/power via attack-priority
+sets. AISkirmishPlayer/.scb RETIRED as unnecessary — **Phase 4 closed.**
 
 **Phase 5 — Hardening + publish prep** (gated on explicit go): fps budget
 pass, Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;

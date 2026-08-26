@@ -22,6 +22,8 @@ if '--faction=jackal' in sys.argv:
              enemy_factory='WP_VehiclePlant', enemy_tower='WP_Bulwark',
              enemy_power='WP_PowerArray', enemy_aa='WP_Skyspear',
              enemy_income='WP_Exchange', enemy_pad='WP_LaunchPad',
+             player_income='WPJ_Racket', player_power='WPJ_Dynamo',
+             raid_a='WP_Outrider',
              assault_a='WP_Tank', assault_b='WP_Zenith',
              assault_c='WP_Lancer', wave_air='WP_Kestrel',
              defender='WP_Tank', defender_scout='WP_Outrider')
@@ -34,6 +36,8 @@ else:
              enemy_factory='WPJ_ChopShop', enemy_tower='WPJ_Watchpost',
              enemy_power='WPJ_Dynamo', enemy_aa='WPJ_Flakhut',
              enemy_income='WPJ_Racket', enemy_pad='WPJ_Roost',
+             player_income='WP_Exchange', player_power='WP_PowerArray',
+             raid_a='WPJ_Vulture',
              assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
              assault_c='WPJ_Sting', wave_air='WPJ_Buzzard',
              defender='WPJ_Mongrel', defender_scout='WPJ_Vulture')
@@ -402,6 +406,20 @@ attack_team("teamWaveAssault", "WP_ProdAssault", 30, 1,
             on_create="WP_WaveHunt")
 attack_team("teamWaveAir", "WP_ProdAir", 25, 1,
             [(F["wave_air"], 2)])
+# Eco-raid: fast movers that hunt with an attack-priority set favoring the
+# player's income/power — they slip past the front and gut the economy.
+attack_team("teamEcoRaid", "WP_ProdRaid", 28, 1,
+            [(F["raid_a"], 3)], on_create="WP_EcoRaid")
+# Punish: unlocked the moment the player destroys an enemy structure —
+# aggression gets answered (normal/brutal only via the condition script).
+attack_team("teamPunish", "WP_ProdPunish", 40, 1,
+            [(F["assault_a"], 3), (F["assault_b"], 2)],
+            on_create="WP_WaveHunt")
+# Defense patrol: trained garrison replacement — guards the base front and
+# is rebuilt whenever it dies. Outranks every attack tier so the AI heals
+# its defense before it schedules offense.
+attack_team("teamDefensePatrol", "WP_ProdDefense", 45, 1,
+            [(F["defender"], 2)], on_create="WP_HoldBase")
 sides_payload += struct.pack("<i", len(_team_dicts))
 sides_payload += b"".join(_team_dicts)
 # nested PlayerScriptsList appended below (win/lose scripts), after its
@@ -538,6 +556,8 @@ scripts_a = (
 P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
 P_TEXT, P_SIDE = 10, 11
 P_INT = 0
+P_OBJTYPE = 15            # Parameter::OBJECT_TYPE (thing-template name)
+P_APS = 28                # Parameter::ATTACK_PRIORITY_SET (named set)
 
 # Fog-of-war start: force classic C&C black shroud. No scripted home reveal —
 # own structures light the base themselves (CC ShroudClearingRange 300), and
@@ -614,6 +634,49 @@ scripts_b = (
              [condition("CONDITION_TRUE", [])],
              [action("TEAM_HUNT",
                      [parameter(P_TEAM, s="<This Team>")])],
+             one_shot=False, subroutine=True)
+    # Eco-raid machinery: a one-shot script defines the attack-priority set
+    # (default 1, the player's income/power heavily favored); the raid
+    # team's on-create applies it and hunts — the hunt then prefers the
+    # economy over whatever is closest.
+    + script("WP_RaidPrioritySetup",
+             [condition("CONDITION_TRUE", [])],
+             [action("SET_DEFAULT_ATTACK_PRIORITY",
+                     [parameter(P_APS, s="WPRaidTargets"), parameter(P_INT, i=1)]),
+              action("SET_ATTACK_PRIORITY_THING",
+                     [parameter(P_APS, s="WPRaidTargets"),
+                      parameter(P_OBJTYPE, s=F["player_income"]), parameter(P_INT, i=60)]),
+              action("SET_ATTACK_PRIORITY_THING",
+                     [parameter(P_APS, s="WPRaidTargets"),
+                      parameter(P_OBJTYPE, s=F["player_power"]), parameter(P_INT, i=40)])])
+    + script("WP_EcoRaid",
+             [condition("CONDITION_TRUE", [])],
+             [action("TEAM_APPLY_ATTACK_PRIORITY_SET",
+                     [parameter(P_TEAM, s="<This Team>"), parameter(P_APS, s="WPRaidTargets")]),
+              action("TEAM_HUNT",
+                     [parameter(P_TEAM, s="<This Team>")])],
+             one_shot=False, subroutine=True)
+    + script("WP_HoldBase",
+             [condition("CONDITION_TRUE", [])],
+             [action("TEAM_GUARD",
+                     [parameter(P_TEAM, s="<This Team>")])],
+             one_shot=False, subroutine=True)
+    # Behavior production conditions: the eco-raid unlocks on its own timer
+    # (never on easy); the punish team unlocks permanently the first time
+    # the player kills an enemy structure (ScoreKeeper-backed condition —
+    # normal/brutal only); the defense patrol is always eligible.
+    + arm("WP_RaidStartN", "RaidTimer", 420, easy=False, normal=True, hard=False)
+    + arm("WP_RaidStartH", "RaidTimer", 240, easy=False, normal=False, hard=True)
+    + script("WP_ProdRaid",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="RaidTimer")])], [],
+             one_shot=False, subroutine=True, easy=False)
+    + script("WP_ProdPunish",
+             [condition("PLAYER_DESTROYED_N_BUILDINGS_PLAYER",
+                        [parameter(P_SIDE, s="PlayerA"), parameter(P_INT, i=1),
+                         parameter(P_SIDE, s="PlayerB")])], [],
+             one_shot=False, subroutine=True, easy=False)
+    + script("WP_ProdDefense",
+             [condition("CONDITION_TRUE", [])], [],
              one_shot=False, subroutine=True)
 )
 scripts_payload = (

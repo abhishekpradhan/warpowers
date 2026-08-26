@@ -21,6 +21,7 @@ if '--faction=jackal' in sys.argv:
              wave_raider='WP_Tank', wave_pack_a='WP_Outrider', wave_pack_b='WP_Tank',
              enemy_factory='WP_VehiclePlant', enemy_tower='WP_Bulwark',
              enemy_power='WP_PowerArray', enemy_aa='WP_Skyspear',
+             enemy_income='WP_Exchange', enemy_pad='WP_LaunchPad',
              assault_a='WP_Tank', assault_b='WP_Zenith',
              assault_c='WP_Lancer', wave_air='WP_Kestrel',
              defender='WP_Tank', defender_scout='WP_Outrider')
@@ -32,6 +33,7 @@ else:
              wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel',
              enemy_factory='WPJ_ChopShop', enemy_tower='WPJ_Watchpost',
              enemy_power='WPJ_Dynamo', enemy_aa='WPJ_Flakhut',
+             enemy_income='WPJ_Racket', enemy_pad='WPJ_Roost',
              assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
              assault_c='WPJ_Sting', wave_air='WPJ_Buzzard',
              defender='WPJ_Mongrel', defender_scout='WPJ_Vulture')
@@ -259,9 +261,52 @@ world_payload = dict_pairs([
     ("weather", D_INT, 0),
 ])
 
+PX, PY = PLAYER_BASE
+EX, EY = ENEMY_BASE
+# enemy-base cluster offsets, expressed from the enemy anchor and mirrored
+# toward the player so every layout keeps the towers on the approach side.
+import math as _math
+_toP = _math.atan2(PY - EY, PX - EX)
+def _off(dx, dy):
+    """offset in the flats frame (enemy at 1200,1200, player toward SW),
+    rotated so 'toward player' tracks the actual layout geometry."""
+    base = _math.atan2(400.0 - 1200.0, 400.0 - 1200.0)
+    rot = _toP - base
+    c, sn = _math.cos(rot), _math.sin(rot)
+    return (EX + dx * c - dy * sn, EY + dx * sn + dy * c)
+
+_fac = _off(-80.0, 50.0)
+_pow = _off(70.0, 40.0)
+_tw1 = _off(-95.0, -95.0)
+_tw2 = _off(80.0, -80.0)
+_df1 = _off(-50.0, -50.0)
+_df2 = _off(40.0, -40.0)
+_df3 = _off(-5.0, -80.0)
+_wsp = _off(-50.0, -100.0)
+_aa = _off(-30.0, 60.0)
+_inc = _off(130.0, 20.0)          # enemy income structure (pre-placed)
+_pad = _off(30.0, 120.0)          # enemy air pad (pre-placed; unlocks air teams)
+_bl_pow2 = _off(150.0, 85.0)      # AI expansion: second power
+_bl_inc2 = _off(185.0, -35.0)     # AI expansion: second income
+_bl_twf = (EX + 0.30 * (PX - EX), EY + 0.30 * (PY - EY))  # forward tower on the lane
+_rly = _off(-20.0, -130.0)        # attack-team gather point at the base front
+
 # ---------- SidesList v3 ----------
-def side(pairs):
-    return dict_pairs(pairs) + struct.pack("<i", 0)  # empty build list
+# Build-list entry wire format (SidesList::ParseSidesDataChunk, v3):
+# buildingName, templateName, x, y, z(forced 0), angle, byte initiallyBuilt,
+# int numRebuilds, script, int health, byte whiner/unsellable/repairable.
+# AIPlayer::processBaseBuilding walks these and dozer-constructs anything
+# missing (queueing a dozer from a build-list factory if none exists), so a
+# not-initially-built entry = the AI visibly expands to that spot in-match.
+def build_entry(template, x, y, angle=0.0, built=False, rebuilds=99):
+    return (ascii_s("") + ascii_s(template)
+            + struct.pack("<fff", x, y, 0.0) + struct.pack("<f", angle)
+            + bytes([1 if built else 0]) + struct.pack("<i", rebuilds)
+            + ascii_s("") + struct.pack("<i", 100) + bytes([0, 0, 1]))
+
+def side(pairs, build_list=()):
+    payload = dict_pairs(pairs) + struct.pack("<i", len(build_list))
+    return payload + b"".join(build_list)
 
 sides_payload = struct.pack("<i", 3)
 sides_payload += side([
@@ -295,6 +340,11 @@ sides_payload += side([
     ("playerNightColor", D_INT, 0xFF3C28),
     ("playerStartMoney", D_INT, 10000),
     ("multiplayerStartIndex", D_INT, 1),
+], build_list=[
+    # The AI expands to these during the match (dozer-built, rebuilt if razed).
+    build_entry(F["enemy_power"], _bl_pow2[0], _bl_pow2[1], 3.4),
+    build_entry(F["enemy_income"], _bl_inc2[0], _bl_inc2[1], 3.0),
+    build_entry(F["enemy_tower"], _bl_twf[0], _bl_twf[1], _toP),
 ])
 # team dicts are collected first so the COUNT is derived, never hand-kept
 # (a stale hardcoded count silently desyncs every chunk after the team
@@ -311,49 +361,47 @@ team([("teamName", D_ASCII, "teamPlayerA"),
 team([("teamName", D_ASCII, "teamPlayerB"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, True)])
-# attack-wave team: 2 Mongrels, spawned by script, attacks on creation
-team([("teamName", D_ASCII, "teamWaveRaiders"),
+# Pre-placed base garrison: its own team, priority ABOVE every attack team
+# and explicitly non-recruitable — Team::tryToRecruit treats the DEFAULT
+# team as always poachable and steals from any lower-priority team, which
+# let the AI draft the mid-map guard + base defenders into its first raider
+# team and kill an idle player's CC at 0:45 (the Phase 4 45-second blitz).
+team([("teamName", D_ASCII, "teamBaseGuards"),
                              ("teamOwner", D_ASCII, "PlayerB"),
-                             ("teamIsSingleton", D_BOOL, False),
-                             ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, F["wave_raider"]),
-                             ("teamUnitMinCount1", D_INT, 2),
-                             ("teamUnitMaxCount1", D_INT, 2),
-                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
-team([("teamName", D_ASCII, "teamWavePack"),
-                             ("teamOwner", D_ASCII, "PlayerB"),
-                             ("teamIsSingleton", D_BOOL, False),
-                             ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, F["wave_pack_a"]),
-                             ("teamUnitMinCount1", D_INT, 2),
-                             ("teamUnitMaxCount1", D_INT, 2),
-                             ("teamUnitType2", D_ASCII, F["wave_pack_b"]),
-                             ("teamUnitMinCount2", D_INT, 1),
-                             ("teamUnitMaxCount2", D_INT, 1),
-                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
-team([("teamName", D_ASCII, "teamWaveAssault"),
-                             ("teamOwner", D_ASCII, "PlayerB"),
-                             ("teamIsSingleton", D_BOOL, False),
-                             ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, F["assault_a"]),
-                             ("teamUnitMinCount1", D_INT, 3),
-                             ("teamUnitMaxCount1", D_INT, 3),
-                             ("teamUnitType2", D_ASCII, F["assault_b"]),
-                             ("teamUnitMinCount2", D_INT, 2),
-                             ("teamUnitMaxCount2", D_INT, 2),
-                             ("teamUnitType3", D_ASCII, F["assault_c"]),
-                             ("teamUnitMinCount3", D_INT, 2),
-                             ("teamUnitMaxCount3", D_INT, 2),
-                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
-# late air wave: a pair of enemy gunships, once, then a slow repeat
-team([("teamName", D_ASCII, "teamWaveAir"),
-                             ("teamOwner", D_ASCII, "PlayerB"),
-                             ("teamIsSingleton", D_BOOL, False),
-                             ("teamHome", D_ASCII, "WaveSpawn"),
-                             ("teamUnitType1", D_ASCII, F["wave_air"]),
-                             ("teamUnitMinCount1", D_INT, 2),
-                             ("teamUnitMaxCount1", D_INT, 2),
-                             ("teamOnCreateScript", D_ASCII, "WP_WaveAttack")])
+                             ("teamIsSingleton", D_BOOL, True),
+                             ("teamProductionPriority", D_INT, 100),
+                             ("teamIsAIRecruitable", D_BOOL, False)])
+# Phase 4: the enemy TRAINS its attack teams (AIPlayer team production) —
+# no more free spawns. Each team carries a production-condition script
+# (evaluated by name; escalation tiers unlock on timers armed at match
+# start), a priority (higher wins when affordable + factory idle), an
+# instance cap, and a gather point at the base front. Units cost the AI
+# real money: killing its Exchange/Racket starves the waves.
+def attack_team(name, cond, pri, maxinst, units, on_create="WP_WaveAttack"):
+    pairs = [("teamName", D_ASCII, name),
+             ("teamOwner", D_ASCII, "PlayerB"),
+             ("teamIsSingleton", D_BOOL, False),
+             ("teamHome", D_ASCII, "EnemyRally"),
+             ("teamProductionCondition", D_ASCII, cond),
+             ("teamProductionPriority", D_INT, pri),
+             ("teamMaxInstances", D_INT, maxinst),
+             ("teamExecutesActionsOnCreate", D_BOOL, True),
+             ("teamOnCreateScript", D_ASCII, on_create)]
+    for i, (tmpl, n) in enumerate(units, start=1):
+        pairs += [("teamUnitType%d" % i, D_ASCII, tmpl),
+                  ("teamUnitMinCount%d" % i, D_INT, n),
+                  ("teamUnitMaxCount%d" % i, D_INT, n)]
+    team(pairs)
+
+attack_team("teamWaveRaiders", "WP_ProdRaiders", 10, 2,
+            [(F["wave_raider"], 2)])
+attack_team("teamWavePack", "WP_ProdPack", 20, 2,
+            [(F["wave_pack_a"], 2), (F["wave_pack_b"], 1)])
+attack_team("teamWaveAssault", "WP_ProdAssault", 30, 1,
+            [(F["assault_a"], 3), (F["assault_b"], 2), (F["assault_c"], 2)],
+            on_create="WP_WaveHunt")
+attack_team("teamWaveAir", "WP_ProdAir", 25, 1,
+            [(F["wave_air"], 2)])
 sides_payload += struct.pack("<i", len(_team_dicts))
 sides_payload += b"".join(_team_dicts)
 # nested PlayerScriptsList appended below (win/lose scripts), after its
@@ -381,35 +429,12 @@ if os.environ.get("WP_PREVIEW"):
                            [("originalOwner", D_ASCII,
                              "teamPlayerB" if tmpl.startswith("WPJ") else "teamPlayerA")]))
 
-PX, PY = PLAYER_BASE
-EX, EY = ENEMY_BASE
-# enemy-base cluster offsets, expressed from the enemy anchor and mirrored
-# toward the player so every layout keeps the towers on the approach side.
-import math as _math
-_toP = _math.atan2(PY - EY, PX - EX)
-def _off(dx, dy):
-    """offset in the flats frame (enemy at 1200,1200, player toward SW),
-    rotated so 'toward player' tracks the actual layout geometry."""
-    base = _math.atan2(400.0 - 1200.0, 400.0 - 1200.0)
-    rot = _toP - base
-    c, sn = _math.cos(rot), _math.sin(rot)
-    return (EX + dx * c - dy * sn, EY + dx * sn + dy * c)
-
-_fac = _off(-80.0, 50.0)
-_pow = _off(70.0, 40.0)
-_tw1 = _off(-95.0, -95.0)
-_tw2 = _off(80.0, -80.0)
-_df1 = _off(-50.0, -50.0)
-_df2 = _off(40.0, -40.0)
-_df3 = _off(-5.0, -80.0)
-_wsp = _off(-50.0, -100.0)
-_aa = _off(-30.0, 60.0)
 objects_payload = b"".join(preview + [
     obj(PX, PY, 0.0, F["player_cc"],
         [("originalOwner", D_ASCII, "teamPlayerA"),
          ("objectName", D_ASCII, "PlayerCC")]),
     obj((PX + EX) / 2.0, (PY + EY) / 2.0, 2.4, F["guard"],
-        [("originalOwner", D_ASCII, "teamPlayerB")]),
+        [("originalOwner", D_ASCII, "teamBaseGuards")]),
     obj(EX, EY, 3.14159265, F["enemy_cc"],
         [("originalOwner", D_ASCII, "teamPlayerB"),
          ("objectName", D_ASCII, "EnemyCC")]),
@@ -422,12 +447,16 @@ objects_payload = b"".join(preview + [
     obj(_tw2[0], _tw2[1], 3.6, F["enemy_tower"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(_df1[0], _df1[1], 2.4, F["defender"],
-        [("originalOwner", D_ASCII, "teamPlayerB")]),
+        [("originalOwner", D_ASCII, "teamBaseGuards")]),
     obj(_df2[0], _df2[1], 3.2, F["defender"],
-        [("originalOwner", D_ASCII, "teamPlayerB")]),
+        [("originalOwner", D_ASCII, "teamBaseGuards")]),
     obj(_df3[0], _df3[1], 2.8, F["defender_scout"],
-        [("originalOwner", D_ASCII, "teamPlayerB")]),
+        [("originalOwner", D_ASCII, "teamBaseGuards")]),
     obj(_aa[0], _aa[1], 3.0, F["enemy_aa"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(_inc[0], _inc[1], 3.2, F["enemy_income"],
+        [("originalOwner", D_ASCII, "teamPlayerB")]),
+    obj(_pad[0], _pad[1], 3.0, F["enemy_pad"],
         [("originalOwner", D_ASCII, "teamPlayerB")]),
     obj(PX, PY + 50.0, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 1), ("waypointName", D_ASCII, "Player_1_Start")]),
@@ -437,6 +466,8 @@ objects_payload = b"".join(preview + [
         [("waypointID", D_INT, 3), ("waypointName", D_ASCII, "InitialCameraPosition")]),
     obj(_wsp[0], _wsp[1], 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 4), ("waypointName", D_ASCII, "WaveSpawn")]),
+    obj(_rly[0], _rly[1], 0.0, "*Waypoints/Waypoint",
+        [("waypointID", D_INT, 5), ("waypointName", D_ASCII, "EnemyRally")]),
 ])
 
 # ---------- GlobalLighting v3 ----------
@@ -521,29 +552,26 @@ scripts_a += (
 # Attack waves: after a 90s grace, 2 Mongrels spawn at WaveSpawn every 75s
 # and attack the player CC (team on-create script drives the attack so
 # "<This Team>" binds to the fresh instance).
+# Phase 4 scripts: the arm scripts start escalation timers once; the
+# WP_Prod* scripts are TEAM PRODUCTION CONDITIONS (evaluated by name from
+# the team dicts — never "fired", so their actions stay empty). Raiders are
+# always in the pool; pack/assault/air join when their timer expires (a
+# TIMER_EXPIRED counter stays expired — nothing resets it — so each tier
+# unlocks permanently). The AI's own team timer paces actual builds.
 scripts_b = (
-    script("WP_WaveStart",
+    # The plain AIPlayer constructor turns unit production OFF (campaign
+    # convention: map scripts must switch the computer player on — the
+    # stock skirmish AI's ctor re-enables it, the campaign one doesn't).
+    # Without this the AI builds its base but never trains a single team;
+    # only queueDozer's temporary force-enable ever slips a unit through.
+    script("WP_AIProductionOn",
            [condition("CONDITION_TRUE", [])],
-           [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=150.0)])])
-    + script("WP_WaveSpawn",
-             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="WaveTimer")])],
-             [action("CREATE_REINFORCEMENT_TEAM",
-                     [parameter(P_TEAM, s="teamWaveRaiders"), parameter(P_WAYPOINT, s="WaveSpawn")]),
-              action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="WaveTimer"), parameter(P_REAL, r=90.0)])],
-             one_shot=False)
+           [action("PLAYER_ENABLE_UNIT_CONSTRUCTION",
+                   [parameter(P_SIDE, s="PlayerB")])])
     + script("WP_PackStart",
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=300.0)])])
-    + script("WP_PackSpawn",
-             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="PackTimer")])],
-             [action("CREATE_REINFORCEMENT_TEAM",
-                     [parameter(P_TEAM, s="teamWavePack"), parameter(P_WAYPOINT, s="WaveSpawn")]),
-              action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=150.0)])],
-             one_shot=False)
+                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=240.0)])])
     + script("WP_AssaultStart",
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
@@ -552,24 +580,31 @@ scripts_b = (
            [condition("CONDITION_TRUE", [])],
            [action("SET_MILLISECOND_TIMER",
                    [parameter(P_COUNTER, s="AirWaveTimer"), parameter(P_REAL, r=600.0)])])
-    + script("WP_AirWaveSpawn",
-             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AirWaveTimer")])],
-             [action("CREATE_REINFORCEMENT_TEAM",
-                     [parameter(P_TEAM, s="teamWaveAir"), parameter(P_WAYPOINT, s="WaveSpawn")]),
-              action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="AirWaveTimer"), parameter(P_REAL, r=360.0)])],
-             one_shot=False)
-    + script("WP_AssaultSpawn",
-             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AssaultTimer")])],
-             [action("CREATE_REINFORCEMENT_TEAM",
-                     [parameter(P_TEAM, s="teamWaveAssault"), parameter(P_WAYPOINT, s="WaveSpawn")]),
-              action("SET_MILLISECOND_TIMER",
-                     [parameter(P_COUNTER, s="AssaultTimer"), parameter(P_REAL, r=240.0)])],
-             one_shot=False)
+    + script("WP_RaiderStart",
+           [condition("CONDITION_TRUE", [])],
+           [action("SET_MILLISECOND_TIMER",
+                   [parameter(P_COUNTER, s="RaiderTimer"), parameter(P_REAL, r=120.0)])])
+    + script("WP_ProdRaiders",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="RaiderTimer")])], [],
+             one_shot=False, subroutine=True)
+    + script("WP_ProdPack",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="PackTimer")])], [],
+             one_shot=False, subroutine=True)
+    + script("WP_ProdAssault",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AssaultTimer")])], [],
+             one_shot=False, subroutine=True)
+    + script("WP_ProdAir",
+             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="AirWaveTimer")])], [],
+             one_shot=False, subroutine=True)
     + script("WP_WaveAttack",
              [condition("CONDITION_TRUE", [])],
              [action("TEAM_ATTACK_NAMED",
                      [parameter(P_TEAM, s="<This Team>"), parameter(P_UNIT, s="PlayerCC")])],
+             one_shot=False, subroutine=True)
+    + script("WP_WaveHunt",
+             [condition("CONDITION_TRUE", [])],
+             [action("TEAM_HUNT",
+                     [parameter(P_TEAM, s="<This Team>")])],
              one_shot=False, subroutine=True)
 )
 scripts_payload = (

@@ -46,8 +46,13 @@ per-class sourcing live in docs/parity.md):
 - [x] Biome tinting (ash on Scrapyard/Range) and 10th structure (Longbow/Lobber artillery, firing untested)
 - [x] Ambient sound beds (wind bed on CCs via SoundAmbient, power hum, factory loop — seamless generated loops)
 
-**Phase 4 — The real opponent:** AISkirmishPlayer path (genmap base build
-lists + auto-reinforce teams + minimal .scb) replacing timer waves.
+**Phase 4 — The real opponent** (v1 LANDED 2026-08-26): the enemy is a live
+AIPlayer — trains its own dozer, expands via a map build list (2nd power,
+2nd income, forward tower; rebuilds), and produces escalating attack teams
+with real money (raider/pack/assault/air tiers on 2/4/8/10-minute unlocks;
+economy counterplay: killing its income starves the waves). Timer-spawned
+waves are gone. Still open for v2: difficulty selector on the deployment
+screen, AISkirmishPlayer/.scb path, counterattack/eco-raid behaviors.
 
 **Phase 5 — Hardening + publish prep** (gated on explicit go): fps budget
 pass, Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;

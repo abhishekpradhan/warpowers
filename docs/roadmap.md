@@ -51,8 +51,11 @@ AIPlayer — trains its own dozer, expands via a map build list (2nd power,
 2nd income, forward tower; rebuilds), and produces escalating attack teams
 with real money (raider/pack/assault/air tiers on 2/4/8/10-minute unlocks;
 economy counterplay: killing its income starves the waves). Timer-spawned
-waves are gone. Still open for v2: difficulty selector on the deployment
-screen, AISkirmishPlayer/.scb path, counterattack/eco-raid behaviors.
+waves are gone. v2a (2026-08-26): OPPOSITION
+difficulty row on the deployment screen — SKIRMISH/STANDARD/BRUTAL, persisted,
+pure data via difficulty-flagged timer-arm scripts (easy never fields
+assault/air; brutal escalates at 1/2.5/5/7 minutes). Still open: the
+AISkirmishPlayer/.scb path, counterattack/eco-raid behaviors.
 
 **Phase 5 — Hardening + publish prep** (gated on explicit go): fps budget
 pass, Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;

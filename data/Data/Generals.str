@@ -944,3 +944,30 @@ END
 WP:DescIdleWorker
 "Select the next idle construction unit. Keep every builder working."
 END
+WP:DifficultyLabel
+"O P P O S I T I O N"
+END
+
+WP:DiffEasy
+"SKIRMISH"
+END
+
+WP:DiffEasyDesc
+"A lighter war. Raids come late and the heaviest Jackal gear stays home."
+END
+
+WP:DiffNormal
+"STANDARD"
+END
+
+WP:DiffNormalDesc
+"The full escalation: raiders, packs, armored assaults, then air."
+END
+
+WP:DiffHard
+"BRUTAL"
+END
+
+WP:DiffHardDesc
+"Everything, sooner. The enemy war machine never slows down."
+END

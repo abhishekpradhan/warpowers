@@ -516,9 +516,11 @@ def action(internal_name, params=()):
     payload += struct.pack("<i", len(params)) + b"".join(params)
     return chunk("ScriptAction", 2, payload)
 
-def script(name, conditions, actions, one_shot=True, subroutine=False):
+def script(name, conditions, actions, one_shot=True, subroutine=False,
+           easy=True, normal=True, hard=True):
     payload = ascii_s(name) + ascii_s("") * 3          # name + 3 comments
-    payload += bytes([1, 1 if one_shot else 0, 1, 1, 1,
+    payload += bytes([1, 1 if one_shot else 0,
+                      1 if easy else 0, 1 if normal else 0, 1 if hard else 0,
                       1 if subroutine else 0])         # active, oneShot, easy, normal, hard, subroutine
     payload += struct.pack("<i", 0)                    # delayEvaluationSeconds
     payload += chunk("OrCondition", 1, b"".join(conditions))
@@ -558,6 +560,16 @@ scripts_a += (
 # always in the pool; pack/assault/air join when their timer expires (a
 # TIMER_EXPIRED counter stays expired — nothing resets it — so each tier
 # unlocks permanently). The AI's own team timer paces actual builds.
+def arm(name, counter, seconds, **flags):
+    """one-shot timer-arm script; difficulty flags carry the per-difficulty
+    escalation (a script disabled for the current difficulty never runs, so
+    its counter never starts and TIMER_EXPIRED stays false = tier locked)"""
+    return script(name,
+                  [condition("CONDITION_TRUE", [])],
+                  [action("SET_MILLISECOND_TIMER",
+                          [parameter(P_COUNTER, s=counter), parameter(P_REAL, r=float(seconds))])],
+                  **flags)
+
 scripts_b = (
     # The plain AIPlayer constructor turns unit production OFF (campaign
     # convention: map scripts must switch the computer player on — the
@@ -568,22 +580,19 @@ scripts_b = (
            [condition("CONDITION_TRUE", [])],
            [action("PLAYER_ENABLE_UNIT_CONSTRUCTION",
                    [parameter(P_SIDE, s="PlayerB")])])
-    + script("WP_PackStart",
-           [condition("CONDITION_TRUE", [])],
-           [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="PackTimer"), parameter(P_REAL, r=240.0)])])
-    + script("WP_AssaultStart",
-           [condition("CONDITION_TRUE", [])],
-           [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="AssaultTimer"), parameter(P_REAL, r=480.0)])])
-    + script("WP_AirWaveArm",
-           [condition("CONDITION_TRUE", [])],
-           [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="AirWaveTimer"), parameter(P_REAL, r=600.0)])])
-    + script("WP_RaiderStart",
-           [condition("CONDITION_TRUE", [])],
-           [action("SET_MILLISECOND_TIMER",
-                   [parameter(P_COUNTER, s="RaiderTimer"), parameter(P_REAL, r=120.0)])])
+    # Escalation timers, per difficulty (deployment-screen OPPOSITION row →
+    # MSG_NEW_GAME difficulty → script easy/normal/hard flags). Easy never
+    # arms assault/air at all.
+    + arm("WP_RaiderStartE", "RaiderTimer", 240, easy=True, normal=False, hard=False)
+    + arm("WP_RaiderStartN", "RaiderTimer", 120, easy=False, normal=True, hard=False)
+    + arm("WP_RaiderStartH", "RaiderTimer", 60, easy=False, normal=False, hard=True)
+    + arm("WP_PackStartE", "PackTimer", 480, easy=True, normal=False, hard=False)
+    + arm("WP_PackStartN", "PackTimer", 240, easy=False, normal=True, hard=False)
+    + arm("WP_PackStartH", "PackTimer", 150, easy=False, normal=False, hard=True)
+    + arm("WP_AssaultStartN", "AssaultTimer", 480, easy=False, normal=True, hard=False)
+    + arm("WP_AssaultStartH", "AssaultTimer", 300, easy=False, normal=False, hard=True)
+    + arm("WP_AirWaveArmN", "AirWaveTimer", 600, easy=False, normal=True, hard=False)
+    + arm("WP_AirWaveArmH", "AirWaveTimer", 420, easy=False, normal=False, hard=True)
     + script("WP_ProdRaiders",
              [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="RaiderTimer")])], [],
              one_shot=False, subroutine=True)

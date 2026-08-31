@@ -1,57 +1,112 @@
-# War Powers (working title)
+# War Powers *(working title)*
 
-A free, browser-playable RTS in the Command & Conquer: Generals / Zero Hour
-idiom — built on the GPL-released engine lineage with **fully original
-replacement assets**, so players need no game files, no install, no launcher.
-**the Meridian Combine** vs **the Jackal Front**; compiled for the browser with
-Emscripten + WebGL2 (via the vendored `dvijoke/d8web` layer), with a native
-macOS build (SDL3 + DXVK + MoltenVK) as the development path.
+**A free real-time strategy game that runs in your browser.** Base building,
+tank columns, fog of war, and an AI that hits back — in the idiom of the
+classic 2000s RTS, with no install, no launcher, and no game files to bring.
 
-**Direction (D018):** port-parity first — the product is the browser port
-(the wasm-generals experience minus the "supply your own game files"
-requirement); our content is the bundled default asset pack on a swappable
-data layer. **Status:** full matches against a real AI opponent
-(base-building, economy, escalating attacks, three difficulty levels) run in
-the browser on 100% original data — combat, fog of war, win/lose, audio, two
-factions. Current work: hardening + publish prep (Phase 5,
-[docs/publish-checklist.md](docs/publish-checklist.md)); the parity bar lives
-in [docs/parity.md](docs/parity.md).
+![A Jackal Front raid emerging from the fog onto a Meridian base](docs/media/readme-battle.jpg)
+*A Jackal Front raid coming out of the shroud onto a Meridian Combine base
+(BRUTAL difficulty, 105 seconds into the match).*
 
-**Licensing (D019):** per-file; legality is the only exclusion bar.
-- Our code: **MIT** ([LICENSE](LICENSE)) · our content: **CC BY 4.0**
-- Imports keep their upstream license (CC0/CC-BY/CC-BY-SA/GPL art/OFL),
-  tracked per-file in [ASSETS.md](ASSETS.md)
-- Engine chain: GPL-3.0 + EA additional terms (engine fork) / MIT (dvijoke)
-  / zlib (DXVK fork) —
-  see [LICENSE-ASSETS.md](LICENSE-ASSETS.md)
+War Powers is built on the GPL-released Command & Conquer: Generals engine
+lineage (via the community GeneralsX port, compiled to WebAssembly) and
+ships **100% original assets** — every model, texture, sound, map, and line
+of text is authored by this project or imported under an open license.
+That combination is the point: the classic engine's feel, playable by anyone
+with a URL.
 
-## Layout
+## The game
 
-See [docs/WORKSPACE.md](docs/WORKSPACE.md) for the full map. Short version:
+- **Two factions.** The **Meridian Combine** — an institutional war machine
+  of hover dozers and precision hardware — against **the Jackal Front**, a
+  guerrilla salvage force of gun trucks and dug-in emplacements.
+- **A real opponent.** The AI builds its base, runs an economy, trains
+  escalating attack waves, garrisons its defenses, retaliates when you
+  destroy its structures, and raids your economy. Three difficulty levels:
+  SKIRMISH, STANDARD, BRUTAL.
+- **Five battlefields** across two biomes — open flats, ridge lanes, a
+  close-quarters scrapyard, a sunken basin, trench lines — picked from the
+  in-game deployment screen.
+- **The full loop.** Build, scout, fight, win or lose, score screen, play
+  again — with a music rotation, unit voices, and a battlefield announcer.
+- **Fast.** Cold boot to the main menu in ~5 seconds on a local connection;
+  the whole game is a ~55MB static bundle.
 
-- `data/` — the complete original game dataset (INI, maps, art, audio, UI)
-- `tools/` — generators and gates (models, textures, SFX/VO, maps, WND
-  layouts, web staging, lints); `tools/blender/` hero-asset pipeline
-- `web/` — the browser boot page
-- `docs/` — vision, roadmap, decisions log, engine notes, parity matrix
-- `engine/` — **submodule**: our GPL fork of the GeneralsX engine lineage
-- `dvijoke/` — **vendored inline** (MIT, upstream meerzulee/dvijoke): the
-  D3D8→WebGL2 layer the wasm build compiles in; carries its own LICENSE
-- clone with `git clone --recursive`; build + push recipes in
-  [docs/WORKSPACE.md](docs/WORKSPACE.md)
+## Play it locally
 
-## Hard rules
+Everything needed to build and run the game lives in this repository (plus
+[emscripten](https://emscripten.org) for the WebAssembly build):
 
-1. **No EA asset or data bytes ever ship** — no EA art, audio, INI text,
-   maps, or archive contents in any repo or deployment. EA never granted
-   redistribution rights; this rule is what makes "no files needed" legal.
-   (GPL *code* from the engine lineage is fine — the project is a GPL fork.)
-2. **No EA trademarks** in branding — per the engine license's additional
-   terms.
-3. **Every asset has a ledger row** in [ASSETS.md](ASSETS.md) before it's
-   used, with its license (per-file licensing per D019).
+```bash
+git clone --recursive https://github.com/abhishekpradhan/warpowers.git
+cd warpowers/engine
+emcmake cmake --preset wasm
+cmake --build build/wasm --target GeneralsXZH.js
+cd ..
+python3 tools/genwebstage.py
+python3 -m http.server 8321 --directory webstage
+```
+
+Then open <http://localhost:8321>. Chromium and Safari are the tested
+browsers. Full recipes — including the native macOS development build
+(SDL3 + DXVK + MoltenVK) — are in [docs/WORKSPACE.md](docs/WORKSPACE.md).
+
+## How it's made
+
+The engine is a fork ([`engine/`](engine), git submodule) of the GeneralsX
+community port of EA's GPL source release; the browser renderer is the
+vendored [`dvijoke/d8web`](dvijoke) D3D8→WebGL2 layer. Everything the game
+*shows* comes from [`data/`](data) — an original, swappable dataset — and
+almost all of it is **generated by scripted pipelines** in
+[`tools/`](tools): maps, models (headless Blender), textures, icons, sound
+effects, and synthesized unit voices are reproducible with a command, not
+hand-placed binaries.
+
+| Directory | Contents |
+|---|---|
+| `data/` | The complete original game dataset: INI rules, maps, art, audio, UI, strings |
+| `tools/` | Asset generators and quality gates; `tools/blender/` model pipelines |
+| `web/` | The boot page (loader, progress, volume, diagnostics) |
+| `engine/` | Engine fork — git submodule (GPL-3.0 with EA's additional terms) |
+| `dvijoke/` | D3D8→WebGL2 layer, vendored inline (MIT, upstream meerzulee/dvijoke) |
+| `docs/` | Vision, roadmap, decision log, engine notes, workspace map |
+
+## Status
+
+Playable end-to-end today; currently in **hardening + publish prep**
+([docs/publish-checklist.md](docs/publish-checklist.md)). The feature bar
+tracks parity with the classic experience in
+[docs/parity.md](docs/parity.md), and the build-by-build history lives in
+[docs/roadmap.md](docs/roadmap.md). Multiplayer is on the roadmap after
+publish. Not deployed anywhere yet — this repository is the whole project.
+
+## Licensing
+
+Per-file licensing ([D019](docs/decisions.md)); the short version:
+
+- **Our code** — MIT ([LICENSE](LICENSE)). **Our content** — CC BY 4.0.
+- **Imports** keep their upstream license, tracked per-file in the
+  [ASSETS.md](ASSETS.md) ledger and credited in [CREDITS.md](CREDITS.md).
+- **Engine chain** — GPL-3.0 + EA additional terms (engine) / MIT (dvijoke)
+  / zlib (DXVK, native dev only). Full map: [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+
+## Ground rules
+
+1. **No EA asset or data bytes, ever** — no EA art, audio, INI text, maps,
+   or archive contents in any repo or deployment. EA never granted asset
+   redistribution; this rule is what makes "no game files needed" legal.
+   (GPL *code* from the engine lineage is the project's foundation.)
+2. **No EA trademarks in branding**, per the engine license's additional terms.
+3. **Every asset gets a provenance ledger row** in [ASSETS.md](ASSETS.md)
+   before it ships.
 4. **Private until polished** — nothing deploys or publishes without an
    explicit go.
+
+## Credits
+
+Standing on the shoulders of the GeneralsX engine community, Kevin MacLeod's
+music, Quaternius's CC0 meshes, and more — the full list is
+[CREDITS.md](CREDITS.md).
 
 ---
 

@@ -24,7 +24,11 @@ subprocess.run([sys.executable,
                check=True)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GAME = os.path.expanduser("~/GeneralsX/GeneralsZH")
+# Stage game data from the REPO (data/ is the single source of truth for the
+# web build). The native runtime dir (~/GeneralsX/GeneralsZH) is a deploy
+# TARGET synced from data/, never a staging source - staging from it shipped
+# five-day-old data once (engine-notes, 2026-08-31).
+GAME = os.path.join(ROOT, "data")
 BUILD = os.path.join(ROOT, "engine", "build", "wasm", "GeneralsMD")
 STAGE = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "webstage")
 

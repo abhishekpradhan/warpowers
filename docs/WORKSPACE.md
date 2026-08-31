@@ -29,7 +29,7 @@ Inside the engine submodule:
 
 | Path | What it is |
 |---|---|
-| `~/GeneralsX/GeneralsZH/` | The native **runtime dir**: deployed binary (`GeneralsXZH` + `run.sh`), synced `Data/`, `Maps/`, `Art/`, `Window/`. Deploy = `rm -f` + `cp` + `codesign -s - -f`. Not a repo — everything in it comes from this workspace |
+| `~/GeneralsX/GeneralsZH/` | The native **runtime dir**: deployed binary (`GeneralsXZH` + `run.sh`) plus `Data/`, `Maps/`, `Art/`, `Window/` synced FROM `data/` (`rsync -a data/<d>/ ~/GeneralsX/GeneralsZH/<d>/`). Deploy = `rm -f` + `cp` + `codesign -s - -f`. Not a repo; a deploy target only — the web stage reads the repo directly (since 2026-08-31) |
 | `~/MoltenVK-src` | MoltenVK source checkout for GPU debugging (not shipped) |
 
 ## GitHub repos (all private, all under abhishekpradhan)
@@ -77,7 +77,13 @@ commits breaks fresh clones. (Applies to workspace→engine and engine→dxvk.)
 git clone --recursive https://github.com/abhishekpradhan/warpowers.git
 ```
 brings the workspace (dvijoke included inline) + the engine submodule.
-Build wasm:
-`source ~/emsdk/emsdk_env.sh && cmake --build engine/build/wasm --target GeneralsXZH.js`
-(configure presets first on a brand-new machine), then `python3
-tools/genwebstage.py` and serve `webstage/`.
+Build + play (matches the README quick start; needs emsdk active):
+
+```
+cd engine && emcmake cmake --preset wasm        # ALWAYS emcmake — plain cmake
+cmake --build build/wasm --target GeneralsXZH.js  # silently uses the host compiler
+cd .. && python3 tools/genwebstage.py           # stages from data/ (repo truth)
+python3 -m http.server 8321 --directory webstage
+```
+
+The native runtime dir is only needed for the native macOS build path.

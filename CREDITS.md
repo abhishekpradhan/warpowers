@@ -4,8 +4,10 @@ War Powers is built on the shoulders of open work. Everything listed here is
 used within its license terms; the full per-file ledger lives in ASSETS.md.
 
 ## Engine
-- **GeneralsX** (GPL-3.0, from EA's source release) — the community source
-  port this project forks.
+- **GeneralsX** (GPL-3.0 with EA's additional terms, from EA's source
+  release) — the community source port this project forks.
+- **DXVK** (zlib) — D3D→Vulkan layer used by the native macOS development
+  build only (not part of the web build).
 - **dvijoke** (MIT) — D3D8→WebGL2 translation layer for the browser build.
   Vendored inline at `dvijoke/` (upstream meerzulee/dvijoke; our copy is
   upstream +3 commits, subtree-merged from warpowers-dvijoke @ ba6791de);

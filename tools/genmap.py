@@ -2,9 +2,12 @@
 """War Powers .map generator — emits the engine's CkMp chunk format.
 
 Byte-level format extracted from the GPL engine source (see docs/map-format
-notes). Generates the Boot Slice map: flat 64x64-cell playable area, two
-players (PlayerA human, PlayerB inert AI), one WP_CommandCenter each,
-start + camera waypoints. Little-endian throughout.
+notes). Emits the skirmish map set: layout-driven terrain (120-200-cell
+playable areas with dune/ridge/basin features) and two sides — PlayerA
+(human) vs PlayerB, a full AIPlayer opponent driven by this file's build
+lists, economy structures, and difficulty-gated attack-team scripts
+(escalation tiers + defense patrol / punish / eco-raid behaviors).
+Little-endian throughout.
 """
 import os
 import struct
@@ -81,8 +84,8 @@ ENEMY_BASE = LAY["enemy"]
 # ---------- geometry ----------
 BORDER = 10
 PLAY = LAY["play"]
-W = H = PLAY + 2 * BORDER          # 84 vertices per axis, border included
-N = W * H                          # 7056
+W = H = PLAY + 2 * BORDER          # vertices per axis, border included (layout-dependent)
+N = W * H                          # total vertices
 FSW = (W + 7) // 8                 # cliff-state bitfield bytes per row
 HEIGHT_BYTE = 16                   # flat ground at z = 16 * 0.625 = 10.0
 
@@ -165,7 +168,7 @@ def _wall(wx, wy, r, frac):
 
 def ridge_height(wx, wy):
     """layout terrain features: ridge walls (perpendicular to the base
-    axis at 45%% / 62%% of the way) and the basin bowl."""
+    axis at 50% / 68% of the way) and the basin bowl."""
     h = 0.0
     r = LAY.get("ridge")
     if r:
@@ -269,14 +272,13 @@ PX, PY = PLAYER_BASE
 EX, EY = ENEMY_BASE
 # enemy-base cluster offsets, expressed from the enemy anchor and mirrored
 # toward the player so every layout keeps the towers on the approach side.
-import math as _math
-_toP = _math.atan2(PY - EY, PX - EX)
+_toP = math.atan2(PY - EY, PX - EX)
 def _off(dx, dy):
     """offset in the flats frame (enemy at 1200,1200, player toward SW),
     rotated so 'toward player' tracks the actual layout geometry."""
-    base = _math.atan2(400.0 - 1200.0, 400.0 - 1200.0)
+    base = math.atan2(400.0 - 1200.0, 400.0 - 1200.0)
     rot = _toP - base
-    c, sn = _math.cos(rot), _math.sin(rot)
+    c, sn = math.cos(rot), math.sin(rot)
     return (EX + dx * c - dy * sn, EY + dx * sn + dy * c)
 
 _fac = _off(-80.0, 50.0)
@@ -286,7 +288,6 @@ _tw2 = _off(80.0, -80.0)
 _df1 = _off(-50.0, -50.0)
 _df2 = _off(40.0, -40.0)
 _df3 = _off(-5.0, -80.0)
-_wsp = _off(-50.0, -100.0)
 _aa = _off(-30.0, 60.0)
 _inc = _off(130.0, 20.0)          # enemy income structure (pre-placed)
 _pad = _off(30.0, 120.0)          # enemy air pad (pre-placed; unlocks air teams)
@@ -367,9 +368,9 @@ team([("teamName", D_ASCII, "teamPlayerB"),
                              ("teamIsSingleton", D_BOOL, True)])
 # Pre-placed base garrison: its own team, priority ABOVE every attack team
 # and explicitly non-recruitable — Team::tryToRecruit treats the DEFAULT
-# team as always poachable and steals from any lower-priority team, which
-# let the AI draft the mid-map guard + base defenders into its first raider
-# team and kill an idle player's CC at 0:45 (the Phase 4 45-second blitz).
+# team as always poachable and steals from any lower-priority team within
+# recruit radius — an unprotected garrison gets drafted into the first
+# attack team.
 team([("teamName", D_ASCII, "teamBaseGuards"),
                              ("teamOwner", D_ASCII, "PlayerB"),
                              ("teamIsSingleton", D_BOOL, True),
@@ -482,8 +483,6 @@ objects_payload = b"".join(preview + [
         [("waypointID", D_INT, 2), ("waypointName", D_ASCII, "Player_2_Start")]),
     obj(PX, PY, 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 3), ("waypointName", D_ASCII, "InitialCameraPosition")]),
-    obj(_wsp[0], _wsp[1], 0.0, "*Waypoints/Waypoint",
-        [("waypointID", D_INT, 4), ("waypointName", D_ASCII, "WaveSpawn")]),
     obj(_rly[0], _rly[1], 0.0, "*Waypoints/Waypoint",
         [("waypointID", D_INT, 5), ("waypointName", D_ASCII, "EnemyRally")]),
 ])
@@ -559,21 +558,16 @@ P_INT = 0
 P_OBJTYPE = 15            # Parameter::OBJECT_TYPE (thing-template name)
 P_APS = 28                # Parameter::ATTACK_PRIORITY_SET (named set)
 
-# Fog-of-war start: force classic C&C black shroud. No scripted home reveal —
-# own structures light the base themselves (CC ShroudClearingRange 300), and
-# the old 450wu permanent reveal was the "initial-reveal anomaly": it swallowed
-# the whole starting viewport plus the enemy guard at (720,560), reading as
-# "map starts bright / never-seen enemies visible" (MAP_SHROUD_ALL worked all
-# along — the far corners it left black were the tell).
+# Fog-of-war start: force classic black shroud. No scripted home reveal —
+# own structures light the base themselves (CC ShroudClearingRange 300); a
+# permanent reveal circle would swallow the starting viewport and any
+# enemies inside it.
 scripts_a += (
     script("WP_FogStart",
            [condition("CONDITION_TRUE", [])],
            [action("MAP_SHROUD_ALL", [parameter(P_SIDE, s="")])])   # all human players
 )
 
-# Attack waves: after a 90s grace, 2 Mongrels spawn at WaveSpawn every 75s
-# and attack the player CC (team on-create script drives the attack so
-# "<This Team>" binds to the fresh instance).
 # Phase 4 scripts: the arm scripts start escalation timers once; the
 # WP_Prod* scripts are TEAM PRODUCTION CONDITIONS (evaluated by name from
 # the team dicts — never "fired", so their actions stay empty). Raiders are

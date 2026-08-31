@@ -12,9 +12,9 @@ runtime dir. Run: python3 tools/gensfx.py
 import math
 import os
 import random
+import shutil
 import struct
 import subprocess
-import sys
 import tempfile
 import wave
 
@@ -22,7 +22,7 @@ SR = 22050
 REPO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                     'data', 'Data', 'Audio', 'Sounds')
 RUNTIME = os.path.expanduser('~/GeneralsX/GeneralsZH/Data/Audio/Sounds')
-ESPEAK = '/opt/homebrew/bin/espeak-ng'
+ESPEAK = shutil.which('espeak-ng') or '/opt/homebrew/bin/espeak-ng'
 
 # ---------------- DSP helpers ----------------
 
@@ -299,7 +299,7 @@ def wind(seed):
     x = _crossloop(x, int(SR * 0.6))
     return normalize(x, 0.55)
 
-def powerhum(seed):
+def powerhum():
     """power-plant hum: mains fundamental + harmonics + faint whine, exact 2s period"""
     dur = 2.0
     n = int(SR * dur)
@@ -335,7 +335,7 @@ def factoryloop(seed):
     return normalize(x, 0.5)
 
 out('wp_amb_wind', wind(1201))
-out('wp_amb_powerhum', powerhum(1301))
+out('wp_amb_powerhum', powerhum())
 out('wp_amb_factory', factoryloop(1401))
 out('wp_arty_01', artyfire(611))
 out('wp_arty_02', artyfire(641))

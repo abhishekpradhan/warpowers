@@ -14,13 +14,14 @@ Serve with any static server, e.g.:  python3 -m http.server -d stage 8080
 import json
 import os
 import shutil
+import datetime
 import subprocess
+import sys
 
 # data-quality gates: a failed lint fails the stage
-subprocess.run([__import__('sys').executable,
+subprocess.run([sys.executable,
                 os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lint_voices.py')],
                check=True)
-import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GAME = os.path.expanduser("~/GeneralsX/GeneralsZH")
@@ -65,7 +66,6 @@ shutil.copy2(os.path.join(ROOT, "data", "Fonts", "LiberationSans-Regular.ttf"),
 # boot page
 # stage the page with a build stamp injected (staging time + engine wasm mtime)
 # so "which build is this session running" is answerable at a glance
-import datetime
 wasm_mtime = os.path.getmtime(os.path.join(STAGE, "GeneralsXZH.wasm"))
 stamp = "staged %s / engine %s" % (
     datetime.datetime.now().strftime("%m-%d %H:%M"),

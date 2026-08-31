@@ -109,6 +109,12 @@
       background: var(--accent);
       border: 0;
     }
+    #ovVol::-moz-range-thumb {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 0;
+    }
 
     /* ---- loading / error overlay ---- */
     #overlay {
@@ -307,6 +313,8 @@
     }
 
     // Manifest first, so the meter knows the full byte budget up front.
+    // Dev-loop cache-buster: forces fresh assets every boot. A public deploy
+    // should switch to content-hashed paths instead (publish checklist §5).
     var bust = 'v=' + Date.now();
     var manifestReady = fetchBytes('gamedata/manifest.json?' + bust, null).then(function(bytes) {
       var files = JSON.parse(new TextDecoder().decode(bytes));
@@ -316,12 +324,11 @@
     });
 
     // Menu-mode boot (D018 in-engine shell): no -file, the engine lands on its
-    // own main menu and matches start from the Deployment screen. ?map= or
-    // ?autotest= restores the direct-load path (autotests only act in-game).
+    // own main menu and matches start from the Deployment screen. ?map=
+    // restores the -file direct-load (quit-after-match) path for the harness;
+    // ?autotest= only sets WP_AUTOTEST and needs a match to act.
     function buildArgs() {
       var base = ['-win', '-noshellmap'];
-      // The engine shell is the menu: plain boot lands on it. ?map= keeps
-      // the -file direct-load (quit-after-match) path for the harness.
       var directMap = params.get('map');
       if (directMap) base = base.concat(['-file', directMap]);
       return base.concat(
@@ -340,7 +347,7 @@
       instantiateWasm: function(imports, cb) {
         setPhase('Downloading engine…');
         fetch('GeneralsXZH.wasm?' + bust, { method: 'HEAD' }).then(function(r) {
-          totals.engine = parseInt(r.headers.get('Content-Length') || '11000000', 10);
+          totals.engine = parseInt(r.headers.get('Content-Length') || '11000000', 10); // fallback ~wasm size keeps the meter honest when HEAD omits Content-Length
           paint();
           return fetchBytes('GeneralsXZH.wasm?' + bust, function(n) { loaded.engine += n; paint(); });
         }).then(function(bytes) {
@@ -354,7 +361,7 @@
       },
       onEngineRunning: function() {
         // First main-loop tick: the shell (or match, in direct-load mode) is
-        // live. Boot budget (D018): deploy click -> here in <=20s.
+        // live. Boot budget (D018): page load -> here in <=20s.
         overlayEl.classList.add('hidden');
         performance.mark('wpBoot:running');
         try {
@@ -404,7 +411,7 @@
         ENV.CNC_GENERALS_PATH = '/game-base';
         ENV.HOME = '/home/web_user';
         if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
-        // WarPowers @debug forward autotest/diagnostic env knobs from the URL
+        // Forward the saved volume + URL diagnostic knobs into the engine env.
         ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
         if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
         if (params.get('doztrace')) ENV.WP_DOZER_TRACE = '1';
@@ -464,10 +471,9 @@
       // Pure loader: boot starts immediately — the in-engine shell is the
       // menu. Audio starts suspended and resumes on the user's first click
       // (miniaudio's WebAudio glue installs the gesture handlers).
-      Module.arguments = buildArgs();
       performance.mark('wpBoot:deploy');
       var s = document.createElement('script');
-      s.src = 'GeneralsXZH.js?v=' + Date.now();
+      s.src = 'GeneralsXZH.js?' + bust;
       s.onerror = function() {
         document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
         document.getElementById('errorBox').style.display = 'block';

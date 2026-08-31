@@ -1,4 +1,4 @@
-// War Powers original strings - Boot Slice UI text (format: LABEL / "text" / END)
+// War Powers original strings - the full UI text set (format: LABEL / "text" / END)
 
 WP:CommandCenter
 "Command Center"
@@ -81,11 +81,11 @@ WP:BuildBulwark
 END
 
 WP:BuildChopShop
-"Construct Chop Shop"
+"Bolt together a Chop Shop"
 END
 
 WP:BuildWatchpost
-"Construct Watchpost"
+"Prop up a Watchpost"
 END
 
 WP:Outrider
@@ -214,34 +214,6 @@ END
 
 WP:Cancel
 "Cancel"
-END
-
-GUI:CantBuildNotFlatEnough
-"Cannot build here - the ground is not flat enough."
-END
-
-GUI:CantBuildNoClearPath
-"Cannot build here - no clear path to the site."
-END
-
-GUI:CantBuildObjectsInTheWay
-"Cannot build here - something is in the way."
-END
-
-GUI:CantBuildRestrictedTerrain
-"Cannot build on this terrain."
-END
-
-GUI:CantBuildShroud
-"Cannot build in unexplored territory."
-END
-
-GUI:CantBuildThere
-"Cannot build there."
-END
-
-GUI:CantBuildTooCloseToSupplies
-"Cannot build here - too close to supplies."
 END
 
 GUI:Closed
@@ -484,7 +456,7 @@ WP:ScoreUnits
 END
 
 WP:ScoreStructures
-"Structures built - %d"
+"Structures - built %d"
 END
 
 WP:ScoreMoney
@@ -559,7 +531,7 @@ WP:Lancer
 END
 
 WP:DescLancer
-"Anti-armor rocket specialist. Effective against vehicles, structures and aircraft; slow against infantry."
+"Anti-armor rocket specialist. Effective against vehicles, structures and aircraft; weak against infantry."
 END
 
 WP:BuildLancer
@@ -913,6 +885,7 @@ END
 GUI:CantBuildShroud
 "Cannot build into the unexplored shroud."
 END
+
 WP:Longbow
 "Longbow Battery"
 END
@@ -930,7 +903,7 @@ WP:Lobber
 END
 
 WP:BuildLobber
-"Construct Lobber Pit"
+"Sink a Lobber Pit"
 END
 
 WP:DescLobber
@@ -938,12 +911,13 @@ WP:DescLobber
 END
 
 WP:IdleWorker
-"Idle Builder"
+"Idle Worker"
 END
 
 WP:DescIdleWorker
-"Select the next idle construction unit. Keep every builder working."
+"Select the next idle construction vehicle. Keep every builder working."
 END
+
 WP:DifficultyLabel
 "O P P O S I T I O N"
 END

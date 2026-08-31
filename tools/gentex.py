@@ -5,7 +5,9 @@ Paints wp_ground.tga: a 256x256 desert sheet the engine reads as a 4x4 grid
 of 64x64 tiles (16 variants; genmap indexes them per-cell to kill repetition).
 Stylized-clean per the creative bible: desaturated sand base, low-contrast
 grain, sparse pebble speckle, occasional streak tiles. Deterministic (seeded).
-Raw 24-bit TGA, top-left origin, no deps.
+Raw 24-bit TGA, top-left origin, no deps. Also emits the ash ground variant,
+the concrete sheet, and the shadow/glow/soft/rally-line/scorch sprite set
+(one writer function per file below).
 """
 import os
 import random
@@ -14,8 +16,6 @@ import sys
 
 SIZE, TILE = 256, 64
 BASE = (171, 158, 136)   # desaturated warm sand (RGB)
-
-rng = random.Random(1917)
 
 def value_noise_grid(n, cells, lo, hi, seed):
     """n x n bilinear-interpolated value noise in [lo, hi]."""
@@ -39,7 +39,7 @@ def value_noise_grid(n, cells, lo, hi, seed):
 def clamp(v):
     return 0 if v < 0 else 255 if v > 255 else int(v)
 
-# per-pixel luminance offset buffer for the whole sheet
+# full-sheet RGB buffer, seeded with the base sand color
 img = [[BASE for _ in range(SIZE)] for _ in range(SIZE)]
 
 for ty in range(SIZE // TILE):
@@ -189,7 +189,6 @@ def write_scorch(path):
     """256px scorch atlas (engine hardcodes EXScorch01.tga; 4x4 UV grid,
     SCORCH_PER_ROW=3 with 1.5-cell spacing -> marks at cells (0,0),(1,0),
     (2,0),(0,1), each mark spanning a quarter of the texture, alpha-blended)."""
-    import random
     n = 256
     hdr = bytearray(18); hdr[2] = 2
     struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 32; hdr[17] = 0x28
@@ -226,7 +225,6 @@ def write_concrete(path):
     """256x512 concrete sheet: 4x8 grid of 64px tiles. Rows 0-3 clean panels
     (seam lines, subtle stains), rows 4-7 worn (cracks, sand encroachment) for
     apron edges. Same top-left-origin 24-bit TGA as the ground sheet."""
-    import random as _r
     CW, CH = 256, 256
     CBASE = (152, 149, 142)
     SAND = BASE
@@ -234,7 +232,7 @@ def write_concrete(path):
     for ti in range(16):
         tx, ty = ti % 4, ti // 4
         worn = ti >= 8
-        rng = _r.Random(500 + ti)
+        rng = random.Random(500 + ti)
         tone = rng.uniform(-6, 6)
         coarse = value_noise_grid(TILE, 4, -6, 6, 900 + ti * 3)
         fine = value_noise_grid(TILE, 16, -3, 3, 901 + ti * 3)

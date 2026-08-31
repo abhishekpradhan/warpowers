@@ -17,22 +17,22 @@ do not have to generate everything ourselves.
 
 ## The matrix
 
-| Class | ZH (approx) | Pack today (2026-08-24) | Parity bar (2 factions) | Source |
+| Class | ZH (approx) | Pack today (2026-08-31) | Parity bar (2 factions) | Source |
 |---|---|---|---|---|
 | Vehicles | ~12/faction ×3 | 7 total | 8/faction | A + B (military CC0 packs via conversion pipeline) |
 | Infantry | ~7/faction | 4 total (2/faction: rifle + rocket, **animated**) | 4/faction | A shipped the rig pipeline (tools/genrig.py); B upgrade path open |
 | Aircraft | ~5/faction | 2 total (1/faction VTOL) | 2/faction | A (hover class shipped; 2nd airframe pending) |
-| Structures | ~13/faction | 11 total (MER 6 / JAK 5: +airpads, +income) | 10/faction | A (Blender kit is strong here) |
+| Structures | ~13/faction | ~20 total (airpads, income, defense incl.) | 10/faction | A (Blender kit is strong here) |
 | Unit animations | walk/attack/build/turret | walk/idle/fire (shared infantry rig) + turrets | walk cycles, buildups | A (procedural W3D hierarchy anims landed) |
-| Maps | ~40 MP | 6 (3 layouts × 2 factions, in-shell picker) | 8–10 varied | A (genmap --layout; biome tint still pending) |
-| Unit VO | ~10 lines/unit, acted | 13 voice sets, 4–7 lines each, synth | keep synth (D014), 8+ lines/unit | A (gensfx scales) |
+| Maps | ~40 MP | 10 (5 layouts × biomes, in-shell picker) | 8–10 varied — **met** | A (genmap --layout) |
+| Unit VO | ~10 lines/unit, acted | 19 voice sets, 4–7 lines each, synth | keep synth (D014), 8+ lines/unit | A (gensfx scales) |
 | EVA/announcer | full set | 6 events | +unit-ready, +superweapon set later | A |
-| Music | ~30 tracks | 1 stub loop | 6–8 track rotation | **C (CC-BY solves this)** |
-| SFX | hundreds | ~12 | ~40 | A + B (Kenney audio CC0, freesound CC0) |
+| Music | ~30 tracks | 6-track CC-BY rotation | 6–8 track rotation — **met** | C (Kevin MacLeod import, ledgered) |
+| SFX | hundreds | ~26 effects (191 wavs incl. VO) | ~40 | A + B (Kenney audio CC0, freesound CC0) |
 | Shell UI | full menu suite | page-as-menu + result banners | roadmap §0 | A (genwnd) |
 | General powers | 15+/faction | 0 | parked (D018) | A |
 | Superweapons | 3 | 0 | parked (D018) | A |
-| AI | 3 difficulties | scripted opponent | parked (D018) | A |
+| AI | 3 difficulties | real AIPlayer: builds, economy, reacts, 3 difficulties (Phase 4) | **met** | A |
 | Balance | 20 yrs of patches | first-pass numbers | playtested self-consistency | playtesting |
 
 ## How the gap actually closes

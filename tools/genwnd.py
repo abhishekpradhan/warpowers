@@ -86,8 +86,10 @@ children.append(window("BeaconWindow", (10, 440, 200, 590), bg=DARK, border=DARK
 # command grid and production queue get DISJOINT rects: overlapped, the
 # invisible queue buttons swallow command clicks while producing (a click on
 # queue slot 1 cancels production — reads as "my clicks do nothing").
-# command grid (2 rows) on top, queue strip below — disjoint rects, and both
-# clear of the 3D viewport overdraw (scene renders down to ~UI y465).
+# Command grid: 3 rows of 6 (the engine derefs all 18 ButtonCommand windows;
+# command sets stop at slot 9, so row 3 never populates — its rect overlaps
+# the queue strip but stays inert). Queue strip below; both clear of the 3D
+# viewport overdraw (scene renders down to ~UI y465).
 children.append(window("CommandWindow", (210, 468, 590, 562), bg=DARK, border=DARK,
                        syscb="PassSelectedButtonsToParentSystem",
                        children=grid("ButtonCommand", 18, 6, 212, 470, 58, 44, 63, 47,
@@ -207,7 +209,6 @@ for t in targets:
 
 # ---------- match-result screens (ScriptActions loads these on VICTORY/DEFEAT) ----------
 def result_screen(fname, key, color):
-    NAME = fname
     body = window("ResultBanner", (200, 240, 600, 320), wtype="STATICTEXT",
                   status="ENABLED", bg="12 14 17 235", border=color,
                   textcolor=color, fontsize=32, bold=1,
@@ -220,7 +221,7 @@ def result_screen(fname, key, color):
                "  LAYOUTINIT = \"[None]\";\n"
                "  LAYOUTUPDATE = \"[None]\";\n"
                "  LAYOUTSHUTDOWN = \"[None]\";\n"
-               "ENDLAYOUTBLOCK\n") + parent.replace(CB + ":", NAME + ".wnd:")
+               "ENDLAYOUTBLOCK\n") + parent.replace(CB + ":", fname + ".wnd:")
     for t in targets:
         d = os.path.join(os.path.dirname(t), "Menus")
         os.makedirs(d, exist_ok=True)
@@ -238,7 +239,7 @@ def menu_layout(fname, body, init="[None]", update="[None]", shutdown="[None]"):
     # Layout callbacks are UNQUOTED: parseInit/parseUpdate/parseShutdown
     # tokenize on whitespace only, so a quoted name never resolves in the
     # function lexicon (window-level callbacks parse differently and accept
-    # quotes). Cost a full click-forensics session to find.
+    # quotes).
     content = ("FILE_VERSION = 2;\n"
                "STARTLAYOUTBLOCK\n"
                f"  LAYOUTINIT = {init};\n"

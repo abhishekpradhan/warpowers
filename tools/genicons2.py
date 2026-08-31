@@ -3,7 +3,6 @@
 added after the Blender portrait sheet filled up (rocket troopers, aircraft).
 Stylized silhouette on the faction plate, same plate colors as sheet one.
 Writes the TGA (both targets) and the MappedImages INI."""
-import math
 import os
 import struct
 
@@ -34,7 +33,6 @@ def disc(cx, cy, r, c):
                 px(x, y, c)
 
 def tri(p0, p1, p2, c):
-    ys = sorted([p0, p1, p2], key=lambda p: p[1])
     pts = [p0, p1, p2]
     miny = int(min(p[1] for p in pts)); maxy = int(max(p[1] for p in pts))
     for y in range(miny, maxy + 1):

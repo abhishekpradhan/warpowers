@@ -77,14 +77,14 @@ at go-time; LAN/relay multiplayer after.
 - [x] Shell (final architecture 2026-08-24, rev 2): THE ENGINE SHELL is the only menu — the page is a pure auto-booting loader (wordmark + progress, no buttons; audio unlocks on first in-menu click). Boot lands on the in-engine main menu (two-tone wordmark, page-matched styling) → deployment picker → match; every exit returns in-engine (score screen on W/L, quit-to-menu on abandon). ESC pause unchanged. ?map= keeps the -file harness path
 - [x] Boot ≤20s: 8.7s local total; performance.mark marks + [BOOT] report permanent (re-measure on real hosting)
 - [x] QoL verified in browser: control groups (Ctrl+#/#/Shift/Alt), select-all, view-CC, stop/scatter, camera keys, pause key, force-attack/-move mod-holds (CommandMap.ini authored — was a 1-line stub, nothing was ever bound)
-  - [ ] Attack-move + guard as command-bar buttons (ATTACK_MOVE/GUARD CommandButtons in unit command sets); rally-point live check
+  - [x] Attack-move + guard as command-bar buttons; rally-point live check (verified Phase 2 — §1)
 - [x] Pause menu / quit-to-menu flow: ESC pause (Return/Restart/Options/Abandon+confirm) → in-engine menu; match end → score → menu
 - [x] Fog-of-war start: classic black shroud (the "anomaly" was our own 450wu scripted home reveal; CC vision lights the base)
 - [ ] Later: LAN/relay multiplayer (wasm-generals parity)
 - Content track runs alongside (bar + per-class sourcing: docs/parity.md —
   generate / import CC0+CC-BY / community post-publish; music is solved by
   CC-BY import when unparked)
-- Parked until parity (game depth): economy loop, general powers, superweapons, real skirmish AI, music
+- Parked until parity (game depth): economy loop, general powers, superweapons (AI landed Phase 4, music Phase 3)
 
 ## 1. Combat juice — fights feel like Generals
 - [x] Real projectile on WP_TankGun (visible, dodgeable shells; ProjectileDetonationFX fires)
@@ -108,7 +108,7 @@ at go-time; LAN/relay multiplayer after.
 - [x] Scripted attack waves via map scripts
 - [x] Skirmish AI investigation — findings + implementation plan in engine-notes (build lists + AISkirmishPlayer + .scb; deferred)
 - [x] Scripted skirmish opponent: defended enemy base (factory/power/towers/defenders) + escalating assault tier; victory = raze it
-- [ ] True skirmish AI (builds, reacts, expands) — the AISkirmishPlayer path
+- [x] True skirmish AI (builds, reacts, expands) — landed Phase 4 via plain AIPlayer + map build lists/scripts (AISkirmishPlayer/.scb retired)
 
 ## 5. UI/UX
 - [x] Radar/minimap live (terrain, shroud, view frustum; layout polish pending)
@@ -124,8 +124,8 @@ at go-time; LAN/relay multiplayer after.
 - [x] Settings persistence (volume slider + faction choice, localStorage -> WP_VOLUME env)
 
 ## 6b. Polish debt (from playtesting/debugging)
-- [ ] Voice-limit tuning: GameSounds occasionally rejects select-barks
-- [ ] Silence W3DFS_MISS spam: 'Locater01.w3d' (userdata hunt) + per-frame empty-name '.w3d' hunt (shell+game; suspect cursor model resolution)
+- [x] Voice-limit tuning: voice pools 12/32 (landed Phase 2)
+- [x] W3DFS_MISS spam killed (landed Phase 2)
 - [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
 - [x] EVA announcer live (Eva.ini + command-net voice: base under attack, structure/unit lost, low power, funds)
 - [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen

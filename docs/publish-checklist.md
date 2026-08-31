@@ -21,6 +21,9 @@ evidence (a log line, a screenshot, a URL).
 - [ ] Frame rate through a BRUTAL late game (assault + air + punish + player
       army all fielded) — measure, don't assume
 - [ ] Real-network boot numbers from a CDN deploy (see §5)
+- [x] Bundle size: 55MB staged (11MB wasm + ~44MB gamedata incl. music) —
+      re-baselined ≤64MB (docs/perf.md); CDN brotli roughly halves wire
+      size, verify on the preview deploy
 - Known perf debt (acceptable at current scale): money-readout font surface
   churn (W3DDisplayString rebuild) — revisit if late-game frames dip.
 

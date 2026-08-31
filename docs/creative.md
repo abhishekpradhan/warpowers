@@ -45,6 +45,9 @@ stays desaturated; units own the saturation.
 
 ## Slice rosters
 
+> **Historical slice plan** — the shipped roster grew well past these lists
+> (Generals.str is the live roster). Kept as the original design intent.
+
 ### Meridian Command
 | Role | Name | Notes |
 |---|---|---|
@@ -74,6 +77,11 @@ First **general powers** after the slice (the namesake mechanic): Meridian
 (spawn a squad from anywhere previously scouted).
 
 ## Art spec
+
+> **Revised by D015 (2026-08-22):** painted-detail baked textures are the
+> bar and the Blender hero pipeline (validated) is the production path;
+> genw3d part-language is demoted to placeholder/utility. The shared-swatch
+> spec below is the original, kept for history.
 
 - Low-poly faceted: units **300–800 tris**, structures **500–1500**.
 - **Palette atlas** texturing: one shared 64×64 swatch texture; every model

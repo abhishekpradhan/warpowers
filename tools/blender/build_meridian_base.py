@@ -1,4 +1,5 @@
-"""Meridian base-loop set: Surveyor (dozer), Power Station, Vehicle Works.
+"""Meridian base-loop set: Fabricator (dozer), Power Array, Vehicle Plant
+(asset IDs keep the original Surveyor-era naming).
 
 Three models through the shared pipeline in one headless run.
 Run: blender --background --python build_meridian_base.py

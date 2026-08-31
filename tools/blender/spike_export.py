@@ -1,4 +1,6 @@
-"""Pipeline spike: headless Blender -> OpenSAGE plugin -> .w3d for the engine.
+"""Pipeline spike (HISTORICAL — kept for reference; the production pipeline
+is wp_pipeline.py + build_*.py; do not run routinely): headless Blender ->
+OpenSAGE plugin -> .w3d for the engine.
 
 Builds a deliberately non-trivial test mesh (beveled cube = shapes genw3d
 cannot make), UV-unwraps it, assigns an image texture, and exports it as a

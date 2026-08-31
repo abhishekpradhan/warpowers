@@ -1,7 +1,7 @@
 # Hosting decision (prepared; no deploy until go)
 
 The web build is a fully static bundle: `webstage/` = engine js+wasm (~11MB)
-+ gamedata (~19MB total staged) + one HTML page. No server-side logic today.
++ gamedata (~55MB total staged, music included) + one HTML page. No server-side logic today.
 
 ## Recommendation: Vercel (static) — matches D013's presumption
 
@@ -19,8 +19,10 @@ multiplayer lobby/relay service (the merged web branch already carries a
 WebRTC transport expecting one); Modal stays for potential asset-pipeline
 compute (batch bakes), not hosting.
 
-Deploy mechanics when approved: `vercel deploy webstage/` (or a repo-linked
-project building via `tools/genwebstage.py`), Deployment Protection ON,
+Deploy mechanics when approved: `vercel` CLI from the local tree (no
+GitHub↔Vercel integration — see publish-checklist §5), Deployment
+Protection ON,
 custom domain at announce. Cache headers: engine js/wasm + gamedata are
-content-hashed by the page's `?v=` buster today; move to hashed filenames
-before launch so CDN caching is immutable-clean.
+cache-busted by the page's `?v=` query today (a dev-loop buster, not true
+content hashing); move to hashed filenames before launch so CDN caching is
+immutable-clean.

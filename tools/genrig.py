@@ -22,7 +22,6 @@ import struct
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import genw3d
 from genw3d import chunk, frustum, mesh_chunk, name32
 
 # ---- chunk ids (hierarchy/animation family) ----

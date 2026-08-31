@@ -16,6 +16,11 @@ No mobile or touch scope. User decision; simplifies input, UI, and testing matri
 
 ## D009 — Uniform copyleft; greenfield-era code guardrail retired (2026-08-21)
 
+> **Superseded on licensing (by D019, 2026-08-23):** assets moved CC BY-SA →
+> CC BY 4.0 and workspace code is MIT — the uniform-copyleft story below is
+> historical. The guardrail retirement and the three load-bearing rules
+> still stand.
+
 User-initiated license review confirmed: the project's engineering complexity comes from EA's asset-redistribution restrictions (immovable under any license we pick), not from our license choices — no switch reduces the current work. Changes made:
 - **Assets: CC BY-SA 4.0** (was CC BY-NC). One story project-wide: GPL v3 code + share-alike assets, OpenRA/0 A.D.-style. Anyone may reuse or sell, but must keep it open and credit.
 - **Guardrail update:** the greenfield-era rule "never copy EA/GPL-lineage code" is obsolete — the project *is* a GPL fork now, so GPL ecosystem code (TheSuperHackers, GeneralsX, other ports' engine layers) may be freely copied/adapted with commit-level provenance. **Concrete unlock for Stage 2:** GeneralsXWeb's audio fix and Generals-Web's HTTP-Range VFS can be lifted as code rather than reimplemented.
@@ -80,6 +85,9 @@ Vercel note: deploys go through the `vercel` CLI from the local tree
 (`.vercelignore` restricts the upload to `webstage/` + `vercel.json`); no
 GitHub↔Vercel integration is installed, so Vercel has no repo access and
 nothing deploys on push.
+
+*(Update, later the same day: dvijoke was vendored inline and its fork repo
+archived — see D020; the go-time fork list is now engine + dxvk.)*
 
 ## D002 — Single-player skirmish first (2026-08-21)
 
@@ -151,7 +159,8 @@ Production path: **Blender pipeline, everything self-produced** (user decision: 
 
 ## D016 — Construction model: dozer-built (2026-08-22, overnight run; user delegated)
 
-**Dozer-built, Generals-style.** The engine decides it: DozerAIUpdate, GUI_COMMAND_DOZER_CONSTRUCT buttons, the placement UI, and construction-percent rendering are native engine paths — while "build from Command Center" (C&C sidebar style) has no engine support and would need custom BuildAssistant/ControlBar changes that also pull away from the Generals nostalgia feel. Each faction gets a construction vehicle (Meridian: Surveyor; Jackal: Packrat — creative.md naming rules apply). Structures build where you place them; base layout stays a player skill.
+**Dozer-built, Generals-style.** The engine decides it: DozerAIUpdate, GUI_COMMAND_DOZER_CONSTRUCT buttons, the placement UI, and construction-percent rendering are native engine paths — while "build from Command Center" (C&C sidebar style) has no engine support and would need custom BuildAssistant/ControlBar changes that also pull away from the Generals nostalgia feel. Each faction gets a construction vehicle (Meridian: Surveyor; Jackal: Packrat — creative.md naming rules apply)
+*[Names since revised: the shipped builders are Fabricator and Rigger.]*. Structures build where you place them; base layout stays a player skill.
 
 ## D017 — Publish faction scope: 2 playable, no tease (2026-08-22, user decision)
 
@@ -188,6 +197,9 @@ files. NC assets only by explicit per-case decision (they permanently bar
 commercial use of that asset). ND stays out on functional grounds (the
 style-coherence pipeline modifies everything, and ND bars derivatives).
 EA-derived content stays out on legality (unlicensed derivative works).
+(This entry also records the licensing moves it implies: our assets
+CC BY-SA 4.0 → CC BY 4.0, and workspace code MIT — superseding D009's
+uniform-copyleft story.)
 
 ## D020 — Repo consolidation: dvijoke vendored inline; engine + dxvk stay forks (2026-08-31, user decision)
 

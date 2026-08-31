@@ -55,13 +55,34 @@ evidence (a log line, a screenshot, a URL).
       switching to immutable), no-cache HTML/manifest
 - [ ] PRIVATE preview deploy with Deployment Protection ON (user go required
       even for this — it sends content to a third-party host)
+      — deploy via `vercel` CLI from the local tree: `.vercelignore` uploads
+      only `webstage/` + `vercel.json`, and NO GitHub↔Vercel integration is
+      installed or needed (Vercel never gets repo access; nothing auto-deploys
+      on push)
 - [ ] Boot budget on the preview URL from a real network (beacon totals)
 - [ ] Brotli/compression verified on .wasm and .js (Vercel default)
 - [ ] Re-run browser matrix against the preview URL
 
 ## 6. Repos / licensing at go-time (D012)
-- [ ] Create org; fork engine + dxvk publicly; push branches; transfer
-      workspace; flip submodule URLs (plan in project memory / WORKSPACE.md)
+Current organization (verified + normalized 2026-08-31; see D012 addendum):
+- [x] Four private repos, all pushed and pinned: `warpowers` (workspace,
+      submodules → engine + dvijoke), `warpowers-engine` (submodule →
+      dxvk at `references/fbraz3-dxvk`), `warpowers-dvijoke`,
+      `warpowers-dxvk`. Every submodule URL points at OUR repo; every
+      pinned SHA is reachable on its remote — `clone --recursive`
+      reproduces the tree.
+- [x] Remote scheme normalized in every checkout: `origin` = our private
+      repo, fork parents/upstreams present fetch-only with push URL set
+      to `DISABLED` (fbraz3/GeneralsX + TheSuperHackers + GeneralsXWeb on
+      engine; meerzulee on dvijoke; doitsujin + fbraz3 on dxvk; OpenSAGE
+      plugin ref). "Never push upstream" is now mechanically enforced.
+- [x] GitHub Actions DISABLED at repo level on all four (inherited
+      upstream CI burned private-repo minutes Aug 22–24: 9 runs on the
+      engine mirror, 8 on dxvk; workflow files already stripped from our
+      branches — the repo-level switch also covers future upstream-sync
+      branches). Re-enable per-repo only if we ever add CI of our own.
+- [ ] At go: create org; fork engine + dxvk + dvijoke publicly; push
+      branches; transfer workspace; flip submodule URLs (D012)
 - [ ] LICENSE / LICENSE-ASSETS.md / CREDITS.md land in the public repos
 - [ ] README pass for the public workspace
 

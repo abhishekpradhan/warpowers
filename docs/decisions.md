@@ -50,6 +50,37 @@ User review: "repos aren't proper forks and aren't well organized; consider an o
 
 Until then the private standalone repos remain the working truth, and the upstreamable-fixes PR option (D010) stays available via a clean public fork that cherry-picks only generic fixes.
 
+**Addendum (2026-08-31, pre-deploy organization audit):** the layout D012
+planned is now fully in place, plus one repo D012 predates. Current state:
+
+| Repo (all private) | Role | Linked as | Fork parent |
+|---|---|---|---|
+| `warpowers` | workspace: docs, data, tools, web page | top-level; submodules → engine, dvijoke | none (ours from scratch) |
+| `warpowers-engine` | GeneralsX engine fork (all WP engine work) | workspace submodule `engine/` | fbraz3/GeneralsX (+ TheSuperHackers, GeneralsXWeb as extra fetch remotes) |
+| `warpowers-dvijoke` | DX8→web layer fork (emscripten path) — **new since D012**, add to the go-time fork list (parent meerzulee/dvijoke) | workspace submodule `dvijoke/` | meerzulee/dvijoke |
+| `warpowers-dxvk` | DXVK fork (native macOS dev path only) | **engine submodule `references/fbraz3-dxvk` — the D012 formalization is DONE** | fbraz3/dxvk (true upstream doitsujin/dxvk kept as fetch remote) |
+
+(OpenSAGE.BlenderPlugin rides along as a reference-only engine submodule
+pointing at the public OpenSAGE repo — not our fork, nothing to publish.)
+
+Normalized in every checkout: `origin` = our private repo and is what local
+branches track; every foreign remote keeps its fetch URL but has its push URL
+set to `DISABLED`, so the "never push upstream" rule is now enforced by git
+itself. All four repos are pushed and every submodule pin is reachable on its
+remote — a `git clone --recursive` of `warpowers` reproduces the whole tree.
+
+**GitHub Actions are disabled at repo level on all four.** Inherited upstream
+CI (GeneralsX CI on the engine mirror, DXVK's Windows build/package jobs) ran
+17 runs against private-repo minutes on Aug 22–24 before the workflow files
+were stripped; the repo-level switch also covers any future upstream-sync
+branch that would reintroduce workflow files. Re-enable per-repo only when we
+add CI of our own. At go-time, the public org forks get a fresh look at CI.
+
+Vercel note: deploys go through the `vercel` CLI from the local tree
+(`.vercelignore` restricts the upload to `webstage/` + `vercel.json`); no
+GitHub↔Vercel integration is installed, so Vercel has no repo access and
+nothing deploys on push.
+
 ## D002 — Single-player skirmish first (2026-08-21)
 
 First playable target is 1v1 vs scripted AI. Multiplayer lands in M3.

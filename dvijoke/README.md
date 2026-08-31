@@ -1,7 +1,9 @@
-> **War Powers dvijoke fork** (private): our fork of dvijoke/d8web for the
-> [War Powers](https://github.com/abhishekpradhan/warpowers) browser RTS —
-> the D3D8-to-WebGL2 layer the wasm build links.
-> License: MIT (upstream). Upstream README follows.
+> **War Powers vendored copy** of dvijoke/d8web — the D3D8-to-WebGL2 layer
+> the [War Powers](https://github.com/abhishekpradhan/warpowers) wasm build
+> links. Maintained inline in the War Powers workspace since 2026-08-31
+> (full upstream history subtree-merged; the former warpowers-dvijoke fork
+> repo is archived). Upstream: meerzulee/dvijoke. License: MIT (this
+> directory's LICENSE). Upstream README follows.
 
 # Dvijoke
 

@@ -42,7 +42,9 @@ ledger (NC permanently bars commercial use of that asset).
 ## The engine chain (upstream licenses; not ours to change)
 - `engine/` (GeneralsX fork): **GPL-3.0** — inherited from EA's source
   release. Our engine modifications are GPL-3.0.
-- dvijoke / d8web (D3D8→WebGL2 layer): **MIT** (upstream license).
+- dvijoke / d8web (D3D8→WebGL2 layer): **MIT** (upstream license) — vendored
+  inline at `dvijoke/` with its LICENSE file (upstream meerzulee/dvijoke,
+  subtree-merged with full history 2026-08-31).
 - DXVK fork: **zlib** (upstream license).
 
 ## Why this is harmonious

@@ -65,24 +65,25 @@ evidence (a log line, a screenshot, a URL).
 
 ## 6. Repos / licensing at go-time (D012)
 Current organization (verified + normalized 2026-08-31; see D012 addendum):
-- [x] Four private repos, all pushed and pinned: `warpowers` (workspace,
-      submodules → engine + dvijoke), `warpowers-engine` (submodule →
-      dxvk at `references/fbraz3-dxvk`), `warpowers-dvijoke`,
-      `warpowers-dxvk`. Every submodule URL points at OUR repo; every
-      pinned SHA is reachable on its remote — `clone --recursive`
-      reproduces the tree.
+- [x] Three private repos, all pushed and pinned: `warpowers` (workspace;
+      dvijoke vendored inline per D020, submodule → engine),
+      `warpowers-engine` (submodule → dxvk at `references/fbraz3-dxvk`),
+      `warpowers-dxvk`. (`warpowers-dvijoke` archived read-only.) Every
+      submodule URL points at OUR repo; every pinned SHA is reachable on
+      its remote — `clone --recursive` reproduces the tree.
 - [x] Remote scheme normalized in every checkout: `origin` = our private
       repo, fork parents/upstreams present fetch-only with push URL set
       to `DISABLED` (fbraz3/GeneralsX + TheSuperHackers + GeneralsXWeb on
-      engine; meerzulee on dvijoke; doitsujin + fbraz3 on dxvk; OpenSAGE
-      plugin ref). "Never push upstream" is now mechanically enforced.
+      engine; doitsujin + fbraz3 on dxvk; OpenSAGE plugin ref). "Never
+      push upstream" is now mechanically enforced.
 - [x] GitHub Actions DISABLED at repo level on all four (inherited
       upstream CI burned private-repo minutes Aug 22–24: 9 runs on the
       engine mirror, 8 on dxvk; workflow files already stripped from our
       branches — the repo-level switch also covers future upstream-sync
       branches). Re-enable per-repo only if we ever add CI of our own.
-- [ ] At go: create org; fork engine + dxvk + dvijoke publicly; push
-      branches; transfer workspace; flip submodule URLs (D012)
+- [ ] At go: create org; fork engine + dxvk publicly; push branches;
+      transfer workspace (dvijoke ships inline in it, D020); flip
+      submodule URLs (D012)
 - [ ] LICENSE / LICENSE-ASSETS.md / CREDITS.md land in the public repos
 - [ ] README pass for the public workspace
 

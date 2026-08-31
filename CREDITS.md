@@ -7,6 +7,9 @@ used within its license terms; the full per-file ledger lives in ASSETS.md.
 - **GeneralsX** (GPL-3.0, from EA's source release) — the community source
   port this project forks.
 - **dvijoke** (MIT) — D3D8→WebGL2 translation layer for the browser build.
+  Vendored inline at `dvijoke/` (upstream meerzulee/dvijoke; our copy is
+  upstream +3 commits, subtree-merged from warpowers-dvijoke @ ba6791de);
+  carries its own LICENSE.
 
 ## Art
 - **Quaternius** — quaternius.com, CC0. Base meshes adapted into War Powers

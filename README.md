@@ -29,7 +29,8 @@ See [docs/WORKSPACE.md](docs/WORKSPACE.md) for the full map. Short version:
 - `web/` — the browser boot page
 - `docs/` — vision, roadmap, decisions log, engine notes, parity matrix
 - `engine/` — **submodule**: our GPL fork of the GeneralsX engine lineage
-- `dvijoke/` — **submodule**: our fork of the D3D8→WebGL2 layer (MIT)
+- `dvijoke/` — **vendored inline** (MIT, upstream meerzulee/dvijoke): the
+  D3D8→WebGL2 layer the wasm build compiles in; carries its own LICENSE
 - clone with `git clone --recursive`; build recipes in
   [docs/engine-notes.md](docs/engine-notes.md)
 

@@ -188,3 +188,33 @@ files. NC assets only by explicit per-case decision (they permanently bar
 commercial use of that asset). ND stays out on functional grounds (the
 style-coherence pipeline modifies everything, and ND bars derivatives).
 EA-derived content stays out on legality (unlicensed derivative works).
+
+## D020 — Repo consolidation: dvijoke vendored inline; engine + dxvk stay forks (2026-08-31, user decision)
+
+User asked whether four repos could be one. Mapped three endpoints (full
+monorepo / 4→2 consolidation / status quo) with measured stakes: the engine
+is the only fork with a **live** upstream (parents committed 2026-08-30 and
+-31; we're 101 commits ahead, 45 behind), while dvijoke's upstream has been
+quiet since 2026-07-07 (22 commits, 332K, our delta = 3 commits) and dxvk's
+fork parent since 2026-03 (dev-only, 126MB history, never ships in the web
+build). A full monorepo would put ~670MB / ~8,600 commits (97% other
+people's) in every clone and kill the upstream-PR path + go-time fork
+banners. **Chosen: Option B (4→2 in daily terms).**
+
+- `dvijoke/` is now **vendored inline** in the workspace via
+  `git subtree add` with full history — tree OID verified byte-identical to
+  the former submodule pin (ba6791de). The engine's
+  `wasm-deps.cmake` reference (`../dvijoke/d8web`) is path-unchanged.
+- Licensing reviewed first: dvijoke is MIT (Meerzulee), same family as our
+  workspace code; no third-party headers inside d8web; MIT notice retention
+  satisfied by keeping `dvijoke/LICENSE` in place; GPL linkage unaffected
+  (MIT→GPL-compatible; the combined wasm binary ships GPL, files stay MIT).
+  No copyleft enters the workspace — that's why the engine stays separate.
+- `warpowers-dvijoke` is **archived** (read-only) on GitHub; history is
+  preserved both there and inline.
+- Amends D012's go-time plan: **two** public forks (engine, dxvk) + the
+  public workspace carrying dvijoke inline with credit + upstream SHA.
+
+Revisit if: meerzulee's dvijoke resumes active development we want to track,
+or we accumulate dvijoke patches worth upstreaming (extract from inline
+history; at 3 commits this is trivial).

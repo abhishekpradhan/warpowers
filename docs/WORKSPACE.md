@@ -1,7 +1,8 @@
 # Workspace map — what lives where
 
 One page to answer "where is that and where does it push." The workspace is
-one git repo with two submodules; everything else on disk is generated.
+one git repo with one submodule (the engine); everything else on disk is
+generated.
 
 ## Directory layout (this repo: `warpowers`)
 
@@ -12,7 +13,7 @@ one git repo with two submodules; everything else on disk is generated.
 | `web/` | `index.html` — the page-as-menu + boot harness (faction picker, volume, build badge) | yes (MIT) |
 | `docs/` | vision, roadmap, decisions, engine-notes (landmine log), publish-checklist, hosting, perf, this file | yes |
 | `engine/` | **Submodule** → GeneralsX fork (GPL-3.0). Native + wasm engine source and build trees | gitlink |
-| `dvijoke/` | **Submodule** → dvijoke fork (MIT). `d8web/` is the D3D8→WebGL2 layer the wasm build compiles in (`engine/cmake/wasm-deps.cmake` references `../dvijoke/d8web`) | gitlink |
+| `dvijoke/` | **Vendored inline** (MIT, upstream meerzulee/dvijoke; full history subtree-merged 2026-08-31 from warpowers-dvijoke @ ba6791de). `d8web/` is the D3D8→WebGL2 layer the wasm build compiles in (`engine/cmake/wasm-deps.cmake` references `../dvijoke/d8web`) | yes (MIT; its own LICENSE) |
 | `refs/` | Third-party asset sources (Quaternius CC0 packs). Conversion inputs only; never shipped | yes |
 | `webstage/` | **Generated** web bundle (engine wasm + gamedata + page), output of `tools/genwebstage.py`. Serve this dir to play | ignored |
 
@@ -35,42 +36,48 @@ Inside the engine submodule:
 
 | Repo | Local path | Branch | Purpose |
 |---|---|---|---|
-| `warpowers` | workspace root | `main` | primary repo (origin) |
-| `warpowers-engine` | `engine/` | `main` | engine fork backup (remote name: `backup`) |
-| `warpowers-dvijoke` | `dvijoke/` | `main` | dvijoke fork backup (remote name: `backup`) |
-| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | `main` | DXVK fork backup (remote name: `backup`) |
+| `warpowers` | workspace root | `main` | primary repo |
+| `warpowers-engine` | `engine/` | `main` | engine fork |
+| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | `main` | DXVK fork (native dev path only) |
 
-Upstreams (fetch-only in practice; **never push**): engine → `generalsxweb`
-(meerzulee/GeneralsXWeb), dvijoke → `origin` (meerzulee/dvijoke), dxvk →
-fbraz3 lineage.
+(`warpowers-dvijoke` is **archived** read-only — its content and history now
+live inline at `dvijoke/`, decision D020.)
 
-**GitHub Actions: none run on these repos.** The engine/dxvk forks inherited
-upstream CI workflows that billed private-repo runner minutes (Windows/macOS
-at 2x/10x multipliers) on every push and drained the account's monthly
-Actions budget (2026-08-24); the workflow files are removed from our
-branches — CI belongs upstream. If a future upstream sync reintroduces
-`.github/workflows/`, delete it again (or disable Actions in the repo
-settings UI: Settings → Actions → General → Disable actions).
+Remote scheme, every checkout (normalized 2026-08-31): `origin` = our private
+repo and what local branches track; fork parents/upstreams are fetch-only
+remotes with their push URL set to `DISABLED`, so **never push upstream** is
+enforced by git itself. Engine carries `upstream` (fbraz3/GeneralsX),
+`superhackers`, `generalsxweb`; dxvk carries `upstream` (doitsujin) and
+`fbraz3`.
+
+**GitHub Actions: DISABLED at repo level on every repo (2026-08-31).** The
+engine/dxvk forks inherited upstream CI workflows that billed private-repo
+runner minutes (Windows/macOS at 2x/10x multipliers) on every push and
+drained the account's monthly Actions budget (2026-08-24). The workflow
+files are stripped from our branches AND Actions is switched off in each
+repo's settings, so even an upstream-sync branch that reintroduces
+`.github/workflows/` cannot run anything. Re-enable per-repo only if we
+ever add CI of our own.
 
 ## Push routine
 
 ```
-git push origin main                                   # workspace
-git -C engine push backup main:main                    # engine fork
-git -C dvijoke push backup main:main                   # dvijoke fork
-git -C engine/references/fbraz3-dxvk push backup       # dxvk fork (rarely changes)
+git push origin main                                   # workspace (includes dvijoke/)
+git -C engine push origin main                         # engine fork
+git -C engine/references/fbraz3-dxvk push origin main  # dxvk fork (rarely changes)
 ```
 
-Rule: after committing in a submodule, commit the updated gitlink in the
-workspace and push both — a workspace push whose gitlinks reference unpushed
-submodule commits breaks fresh clones.
+Rule: after committing in a submodule, commit the updated gitlink in its
+parent and push both — a push whose gitlinks reference unpushed submodule
+commits breaks fresh clones. (Applies to workspace→engine and engine→dxvk.)
 
 ## Fresh clone
 
 ```
 git clone --recursive https://github.com/abhishekpradhan/warpowers.git
 ```
-brings the workspace + engine + dvijoke. Build wasm:
+brings the workspace (dvijoke included inline) + the engine submodule.
+Build wasm:
 `source ~/emsdk/emsdk_env.sh && cmake --build engine/build/wasm --target GeneralsXZH.js`
 (configure presets first on a brand-new machine), then `python3
 tools/genwebstage.py` and serve `webstage/`.

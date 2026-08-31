@@ -68,9 +68,12 @@ boot/fail beacons added (server-log-visible cross-browser verification),
 Safari BOOTS (751ms; human match pending), Firefox not installed here,
 trademark audit clean on user surfaces, vercel.json/.vercelignore staged
 (1h cache until content-hashed paths), docs/publish-checklist.md is the
-gate list. Remaining: private protected deploy (user go) + real-network
-numbers, Firefox, human playthroughs per difficulty, repo-publication steps
-at go-time; LAN/relay multiplayer after.
+gate list. Remaining: private protected deploy + real-network
+numbers (ON HOLD per user, 2026-08-31), Firefox, human playthroughs per
+difficulty, repo-publication steps at go-time; LAN/relay multiplayer after.
+Also landed this phase: repo consolidation (D020), faction canon (D021),
+full polish/comment sweep (69 findings), README rebuilt with screenshot,
+web stage now reads data/ directly.
 
 ## 0. Port parity (the working plan — D018)
 - [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon

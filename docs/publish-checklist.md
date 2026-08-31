@@ -85,7 +85,10 @@ Current organization (verified + normalized 2026-08-31; see D012 addendum):
       transfer workspace (dvijoke ships inline in it, D020); flip
       submodule URLs (D012)
 - [ ] LICENSE / LICENSE-ASSETS.md / CREDITS.md land in the public repos
-- [ ] README pass for the public workspace
+- [ ] README pass for the public workspace: edit README.md in place —
+      add the hosted Play URL, drop "(working title)" if the name is
+      final, final tone once-over (README.draft.md was folded in and
+      deleted 2026-08-31 per D011 — no parallel draft to maintain)
 
 ## 7. After go
 - [ ] LAN/relay multiplayer track (wasm-generals parity)

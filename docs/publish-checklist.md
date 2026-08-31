@@ -1,44 +1,70 @@
-# Publish checklist (D012 execution plan)
+# War Powers — publish checklist (Phase 5)
 
-Nothing here executes without the user's explicit go. This is the ordered
-runbook for taking War Powers public.
+Nothing on this list authorizes a public deploy. Publishing remains gated on
+an explicit user go (D013). Work through top to bottom; check items only with
+evidence (a log line, a screenshot, a URL).
 
-## Phase 0 — final audits (private)
-- [ ] Trademark sweep: grep every shipped surface (window title, page title,
-      strings, README, repo names/descriptions) for EA marks. Engine GPL file
-      headers keep their legal notices (lineage, not product surface).
-- [ ] Asset audit: every file in `data/` has an ASSETS.md row; licenses are
-      CC BY 4.0 (ours) or a D019-acceptable upstream license (CC0/CC-BY/
-      CC-BY-SA/GPL art/OFL — per-file, tracked in ASSETS.md).
-- [ ] Fresh-clone reproducibility on a second machine/user: clone --recursive,
-      run every tools/ pipeline, build native + wasm, BASE_LOOP_OK.
+## 1. Product quality gate (D013 bar)
+- [x] In-engine shell end-to-end: menu → deployment (battlefield + opposition
+      + faction) → match → pause/restart/abandon → score → menu
+- [x] Real opponent: AIPlayer with base building, economy, escalation tiers,
+      difficulty, defense patrol / punish / eco-raid (Phase 4)
+- [x] Music rotation, ambient beds, VO, SFX (user-confirmed audible)
+- [ ] One full playthrough per difficulty by a human before go
+- [ ] Second-machine sanity run (different Mac / lower-end hardware)
 
-## Phase 1 — GitHub org + true forks
-- [ ] Create the org (name TBD with the user; check availability).
-- [ ] Fork chain with real GitHub fork relationships (provenance visible):
-      - engine: fork fbraz3/GeneralsX -> org/warpowers-engine; push
-        `warpowers` + `warpowers-web` branches.
-      - dvijoke: fork meerzulee/dvijoke -> org/dvijoke; apply
-        tools/patches/dvijoke-d8web-atlas-probe-trace.patch as a commit.
-      - dxvk: transfer/fork chain doitsujin/dxvk -> fbraz3/dxvk ->
-        org/warpowers-dxvk (already exists as a plain repo; recreate as fork
-        if provenance matters enough to rewrite).
-- [ ] Workspace repo -> org/warpowers; update .gitmodules URLs; verify
-      clone --recursive from the org.
+## 2. Performance budget
+- [x] Local boot: 5.5s cold total (165ms engine dl, 214ms data, 5.2s init) —
+      budget ≤20s
+- [x] Frame budget on M-series: 60/s sustained through early-match combat
+      (pump-rate measurement; see engine-notes Phase 5 entry)
+- [ ] Frame rate through a BRUTAL late game (assault + air + punish + player
+      army all fielded) — measure, don't assume
+- [ ] Real-network boot numbers from a CDN deploy (see §5)
+- Known perf debt (acceptable at current scale): money-readout font surface
+  churn (W3DDisplayString rebuild) — revisit if late-game frames dip.
 
-## Phase 2 — public flip order
-1. dxvk fork (leaf, no secrets)
-2. dvijoke fork
-3. engine fork
-4. workspace repo (README.draft.md -> README.md, license files at root)
+## 3. Browser matrix
+- [x] Chromium (dev harness, daily driver)
+- [x] Safari — BOOTS (beacon total=751ms, full asset stage + engine main
+      loop reached); a human-played match remains a manual pre-go item
+- [ ] Safari — one human-played match
+- [ ] Firefox — not installed on this machine; boot beacon + match on a
+      machine that has it (or install with user ok)
+- Boot/fail beacons land in any static server's access log:
+  `/wp-boot-ok?total=…&ua=…` on success, `/wp-boot-fail?…` on engine abort.
 
-## Phase 3 — upstream PRs (goodwill + provenance)
-- [ ] GeneralsXWeb: wasm audio fixes (zero-channel decode buffers; group
-      routing bypass), INI unknown-block fatal diagnostics, drawable icon
-      null-guards, missing-label once-only logging.
-- [ ] Position each PR small and self-contained; reference our notes.
+## 4. Branding / trademark surfaces
+- [x] User-visible surfaces clean: tab/window title, page copy, all in-game
+      strings (Generals.str audited — zero EA marks), score/menu screens
+- [x] Attribution surfaces correct and REQUIRED: CREDITS.md, ASSETS.md,
+      LICENSE-ASSETS.md (engine lineage GeneralsX/GPL, CC-BY music, etc.)
+- [ ] Pre-go final sweep: `grep -riE "electronic arts|command & conquer|zero
+      hour" webstage/` must return only attribution files
+- Known + deliberate (devtools-visible only, not user-facing branding):
+  engine binary name `GeneralsXZH.js/.wasm`, `Generals.str` filename
+  (engine-hardcoded), `CNC_GENERALS_*` env names, GeneralsX console banner.
+  These are engine-lineage identifiers; renaming is cosmetic and deferred.
+- [ ] Formal trademark search + domain grab ("War Powers", e.g. warpowers.gg)
+      before M1 public
 
-## Phase 4 — hosting (decision doc: docs/hosting.md)
-- [ ] Execute the hosting decision (presumptive: Vercel, Deployment
-      Protection ON until announce).
-- [ ] Custom domain (D006 trademark/domain task) at announce time.
+## 5. Hosting (Vercel, per D013)
+- [x] `vercel.json` + `.vercelignore` prepared: static serve of `webstage/`
+      only, wasm content-type, 1h asset cache (NOT immutable — asset paths
+      aren't content-hashed yet; bump genwebstage to hashed paths before
+      switching to immutable), no-cache HTML/manifest
+- [ ] PRIVATE preview deploy with Deployment Protection ON (user go required
+      even for this — it sends content to a third-party host)
+- [ ] Boot budget on the preview URL from a real network (beacon totals)
+- [ ] Brotli/compression verified on .wasm and .js (Vercel default)
+- [ ] Re-run browser matrix against the preview URL
+
+## 6. Repos / licensing at go-time (D012)
+- [ ] Create org; fork engine + dxvk publicly; push branches; transfer
+      workspace; flip submodule URLs (plan in project memory / WORKSPACE.md)
+- [ ] LICENSE / LICENSE-ASSETS.md / CREDITS.md land in the public repos
+- [ ] README pass for the public workspace
+
+## 7. After go
+- [ ] LAN/relay multiplayer track (wasm-generals parity)
+- [ ] Telemetry decision (even just beacon-level boot stats)

@@ -61,9 +61,16 @@ script condition was a stub, now implemented via ScoreKeeper), and an
 eco-raid tier that hunts the player's income/power via attack-priority
 sets. AISkirmishPlayer/.scb RETIRED as unnecessary — **Phase 4 closed.**
 
-**Phase 5 — Hardening + publish prep** (gated on explicit go): fps budget
-pass, Safari/Firefox, real-network boot numbers, docs/publish-checklist.md;
-LAN/relay multiplayer after (wasm-generals parity).
+**Phase 5 — Hardening + publish prep** (IN PROGRESS 2026-08-31; publishing
+itself stays gated on explicit go): fps budget MEASURED (flat 60/s through
+BRUTAL combat on M-series; late-game mega-army stress open), local boot 5.5s,
+boot/fail beacons added (server-log-visible cross-browser verification),
+Safari BOOTS (751ms; human match pending), Firefox not installed here,
+trademark audit clean on user surfaces, vercel.json/.vercelignore staged
+(1h cache until content-hashed paths), docs/publish-checklist.md is the
+gate list. Remaining: private protected deploy (user go) + real-network
+numbers, Firefox, human playthroughs per difficulty, repo-publication steps
+at go-time; LAN/relay multiplayer after.
 
 ## 0. Port parity (the working plan — D018)
 - [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon

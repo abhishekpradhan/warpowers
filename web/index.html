@@ -333,7 +333,10 @@
       arguments: buildArgs(),
       print: log,
       printErr: log,
-      onAbort: function(w) { fail('The engine stopped unexpectedly. (' + w + ')'); },
+      onAbort: function(w) {
+        try { fetch('/wp-boot-fail?w=' + encodeURIComponent(String(w).slice(0, 80)) + '&ua=' + encodeURIComponent(navigator.userAgent.slice(0, 80))).catch(function(){}); } catch (e) {}
+        fail('The engine stopped unexpectedly. (' + w + ')');
+      },
       instantiateWasm: function(imports, cb) {
         setPhase('Downloading engine…');
         fetch('GeneralsXZH.wasm?' + bust, { method: 'HEAD' }).then(function(r) {
@@ -371,6 +374,14 @@
               report.dataStageMs + 'ms, init ' + report.engineInitMs +
               'ms, total ' + report.totalMs + 'ms' +
               (report.totalMs > 20000 ? ' (OVER 20s BUDGET)' : ''));
+          // Boot beacon: a throwaway GET that lands in any static server's
+          // access log — lets cross-browser boots (Safari/Firefox, where we
+          // have no console access) be verified from the server side.
+          try {
+            fetch('/wp-boot-ok?total=' + report.totalMs + '&ua=' +
+                  encodeURIComponent(navigator.userAgent.slice(0, 80)))
+              .catch(function(){});
+          } catch (e) {}
         } catch (e) { /* marks missing on odd paths - report is best-effort */ }
       },
       onGameExit: function() {

@@ -1,0 +1,6 @@
+# Deploy ONLY the staged web build. Everything else in the workspace
+# (engine sources, tools, docs, raw data) stays local.
+*
+!webstage
+!webstage/**
+!vercel.json

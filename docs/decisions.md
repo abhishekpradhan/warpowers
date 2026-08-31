@@ -149,7 +149,8 @@ User direction after the first browser match: the objective is a **polished, mod
 
 ## D014 — Creative round: the trio, names, VO direction (2026-08-22)
 
-User-selected from proposals: factions **Meridian Command** (superpower), **Jackal Front** (guerrilla), **Iron Pact** (industrial horde — designed now, built third); build order Meridian + Jackal first for maximum per-match asymmetry. VO direction: **processed radio barks** (short recorded phrases through a fixed comms chain — any voice usable, personality lives in the writing). Full taste document: [creative.md](creative.md) — palettes with colorblind-aware trims, naming rules (no EA/C&C names, ever), slice rosters, art spec (300–800 tri units, shared palette-atlas texturing, HLod subobject hierarchy), audio identity. First general powers after the slice: Precision Strike vs Tunnel Ambush.
+User-selected from proposals: factions **Meridian Command** (superpower), **Jackal Front** (guerrilla), **Iron Pact** (industrial horde — designed now, built third); build order Meridian + Jackal first for maximum per-match asymmetry.
+*[Names finalized 2026-08-31: **Meridian Combine** / **Jackal Front** — D021.]* VO direction: **processed radio barks** (short recorded phrases through a fixed comms chain — any voice usable, personality lives in the writing). Full taste document: [creative.md](creative.md) — palettes with colorblind-aware trims, naming rules (no EA/C&C names, ever), slice rosters, art spec (300–800 tri units, shared palette-atlas texturing, HLod subobject hierarchy), audio identity. First general powers after the slice: Precision Strike vs Tunnel Ambush.
 
 ## D015 — Asset quality bar: ZH-comparable; all self-produced (2026-08-22)
 
@@ -164,7 +165,7 @@ Production path: **Blender pipeline, everything self-produced** (user decision: 
 
 ## D017 — Publish faction scope: 2 playable, no tease (2026-08-22, user decision)
 
-Meridian Command vs Jackal Front are the publish bar; **Iron Pact stays fully internal** — no roster, no teaser presence, nothing on public surfaces until after launch. All overnight/roster work targets the two factions only.
+Meridian Combine vs Jackal Front are the publish bar (names per D021); **Iron Pact stays fully internal** — no roster, no teaser presence, nothing on public surfaces until after launch. All overnight/roster work targets the two factions only.
 
 ## D018 — Direction: port-parity first; content is the bundled pack (2026-08-23, user decision)
 
@@ -230,3 +231,19 @@ banners. **Chosen: Option B (4→2 in daily terms).**
 Revisit if: meerzulee's dvijoke resumes active development we want to track,
 or we accumulate dvijoke patches worth upstreaming (extract from inline
 history; at 3 commits this is trivial).
+
+## D021 — Faction names finalized: Meridian Combine / Jackal Front (2026-08-31, user delegated)
+
+The shipped strings said Combine/League while every doc said Command/Front
+(the Combine/League pair entered with the in-engine shell and no doc
+followed). User delegated the pick; chosen: **the Meridian Combine** vs
+**the Jackal Front** — the stronger name from each pair.
+- *Combine* over *Command*: carries the corporate-war-machine satire (D004),
+  more distinctive than RTS-generic "Command", avoids "the Meridian Command
+  command center", and the shipped VO copy already says it ("Fastest boots
+  in the Combine").
+- *Front* over *League*: the insurgent-front register matches the faction's
+  guerrilla identity; "League" reads soft.
+One string changed in game data (League → Front; deploy buttons compose
+from it); docs synced; D014/D017 annotated. "Meridian Command Center"
+(the building) is unaffected — command centers stay command centers.

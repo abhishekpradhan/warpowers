@@ -3,7 +3,7 @@
 A free, browser-playable RTS in the Command & Conquer: Generals / Zero Hour
 idiom — built on the GPL-released engine lineage with **fully original
 replacement assets**, so players need no game files, no install, no launcher.
-**Meridian Command** vs **the Jackal Front**; compiled for the browser with
+**the Meridian Combine** vs **the Jackal Front**; compiled for the browser with
 Emscripten + WebGL2 (via the vendored `dvijoke/d8web` layer), with a native
 macOS build (SDL3 + DXVK + MoltenVK) as the development path.
 

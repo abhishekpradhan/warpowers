@@ -13,7 +13,7 @@ joke: everyone involved claims emergency *war powers*; nobody declared war.
 
 ## The trio
 
-| | **Meridian Command** | **Jackal Front** | **Iron Pact** *(third)* |
+| | **Meridian Combine** | **Jackal Front** | **Iron Pact** *(third)* |
 |---|---|---|---|
 | Fantasy | PR-managed superpower warfare | improvised guerrilla war economy | industrial mass and momentum |
 | Satire | branded, networked, deniable | scrap-and-salvage ingenuity | propaganda-broadcast collectivism |
@@ -48,7 +48,7 @@ stays desaturated; units own the saturation.
 > **Historical slice plan** — the shipped roster grew well past these lists
 > (Generals.str is the live roster). Kept as the original design intent.
 
-### Meridian Command
+### Meridian Combine
 | Role | Name | Notes |
 |---|---|---|
 | Builder | **Fabricator** | hover dozer, printing-scaffold build FX later |

@@ -14,7 +14,7 @@ import struct
 import sys
 
 # --faction=jackal writes the mirrored WPTestJ map: the player starts as the
-# Jackal League and the scripted opponent is the Meridian Combine.
+# Jackal Front and the AI opponent is the Meridian Combine.
 if '--faction=jackal' in sys.argv:
     sys.argv = [a for a in sys.argv if a != '--faction=jackal']
     F = dict(map_name=None, is_jackal=True,

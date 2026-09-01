@@ -82,13 +82,15 @@ publish. Not deployed anywhere yet — this repository is the whole project.
 
 ## Licensing
 
-Per-file licensing ([D019](docs/decisions.md)); the short version:
+One sentence: **everything in this repository is free to reuse with
+attribution; the only copyleft is the engine repo, and the compiled game
+ships under GPL.** The tiers ([D019/D022](docs/decisions.md)):
 
 - **Our code** — MIT ([LICENSE](LICENSE)). **Our content** — CC BY 4.0.
 - **Imports** keep their upstream license, tracked per-file in the
   [ASSETS.md](ASSETS.md) ledger and credited in [CREDITS.md](CREDITS.md).
 - **Engine chain** — GPL-3.0 + EA additional terms (engine) / MIT (dvijoke)
-  / zlib (DXVK, native dev only). Full map: [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+  / zlib (DXVK, native dev only). Full map: [LICENSING.md](LICENSING.md).
 
 ## Ground rules
 

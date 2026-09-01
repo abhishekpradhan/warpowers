@@ -140,10 +140,10 @@ web stage now reads data/ directly.
 
 ## 7. Publish readiness (prepare only — nothing goes public without approval)
 - [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
-- [x] LICENSE-ASSETS.md (MIT code / CC BY 4.0 content / per-file imports, D019) + ledger + credits current
+- [x] LICENSING.md (MIT code / CC BY 4.0 content / permissive per-file imports, D019/D022) + ledger + credits current
 - [x] Public-README content drafted (folded into README.md 2026-08-31, D011 —
   no parallel draft file; engine fork README at D012 time)
 - [x] Fresh-clone reproducibility verified (clone --recursive + genmap/genwnd/Blender-from-clone; blender scripts de-absolutized; gentex single-arg mode quirk noted)
 - [x] D012 execution runbook written (docs/publish-checklist.md)
 - [ ] Upstream PR candidates (with user approval): wasm audio fixes (decode config, group routing), INI unknown-block diagnostics, icon null-guards
-- [x] Hosting comparison doc (docs/hosting.md): Vercel static now, Railway reserved for lobby
+- [x] Hosting decision: Vercel static now, Railway reserved for lobby (comparison folded into D013)

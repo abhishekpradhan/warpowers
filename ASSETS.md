@@ -2,14 +2,14 @@
 
 Every asset file that enters the project gets a row **when it is added, not later**. This ledger is what lets us ship legally and publicly without an audit crisis.
 
-**Acceptance rules (D019 — legality is the only bar; per-file licensing):**
+**Acceptance rules (D019 as narrowed by D022 — legality is the exclusion
+bar; per-file licensing; permissive-attribution imports only):**
 - ✅ Original work (ours) — CC BY 4.0
 - ✅ CC0 / public domain (adaptations ship under our CC BY 4.0)
-- ✅ CC-BY / CC-BY-SA / GPL-licensed art / OFL — the file (and adaptations,
-  where the license requires) ships under its upstream license; this ledger
-  is the authoritative per-file license map, CREDITS.md carries the credits
-- ⚠️ NC only by explicit per-case decision noted here (permanently bars
-  commercial use of that asset)
+- ✅ CC BY / SIL OFL — the file ships under its upstream license; this
+  ledger is the authoritative per-file license map, CREDITS.md the credits
+- ⚠️ ShareAlike / GPL art / NC: not pre-approved — each would need a fresh
+  decision-log entry before import (none ever has)
 - ❌ Anything EA-derived (unlicensed derivative works), anything unlicensed,
   ND-encumbered (the style pipeline modifies everything; ND bars derivatives)
 

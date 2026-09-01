@@ -41,7 +41,7 @@ evidence (a log line, a screenshot, a URL).
 - [x] User-visible surfaces clean: tab/window title, page copy, all in-game
       strings (Generals.str audited — zero EA marks), score/menu screens
 - [x] Attribution surfaces correct and REQUIRED: CREDITS.md, ASSETS.md,
-      LICENSE-ASSETS.md (engine lineage GeneralsX/GPL, CC-BY music, etc.)
+      LICENSING.md (engine lineage GeneralsX/GPL, CC-BY music, etc.)
 - [ ] Pre-go final sweep: `grep -riE "electronic arts|command & conquer|zero
       hour" webstage/` must return only attribution files
 - Known + deliberate (devtools-visible only, not user-facing branding):
@@ -87,7 +87,7 @@ Current organization (verified + normalized 2026-08-31; see D012 addendum):
 - [ ] At go: create org; fork engine + dxvk publicly; push branches;
       transfer workspace (dvijoke ships inline in it, D020); flip
       submodule URLs (D012)
-- [ ] LICENSE / LICENSE-ASSETS.md / CREDITS.md land in the public repos
+- [ ] LICENSE / LICENSING.md / ASSETS.md / CREDITS.md land in the public repos
 - [ ] README pass for the public workspace: edit README.md in place —
       add the hosted Play URL, drop "(working title)" if the name is
       final, final tone once-over (README.draft.md was folded in and

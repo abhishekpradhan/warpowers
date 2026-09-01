@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """War Powers .map generator — emits the engine's CkMp chunk format.
 
-Byte-level format extracted from the GPL engine source (see docs/map-format
-notes). Emits the skirmish map set: layout-driven terrain (120-200-cell
+Byte-level format extracted from the GPL engine source (wire-format notes
+live in docs/engine-notes.md and this file's writer comments). Emits the skirmish map set: layout-driven terrain (120-200-cell
 playable areas with dune/ridge/basin features) and two sides — PlayerA
 (human) vs PlayerB, a full AIPlayer opponent driven by this file's build
 lists, economy structures, and difficulty-gated attack-team scripts

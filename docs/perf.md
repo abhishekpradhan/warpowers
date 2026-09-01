@@ -25,7 +25,7 @@ MainLoop pump-rate). The 2026-08-23 baseline is kept at the bottom.
   mid-laptop pending second machine.
 
 ## Follow-ups
-- Hashed asset filenames for immutable CDN caching (docs/hosting.md).
+- Hashed asset filenames for immutable CDN caching (publish-checklist §5).
 - Known perf debt: money-readout font surface churn (no measured symptom).
 
 ## Baseline for contrast (2026-08-23, pre-shell)

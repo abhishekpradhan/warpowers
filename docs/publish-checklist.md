@@ -5,7 +5,7 @@ repository visibility. The owner authorized implementing the polish plan,
 preparing private repositories and committing/pushing work. A public release
 remains a separate decision (D013).
 
-Current local playtest candidate: `3b26e3104fcb`, 66,760,647 bytes. Build, web,
+Current local playtest candidate: `90c472ea661a`, 66,761,316 bytes. Build, web,
 packaging and content gates pass. Bounded observations from earlier candidates
 are explicitly identified in [verification.md](verification.md). A checked
 fixture is evidence for that fixture; broader release categories stay open
@@ -13,6 +13,10 @@ where only some requirements have been exercised.
 
 ## Completed local checks
 
+- [x] `90c472ea661a`: complete branch review, native build, 27 web tests,
+      nine packaging tests, 16 keyboard regression cases and all content gates
+      pass. Fixed failure-screen native re-entry and unsafe staging destinations;
+      normal menu/deployment/briefing/guidance browser smoke passes.
 - [x] `3b26e3104fcb`: 25 web tests, six packaging tests and all content gates
       pass; lost-builder recovery is covered. Ordinary final-build contrast,
       guidance reopening and overview checks pass. The retry diagnostic and

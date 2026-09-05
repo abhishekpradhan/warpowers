@@ -1,7 +1,44 @@
 # Current polish verification
 
+## Review before merging to main
+
+The September 5 merge review covers the complete game, engine and native
+renderer polish branches against their private forks' `main` branches.
+It found and corrected two additional failures:
+
+- Browser recovery previously called the native pause export while handling
+  an engine failure. If that export also threw, the recovery UI never appeared.
+  Failure handling now stays in the browser, disables subsequent native entry
+  points and ignores late lifecycle callbacks so Reload and diagnostics remain
+  available. This is an error-recovery fix, not a fix for the intermittent
+  native Retry crash documented below.
+- The stager's legacy `GeneralsXZH.wasm` marker could mistake the compiler
+  output directory for a replaceable web stage. It now rejects compiler/source
+  trees and repository roots before checking stage markers. Isolated fixtures
+  verify that those directories survive rejection and safe custom legacy
+  stages remain replaceable.
+
+The engine quick-start also now uses the standard `http://localhost:8322`
+URL and describes the MIME/cache headers the server actually sends. Engine
+lifecycle/rendering/input review found no additional confirmed blocker;
+the previously disclosed intermittent native Retry crash remains open.
+
+Reviewed candidate `90c472ea661a` stages at 66,761,316 bytes (63.669 MiB),
+with engine `5f4f3417` and renderer `538cb703`. The native WebAssembly build,
+27 web tests, nine packaging tests, 16 production keyboard cases and all
+voice/content/17-map gates pass. The final Chromium browser smoke check
+boots the main menu, deploys Field Orientation, opens/closes the briefing,
+reopens guidance and returns from its all-steps overview without browser
+errors. A normally completed Fabricator advances guidance to step 2.
+The new recovery and staging regressions also fail against the pre-fix
+`8eba37e` source in isolated temporary fixtures, confirming both detect their
+reported bugs. This bounded merge check supplements the earlier playtest evidence;
+it does not claim another full campaign walkthrough or native crash fix.
+
+## Earlier feedback verification
+
 Local evidence recorded 2026-09-05 in the Chromium in-app browser on the
-development Mac. The current local candidate is `3b26e3104fcb`. Earlier
+development Mac. The previous feedback candidate was `3b26e3104fcb`. Earlier
 candidate results are identified below; they are retained evidence, not a
 claim that every diagnostic was rerun after each subsequent change.
 

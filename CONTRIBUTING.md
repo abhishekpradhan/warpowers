@@ -21,6 +21,7 @@ cmake --build build/wasm --target GeneralsXZH.js
 cd ..
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 engine/scripts/qa/test-keyboard-modifiers.py
 python3 tools/lint_voices.py
 python3 tools/validate_gameplay.py
 python3 tools/check_content.py

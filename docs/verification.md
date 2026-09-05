@@ -1,70 +1,155 @@
 # Current polish verification
 
-Local checks recorded 2026-09-05. This page distinguishes observed behavior
-from diagnostic fixtures and from release checks needing independent people
-or devices. These runs use a local staged WebAssembly build in the available
-Chromium in-app browser on the development Mac.
+Local evidence recorded 2026-09-05 in the Chromium in-app browser on the
+development Mac. The final local playtest candidate is `2a5fb93551f9`. Earlier
+candidate results are identified below; they are retained evidence, not a
+claim that every diagnostic was rerun after each subsequent change.
 
 ## Automated local gates
 
-- Web-state tests: malformed/blocked storage, settings bounds, actual command
-  remapping, explicit-win progression, safe identifiers, time/map normalization.
-- Packaging tests: repeatable hashes, complete content references and notices,
-  UI versus save compatibility, engine-glue release identity, protected output
-  paths, and rejection of an oversized candidate without replacing a working stage.
-- Voice lint: 80 distinct events across 21 templates, no accidental shared pools.
-- Content references: native model/texture/icon/window and operation metadata checks.
-- Map validator: independently decodes all 17 shipped map binaries, evaluates
-  seven mission success/failure/tie cases, checks actual native condition/action
-  signatures, paid AI responses, supply/counter/budget contracts, and flood-fills
-  traversable routes to units, caches and objectives with a cliff-clearance margin.
+Candidate `2a5fb93551f9` passes the full WASM build, six web-state tests, six
+packaging tests, 16 native keyboard cases, voice lint, content-reference checks and
+the independent map validator.
+
+- Web-state tests cover malformed/blocked storage, settings bounds, command
+  remapping, explicit-win progression, safe identifiers and time/map normalization.
+- Packaging tests cover repeatable hashes, content references and notices,
+  UI/save compatibility, engine-glue release identity, protected output paths
+  and rejection of oversized candidates without replacing a working stage.
+- Keyboard cases exercise production event-state methods for left/right
+  Ctrl/Shift/Alt, chord ordering, release and repeat handling. They do not
+  substitute for the observed browser input flows below.
+- Voice lint checks 80 distinct events across 21 templates and shared-pool rules.
+- Content checks cover native model/texture/icon/window references and operations.
+- Map validation independently decodes all 17 binaries, checks seven mission
+  success/failure/tie cases, native condition/action signatures, paid AI responses,
+  supply/counter/budget contracts and traversable routes with cliff clearance.
 
 Run commands are in [CONTRIBUTING.md](../CONTRIBUTING.md). These checks do
-not establish final balance or visual quality by themselves.
+not establish final balance, presentation or the full release matrix.
 
-## Observed browser behavior
+## Native missions and faction mechanics
 
-Build `16a02361cddb`:
+Candidate `6375e6bfb189` passed all seven native mission success cases,
+all seven mission failure cases and the three additional HQ-loss failures.
+Each asserted the actual native result callback; no `MISSION_CHECK FAIL`
+was reported. The same candidate's power fixtures passed: Precision Strike
+inflicted 550 damage and Tunnel Ambush spawned five infantry. These fixtures
+explicitly satisfy prerequisites or advance timers; they do not prove the
+normal player targeting flow or a human mission playthrough.
 
-- Main menu and deployment: original panorama, mode switching, tactical preview,
-  assigned training faction and native deployment button all render and respond.
-- Field Orientation: briefing opens, resumes the game, HQ selection works;
-  queueing a Fabricator charges money and creates the unit. The objective advances
-  to supply/power. The idle-builder key selects and centers the Fabricator.
-- Exchange and Power Array: builder portraits, native tooltips, placement and
-  construction progress work. The Exchange finishes and provides its small
-  income stream.
-- Checkpoint: browser storage writes successfully; full page reload exposes
-  Resume checkpoint. Restored scene retains objects, construction, money and time.
-  A case mismatch initially lost the mission identity; a subsequent engine fix
-  canonicalizes portable save map names. That fix requires another round-trip check.
-- Post-boot error UI: earlier integration failures visibly reopened the loader
-  with a recovery message and diagnostics. Missing scenery Body modules and an
-  overlong EM_ASM call were corrected; training then loaded successfully.
+Both supply fixtures failed on `6375e6bfb189`. A steering defect was corrected
+in the later candidate whose ID begins `6b10`. On that build, native production,
+gathering and delivery passed for both factions:
 
-Build `7a05419481b2`, native diagnostic fixtures:
+| Faction | Observation at 60 seconds | Income detail |
+|---|---|---|
+| Meridian | 39 crates removed; maximum observed cargo 4 | Cash delta $2,100, including $300 passive income |
+| Jackal | 22 crates removed; maximum observed cargo 2 | Cash delta $1,240, including $240 passive income |
 
-- Meridian supply: creates a completed power/depot fixture, then queues a Porter
-  through native production. The produced truck carries four crates, delivers,
-  and repeats. At 60 seconds, 20 crates were removed and income increased $1,100,
-  including approximately $300 passive hub income. Harness reports PASS.
-- Jackal Tunnel Ambush: invokes the native power at a revealed target after an
-  explicit ready-state fixture. Five infantry spawn and the next-ready frame moves
-  forward. Harness reports PASS. Construction/cooldown waiting and user targeting
-  are separate input checks.
+Totals include the opening hauler as well as the produced truck. They must
+not be presented as the throughput of one newly trained unit. Full depletion,
+reassignment, supply raids and balance remain separate checks.
 
-The supply harness initially selected an unrelated starting truck and failed to
-complete the fixture depot's native creation lifecycle. Its corrected run tracks
-the produced truck's producer ID and calls the same module completion hooks as a
-finished building. The result above is from the corrected harness.
+## Observed player flows
 
-- Jackal supply: the produced Scavenger carries two crates and repeats the
-  route. At 60 seconds, 12 crates were removed and income increased $740,
-  including approximately $240 passive income. Harness reports PASS.
-- Meridian Precision Strike: the native effect deals 550 damage to its target
-  and advances the recharge frame. Harness reports PASS.
-- A prolonged, undefended power fixture also ended in an actual AI assault and
-  HQ destruction, displaying the native Defeat banner and a losing match result.
+On `6375e6bfb189`, a normal menu deployment into Field Orientation proceeded
+through HQ selection, production of two Fabricators, Power Array construction
+and starting an Exchange. Saving, fully reloading the page and choosing Resume
+checkpoint restored the correct Field Orientation identity and stage 1, a
+3:20 battle time, existing structures and the Exchange foundation, $3,500 and
+the native HUD. The earlier save-map identity/control-bar defects are therefore
+covered by an observed round trip. The resumed Exchange construction
+subsequently completed successfully.
+
+On the `6b10` candidate:
+
+- Deploying diagnostic Field Orientation through the normal menu reached the
+  native debrief, then the Victory report; Retry opened a fresh training match.
+  This verifies the same-faction retry path.
+- Fullscreen and returning through Settings/Escape worked.
+- Pressing P to pause, opening Settings and closing it with Escape preserved
+  the paused 10:47 clock; pressing P again resumed the match.
+
+On `db2a99b4c142`, Control+1 assigned nine selected units to group 1 with
+visible group labels. After deselecting, bare 1 recalled all nine. A right-click
+move order moved the whole selected army. The Jackal Chop Shop produced two
+Mongrels through its normal UI. With four units queued, two finished, one active
+entry was cancelled with a refund and one remained pending.
+
+The attack-move button initially failed to enter targeting mode on this build.
+The missing `NEED_TARGET_POS` declaration was corrected, covered by the validator
+and restaged as `a89d614eaa5c`. On that candidate, Q selected seven Jackal units;
+clicking Attack Move and then revealed ground moved the army with its selection
+retained. The I shortcut selected and centered the original Rigger and displayed
+eight construction portraits. The earlier targeting failure is resolved.
+Settings also remapped the idle-worker action from I to J; after Restart,
+the native hint displayed J and pressing J selected/centered the Fabricator.
+
+On `a89d614eaa5c`, an ordinary builder placement constructed a Jackal Watchpost.
+Progress was observed at 63%, then the original tower finished and the centered
+“Construction complete.” toast appeared, including in the accessibility tree.
+
+The same candidate passed a player-input Tunnel Ambush check after 120 seconds
+elapsed naturally: select Den, click the power button, then left-click open
+explored ground. Five infantry spawned (unit count 8 → 13), with selection
+retained. This adds targeting and natural recharge evidence to the native fixture.
+
+On `9294283038c0`, Precision Strike passed the player-input flow after its
+150-second recharge elapsed naturally. At current frame 4505, its ready frame
+was 4500 and the button was enabled. Clicking the power button set the pending
+command to `Command_WPPrecisionStrike`; clicking empty explored ground accepted
+the target. At frame 6719 the next-ready frame advanced to 11216, the button
+became disabled and the pending command cleared. A new impact scorch appeared
+on the ground, while the Directorate selection remained intact. The initial
+unsuccessful attempt was not reproduced. The transient three-second warning was
+not captured, so its readability remains unverified.
+
+The final `2a5fb93551f9` candidate visibly displayed RECHARGING 1:51 at 0:39,
+RECHARGING 0:01 at 2:29 and POWER READY at 2:44. The ready heading fit its
+existing bounds. Clicking the power and empty explored ground fired another
+strike, produced a new scorch and displayed RECHARGING 2:22 at 3:28. This
+verifies the native ready/cooldown presentation. Q selecting the army resets
+the heading to ORDERS. The POWER REQUIRED condition
+and transient warning readability remain separate checks.
+
+A normal Field Orientation checkpoint round trip also passed on `9294283038c0`.
+The HQ trained a Fabricator, which built a Power Array. Saving through Settings
+updated the persistent checkpoint timestamp. A full page reload enabled Resume;
+the correct Field Orientation briefing opened, and Return restored stage 1's
+Exchange/power/Porter objective, 2:46 time, $4,850, one Fabricator, two structures,
+16 power and the native HUD. The remapped J hint remained intact. This run
+restored a completed Power Array; the earlier `6375e6bfb189` run separately
+covered a foundation that resumed and completed construction.
+
+Both commander-trial result destinations passed through ordinary menu controls
+with diagnostic mission outcomes. On `9294283038c0`, Engage → Commander Trials
+→ Hostile Takeover → Deploy Jackal reached the native win at three seconds,
+the correct web debrief/story/stats, the native Victory report and Continue →
+main menu. On `2a5fb93551f9`, Meridian's Glass Rampart followed the corresponding
+menu → deployment → native win → debrief → Victory report flow; Change
+Battlefield returned to the correct deployment screen. Final trial preview
+titles and summaries fit, with the full briefings preserved. These are navigation
+checks, not human mission completions. The diagnostic operation record remained
+0/4 because fixture outcomes do not write progression.
+The final independent stage also opened the ordinary main menu without
+diagnostics and with a fresh 0/4 operation record.
+
+The Jackal native art review on `db2a99b4c142` contained 22 fixtures with zero
+missing models. Original structures, infantry, vehicles and both Jackal airframes
+were visible, with distinct rust tones and silhouettes. Meridian was reviewed
+on the `db2a99b4c142` and `9294283038c0` scenes: 23 fixtures, zero missing models,
+all building/unit rows visible, including white/gold architecture, infantry,
+armor/support units and both airframes. Q selected nine combat units; vehicles
+steered and aircraft flew.
+
+The crowded `6b10` scene also showed firing, explosions, smoke, ground scorches
+and dark wrecks; those wrecks later expired. These observations cover real
+motion and several combat states, not every lifecycle condition. Rendered model
+and portrait contacts were also reviewed.
+
+Both final browser tabs reported an empty console-error list. See
+[perf.md](perf.md) for the separate isolated crowded-battle measurement.
 
 ## Reproduce focused diagnostics
 
@@ -75,14 +160,15 @@ After staging and starting `tools/serve.py`:
 - `/?map=Maps/WPTest.map&autotest=powers` — Precision Strike.
 - `/?map=Maps/WPTestJ.map&autotest=powers` — Tunnel Ambush.
 
-The diagnostic report is visibly retained in the page; verbose frame logs cannot
-roll its result out of view. Ordinary play shows no diagnostic report. Diagnostic outcomes do not write the player’s persistent operation record. Avoid
-`debug=1` unless tracing a specific engine problem: it produces verbose logs.
+The page retains a visible diagnostic report; ordinary play does not show it.
+Diagnostic outcomes do not write the player's persistent operation record.
+Avoid `debug=1` unless tracing a specific engine problem: its logs are verbose.
 
-Mission regression URLs use `/?map=Maps/<map>.map&autotest=mission` for
-success and `autotest=mission-defeat` for failure. Run both for each map:
+Use `/?map=Maps/<map>.map&autotest=mission` for success and
+`autotest=mission-defeat` for failure. All rows passed both branches on
+`6375e6bfb189`, including the additional cases indicated here:
 
-| Map | Mission | Additional failure check |
+| Map | Mission | Additional passing failure case |
 |---|---|---|
 | `WPTraining` | Field Orientation | — |
 | `WPOp01` | First Light | — |
@@ -92,44 +178,55 @@ success and `autotest=mission-defeat` for failure. Run both for each map:
 | `WPChallengeM` | Glass Rampart | `mission-defeat-hq` |
 | `WPChallengeJ` | Hostile Takeover | `mission-defeat-hq` |
 
-These fixtures create prerequisites, destroy named targets and advance timers
-to exercise native script branches. They assert intermediate counters and the
-actual native result callback, rather than recording a synthetic completion.
-Require `MISSION_RESULT PASS` and no `MISSION_CHECK FAIL`. They do not replace
-a human mission playthrough or prove balance. Direct-map sessions exit after a
-result; to verify debrief → report → retry/menu, open `/?autotest=mission`
+The fixtures create prerequisites, destroy named targets and advance timers
+while asserting intermediate counters and the actual result callback. Require
+`MISSION_RESULT PASS` and no `MISSION_CHECK FAIL`. Direct-map sessions exit
+after a result. For menu/debrief/report testing, open `/?autotest=mission`
 and deploy Field Orientation through the menu.
 
-For a roster scene, use `/?map=Maps/WPTest.map&review=1` (Meridian) or
-`WPTestJ` (Jackal). `review=stress` adds a bounded 120-unit encounter and
-reports render/logic timing and heap capacity. Run this separately from other
-active game tabs when recording performance.
+For a roster scene, use `/?map=Maps/WPTest.map&review=1` or the Jackal
+`WPTestJ` map. `review=stress` creates a bounded 120-unit attack-move encounter
+and reports render/logic timing and WASM heap capacity. Run it separately
+from other active game tabs when measuring performance.
 
-## Remaining candidate checks
+## Build reproduction and remaining release checks
 
-Candidate `6375e6bfb189` contains the final roster/portraits, powered Meridian
-defenses, save-map identity/control-bar corrections and fixed native mission
-result assertions. It compiles and passes all local static gates; its staged
-payload is 66,729,367 bytes. Six web-state and six packaging tests pass.
+The final pushed source snapshot is root `0ab5819`, engine
+`05c81c9908d95f6428b14a96935694539b6c1b9d` and DXVK `538cb703`.
+An independent checkout fetched these pins, passed all six web tests, six
+packaging tests, 16 native keyboard cases and content/gameplay/voice gates,
+then completed an incremental WASM build and staging. The tree was clean and
+all recursive pins resolved. Its candidate `a50ecbb361a0` is 66,734,559 bytes,
+159 bytes larger than primary candidate `2a5fb93551f9` and below 64 MiB.
+The primary candidate remains the local playtest build.
 
-The final rendered portrait and model contact sheets were visually reviewed.
-Browser automation is currently blocked by the development Mac lock screen;
-manual unlock is required to resume the checks below. No final play-readiness
-claim is made while those checks are pending.
+A fresh recursive GitHub clone at root `5ad409c`, engine `d04deed8` and
+DXVK `538cb703` passed all 12 tests and content/gameplay/voice gates. The
+documented Emscripten configuration, full 1,279-step clean engine build and
+staging also passed. Its candidate was `8b0a011a5989`, 66,729,527 staged
+bytes. Different compiled bytes from the primary checkout demonstrate a
+working clean build, not byte-identical compilation. The final checkout reused
+that independently built tree for its incremental build after fetching the
+subsequent fixes; it was not a second full clean build.
 
-Native mission end-to-end regressions, final in-engine art review, input-driven unit/combat
-coverage, final save/restore identity, fullscreen/settings recovery, a crowded
-performance run are pending. The root, engine and native DXVK branches have
-been pushed in child-first order. A fresh recursive GitHub clone at root
-`5ad409c`, engine `d04deed8` and DXVK `538cb703` passes all 12 tests and all
-content/gameplay/voice gates; its documented Emscripten configuration succeeds.
-The full 1,279-step clean engine build and subsequent staging also pass.
-That independently compiled candidate is `8b0a011a5989`, with a staged size
-of 66,729,527 bytes. Its compiled bytes differ from the primary candidate;
-this demonstrates a working clean build, not byte-identical compilation.
-The primary staged candidate remains `6375e6bfb189`. All its 471 manifest
-entries, engine files and font match their declared hashes and byte lengths.
-Local HTTP checks return the expected WASM/JavaScript MIME types, immutable
-hashed assets, revalidating HTML/build metadata and bundled notices.
-The separate human/browser/network release matrix remains in
-[publish-checklist.md](publish-checklist.md).
+All 471 final manifest entries, engine files and the font were checked against
+their declared hashes and lengths. Local HTTP HEAD checks returned 200:
+HTML/build metadata use no-cache; WASM uses application/wasm and JavaScript
+uses text/javascript with immutable one-year caching. Bundled notices also
+passed the packaging checks. The current stage is identified by
+`webstage/build.json`; [perf.md](perf.md) records its exact size.
+
+A final bounded hygiene review covered the root/engine changes at the pushed
+snapshot: 16 changed text files, 638,130 bytes including keyboard fixtures.
+It found no high-confidence credential patterns, absolute developer paths,
+build/save/env artifacts, missing local links or removed attribution. The
+root engine gitlink matched the pushed engine commit. This supplements the
+earlier tracked-text scan; it is not a historical security certification.
+
+The candidate is ready for local playtesting. Remaining release work includes
+the rest of the input and lifecycle matrix, transient power-warning and
+POWER REQUIRED presentation, full human training, campaign and balance
+playthroughs, audio listening, other browsers/hardware, a controlled long soak
+and real-network loading. Keep the independent gates
+in [publish-checklist.md](publish-checklist.md) open until their complete
+requirements have evidence.

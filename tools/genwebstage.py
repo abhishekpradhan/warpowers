@@ -38,7 +38,8 @@ def read_notices(root: Path) -> dict[str, bytes]:
     """Read only declared notices; missing license material aborts staging."""
     files = {
         'CREDITS.md': root / 'CREDITS.md', 'ASSETS.md': root / 'ASSETS.md',
-        'LICENSING.md': root / 'LICENSING.md', 'LICENSE.txt': root / 'LICENSE',
+        # Preserve the browser download URL when the repository guide is renamed.
+        'LICENSING.md': root / 'LICENSE.md', 'LICENSE.txt': root / 'LICENSE',
         'ENGINE-LICENSE.md': root / 'engine/LICENSE.md',
         'DVIJOKE-LICENSE.txt': root / 'dvijoke/LICENSE',
         'FONT-LICENSE.txt': root / 'data/Fonts/LICENSE-LiberationFonts',

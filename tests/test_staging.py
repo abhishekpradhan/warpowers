@@ -27,7 +27,7 @@ class StageTests(unittest.TestCase):
             'web/styles.css': b"url('fonts/default.ttf')", 'web/index.html': b'<link href="styles.css"><script src="app.js"></script>',
             'web/credits.html': b'{{BUILD}} {{SOURCE}} <ul>{{DEPENDENCY_NOTICES}}</ul>',
             'CREDITS.md': b'credits', 'ASSETS.md': b'provenance',
-            'LICENSING.md': b'license map', 'LICENSE': b'code notice',
+            'LICENSE.md': b'license map', 'LICENSE': b'code notice',
             'licenses/third-party.json': json.dumps({'schemaVersion': 1, 'components': [{
                 'id': 'fixture', 'name': 'Fixture Library', 'version': '1.0', 'license': 'MIT',
                 'source': 'https://example.com/library/1.0', 'notice': 'third-party/fixture.txt',

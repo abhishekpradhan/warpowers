@@ -1,7 +1,5 @@
 # War Powers
 
-[Licensing](LICENSING.md) · [Dependency notices](licenses/README.md) · [Contributing](CONTRIBUTING.md)
-
 ![Original War Powers models in the menu panorama](docs/media/warpowers-panorama.jpg)
 
 A free real-time strategy game built for the browser: establish a base,
@@ -83,7 +81,7 @@ parent gitlinks so recursive clones remain reproducible.
 Root code is [MIT](LICENSE); project-authored content is CC BY 4.0. Imports
 retain their own licenses. The engine is GPL-3.0 with EA's additional terms;
 its compiled distribution must retain the applicable source and notices.
-See [LICENSING.md](LICENSING.md), the per-file [asset ledger](ASSETS.md),
+See the [licensing guide](LICENSE.md), the per-file [asset ledger](ASSETS.md),
 and [credits](CREDITS.md) for the boundaries and acknowledgements.
 
 No EA assets or game data ship with this project. EA names identify the

@@ -244,6 +244,11 @@ superseded entries compressed per D011); executed/stale docs deleted per
 D011 — fork-plan.md (plan fully executed), hosting.md (folded into D013),
 tools/patches/ (its one patch is committed in the vendored dvijoke).
 
+On 2026-09-05 the overview was renamed again to **LICENSE.md** so GitHub
+surfaces it in a License tab. The root **LICENSE** still contains the MIT
+terms; the overview's content and the browser's `licenses/LICENSING.md`
+download URL are unchanged.
+
 ## D023 — Open mission access; optional portable operation record (2026-09-05)
 
 **User direction:** this browser game has no accounts, and losing browser data

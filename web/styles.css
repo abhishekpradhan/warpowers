@@ -1,0 +1,190 @@
+@font-face {
+  font-family: WarSans;
+  src: url('fonts/default.ttf') format('truetype');
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --ink: #d9e1e5;
+  --muted: #94a2ae;
+  --gold: #d7b45a;
+  --line: #2b3c47;
+  --danger: #e58775;
+  --ui-scale: 1;
+  font-family: WarSans, Arial, sans-serif;
+  background: #070c11;
+  color: var(--ink);
+}
+* { box-sizing: border-box; }
+body { margin: 0; overflow: hidden; }
+button, input, select { font: inherit; }
+button, a, input, select { touch-action: manipulation; }
+button {
+  cursor: pointer; color: var(--ink); background: #192732;
+  border: 1px solid #3a4a55; border-radius: 3px; padding: 10px 15px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+button:hover { background: #263a47; border-color: #71848f; }
+button:disabled { cursor: default; opacity: .45; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 4px;
+}
+a { color: var(--muted); text-underline-offset: 4px; }
+a:hover { color: var(--gold); }
+[hidden] { display: none !important; }
+.primary { background: var(--gold); color: #131b20; border-color: var(--gold); font-weight: 700; }
+.primary:hover { background: #ecd086; border-color: #ecd086; }
+.eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; margin: 0 0 12px; line-height: 1.6; }
+.textButton { padding: 0; border: 0; background: none; color: var(--muted); font-size: 11px; }
+.textButton:hover { background: none; color: var(--gold); }
+#stage { height: 100dvh; display: flex; align-items: center; justify-content: center; background: #030608; }
+#frame { position: relative; aspect-ratio: 16 / 9; width: min(100vw, calc(100dvh * 16 / 9)); overflow: hidden; background: #0b1118; }
+#canvas { display: block; width: 100%; height: 100%; outline: none; }
+#testReport { position: fixed; bottom: 0; left: 0; right: 0; max-height: 130px; overflow: auto; margin: 0; padding: 8px 12px; background: #081118ee; color: #d8e4cc; z-index: 60; font: 11px/1.4 monospace; white-space: pre-wrap; pointer-events: none; }
+
+/* Utility controls stay out of the engine's world input and command bar. */
+#utilityBar {
+  position: absolute; right: 16px; top: 14px; z-index: 5; display: flex;
+  align-items: center; gap: 3px; padding: 3px 5px; background: rgba(9, 17, 23, .92);
+  border: 1px solid #32414b; border-radius: 4px; font-size: calc(11px * var(--ui-scale));
+  box-shadow: 0 3px 18px #0004;
+}
+#utilityBar button { border: 0; background: none; padding: 8px 11px; }
+#utilityBar button:hover { background: #283944; color: var(--gold); }
+#utilityBar .iconButton { font-size: 19px; padding: 3px 9px; }
+#utilityBar .isMuted { color: var(--danger); }
+.utilityDivider { height: 18px; border-left: 1px solid var(--line); margin: 0 5px; }
+.counter { font-size: 9px; color: var(--gold); margin-left: 4px; }
+#missionHud {
+  position: absolute; top: 18px; left: 22px; z-index: 3; max-width: min(350px, 38%);
+  padding: 13px 16px; background: linear-gradient(90deg, rgba(9, 18, 24, .93), rgba(9, 18, 24, .79));
+  border-left: 2px solid var(--gold); pointer-events: none; font-size: calc(12px * var(--ui-scale));
+}
+#missionHud .eyebrow { display: flex; justify-content: space-between; gap: 24px; margin: 0 0 4px; font-size: 9px; }
+#missionHud h1 { font-size: 15px; margin: 0 0 7px; font-weight: 700; letter-spacing: .03em; }
+#missionHud p { margin: 0; line-height: 1.45; }
+#missionHud button { pointer-events: auto; margin-top: 9px; }
+.objectiveMeta { display: flex; justify-content: space-between; gap: 16px; color: var(--gold); font-size: 11px; line-height: 1.5; margin-top: 5px; }
+#guide {
+  position: absolute; right: 20px; top: 77px; max-width: 290px; background: rgba(11, 24, 31, .94);
+  border-top: 2px solid var(--gold); padding: 14px 17px; font-size: calc(12px * var(--ui-scale));
+  z-index: 4; animation: slideIn .3s ease-out;
+}
+#guide .eyebrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+#guide strong { font-size: 13px; }
+#guide p { color: #aabbc5; line-height: 1.55; margin: 7px 0 0; }
+#dismissGuide { font-size: 19px; line-height: 1; }
+#toast {
+  position: absolute; left: 50%; top: 19%; transform: translateX(-50%); max-width: 460px;
+  padding: 12px 20px; background: #112732ed; border: 1px solid #547482; border-radius: 4px;
+  box-shadow: 0 6px 30px #0008; font-size: 13px; text-align: center; z-index: 30;
+}
+
+/* Loader uses the same command-network palette as the native menu. */
+#boot {
+  position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 65% 42%, #273539 0, transparent 48%), linear-gradient(115deg, #0a141d, #111e27 55%, #142025);
+  opacity: 1; transition: opacity .45s ease;
+}
+#boot.departing { opacity: 0; pointer-events: none; }
+.bootGrid {
+  position: absolute; inset: 0; opacity: .18;
+  background-image: linear-gradient(#b5b2a022 1px, transparent 1px), linear-gradient(90deg, #b5b2a022 1px, transparent 1px);
+  background-size: 64px 64px; mask-image: linear-gradient(115deg, transparent, black);
+}
+.bootGrid:after { content: ''; position: absolute; width: 40%; height: 80%; right: 0; top: -10%; border: 1px solid #d7b45a55; transform: rotate(35deg); }
+.bootContent { width: min(540px, 75%); position: relative; animation: slideIn .5s ease-out; }
+.wordmark { font-size: clamp(35px, 5.2vw, 72px); font-weight: 700; letter-spacing: .06em; white-space: nowrap; color: #eee8d9; }
+.wordmark span { color: var(--gold); }
+.bootContent > .eyebrow { margin-bottom: 24px; }
+.bootTagline { font-size: 15px; color: #a5b3bb; letter-spacing: .04em; margin: 16px 0 45px; }
+.bootProgress { height: 3px; background: #364650; overflow: hidden; }
+.bootProgress > div { height: 100%; width: 0; background: var(--gold); transition: width .2s; }
+.bootStatus { display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; letter-spacing: .07em; color: #b9c5cc; }
+#bootHint { font-size: 11px; color: #7c909d; margin-top: 26px; line-height: 1.6; }
+.bootFooter { position: absolute; left: 30px; right: 30px; bottom: 24px; display: flex; justify-content: space-between; gap: 20px; color: #788d99; font-size: 9px; letter-spacing: .11em; }
+.bootFooter a { text-decoration: none; }
+.versus { margin: 0 12px; color: var(--gold); }
+#bootError { margin-top: 24px; border-top: 1px solid #624336; padding-top: 14px; }
+#errorMessage { font-size: 14px; line-height: 1.6; color: #eab9a5; }
+#errorCode { font-size: 10px; color: var(--muted); }
+.actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+/* Shared modal provides keyboard focus containment and native Escape support. */
+#panel {
+  margin: auto; border: 1px solid #3d525f; padding: 0; color: var(--ink); background: #0f1a23;
+  width: min(760px, calc(100vw - 48px)); max-height: calc(100dvh - 50px); border-radius: 6px;
+  box-shadow: 0 25px 100px #000b; font-size: calc(13px * var(--ui-scale));
+}
+#panel::backdrop { background: #02070bc9; backdrop-filter: blur(3px); }
+.panelHeader { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 25px 32px 22px; border-bottom: 1px solid var(--line); background: #12212bf5; }
+.panelHeader h2 { font-size: 25px; font-weight: 400; letter-spacing: .015em; margin: 0; }
+.panelHeader .eyebrow { font-size: 9px; color: var(--gold); margin-bottom: 6px; }
+.closeButton { font-size: 25px; line-height: 1; padding: 4px 9px; background: none; border: 0; }
+.panelFooter { padding: 17px 32px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 22px; font-size: 10px; line-height: 1.5; color: #7f959f; background: #0d1820; }
+#panelBody { padding: 27px 32px 30px; }
+.sectionLabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); margin: 26px 0 12px; }
+.sectionLabel:first-child { margin-top: 0; }
+.settingRow { display: grid; grid-template-columns: 1fr 240px; align-items: center; gap: 22px; min-height: 47px; border-bottom: 1px solid #263842; }
+.settingRow > label { color: #c3d0d7; }
+.rangeWrap { display: flex; align-items: center; gap: 13px; }
+.rangeWrap output { font-size: 11px; width: 32px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--gold); height: 20px; }
+select { width: 100%; padding: 7px 9px; color: var(--ink); background: #172833; border: 1px solid #3a4d5a; border-radius: 3px; }
+input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--gold); justify-self: end; }
+.muted { color: var(--muted); line-height: 1.6; font-size: 12px; }
+.settingsNote { font-size: 11px; line-height: 1.6; color: #899eaa; margin: 14px 0; }
+.settingsNote.pending { color: var(--gold); }
+.saveRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.saveRow p { flex-basis: 100%; margin: 2px 0 0; }
+.controlList { margin: 0; }
+.controlList > div { display: flex; gap: 24px; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #293b46; }
+.controlList dt { color: #becbd3; }
+.controlList dd { margin: 0; text-align: right; color: #ebdbad; }
+.controlList kbd { font: 11px WarSans, Arial, sans-serif; background: #22333f; border: 1px solid #465762; border-radius: 3px; padding: 3px 6px; margin-left: 3px; }
+.manualIntro { color: #c8d3d8; line-height: 1.65; font-size: 14px; margin: 0 0 24px; }
+.manualColumns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.manualColumns h3 { color: var(--gold); font-weight: 400; font-size: 17px; }
+.manualColumns p, .manualColumns li { font-size: 12px; line-height: 1.7; color: #a9bac5; }
+.manualColumns ul { padding-left: 16px; }
+.missionEntry { display: grid; grid-template-columns: 30px 1fr auto; gap: 18px; padding: 20px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.missionIndex { color: #718d9c; font-size: 11px; padding-top: 4px; }
+.missionEntry h3 { margin: 0 0 5px; font-size: 16px; font-weight: 400; color: #e1e4df; }
+.missionEntry p { margin: 6px 0 0; color: #8fa6b2; line-height: 1.6; font-size: 12px; }
+.missionEntry .missionFaction { font-size: 9px; letter-spacing: .1em; color: #b4a773; text-transform: uppercase; }
+.missionStatus { font-size: 10px; white-space: nowrap; color: #85bfa5; padding-top: 4px; }
+.briefingLead { font-size: 17px; color: #e0e3db; line-height: 1.7; margin-top: 0; }
+.objectiveList { padding-left: 22px; }
+.objectiveList li { padding: 7px 0; color: #bdcdd6; line-height: 1.5; }
+.operationTag { font-size: 10px; color: var(--gold); letter-spacing: .09em; margin-bottom: 15px; }
+.resultBanner { font-size: 12px; letter-spacing: .12em; color: var(--gold); padding-bottom: 15px; }
+.resultStats { display: flex; gap: 28px; flex-wrap: wrap; margin: 25px 0; }
+.resultStats strong { display: block; font-size: 26px; color: #e6e6dc; font-weight: 400; }
+.resultStats span { font-size: 10px; color: var(--muted); }
+.noscript { position: fixed; inset: 0; background: #101c25; display: grid; place-content: center; padding: 40px; }
+#debugLog { position: fixed; bottom: 0; left: 0; right: 0; max-height: 130px; overflow: auto; background: #020507e8; font-size: 9px; pointer-events: none; z-index: 90; margin: 0; padding: 8px; }
+.highContrast { --ink: #fff; --muted: #cadbe6; --line: #6b8696; }
+.highContrast #missionHud, .highContrast #guide { background: #07131c; border-color: #ffe58d; }
+.highContrast .settingRow, .highContrast .controlList > div { border-color: #5d7786; }
+.reducedMotion *, .reducedMotion *::before, .reducedMotion *::after { animation: none !important; transition: none !important; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 950px) {
+  #utilityBar { top: 7px; right: 7px; font-size: 10px; }
+  #utilityBar button { padding: 6px 7px; }
+  #missionHud { top: 10px; left: 10px; max-width: 32%; padding: 9px 11px; }
+  #missionHud h1 { font-size: 13px; } #missionHud p { font-size: 10px; }
+  #missionHud .eyebrow { font-size: 8px; }
+  #guide { right: 10px; top: 57px; width: 240px; max-width: 32%; padding: 10px; font-size: 11px; }
+  .bootTagline { margin-bottom: 25px; }
+  .bootFooter { bottom: 14px; left: 20px; right: 20px; font-size: 8px; }
+}
+@media (max-width: 640px) {
+  .settingRow { grid-template-columns: 1fr 150px; gap: 15px; }
+  .manualColumns { grid-template-columns: 1fr; gap: 12px; }
+  #panelBody { padding: 20px; } .panelHeader { padding: 20px; }
+  .panelFooter { padding: 15px 20px; flex-direction: column; gap: 6px; }
+  .missionEntry { grid-template-columns: 20px 1fr; gap: 10px; } .missionStatus { grid-column: 2; }
+  #utilityBar button { padding: 5px; } .bootFooter > span { display: none; }
+  .bootContent > .eyebrow { margin-bottom: 14px; } .bootTagline { margin: 10px 0 20px; }
+  #bootHint { margin-top: 12px; } .wordmark { font-size: 34px; }
+}

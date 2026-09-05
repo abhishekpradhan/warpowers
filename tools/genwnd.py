@@ -6,13 +6,15 @@ windows the in-game UI dereferences at runtime (ButtonQueue01..09 are hard
 requirements — ControlBarCommand.cpp derefs them unguarded) and wires the
 gadget message chain: button GBM_SELECTED -> PassSelectedButtonsToParentSystem
 -> container -> ControlBarParent's ControlBarSystem -> ControlBar command
-processing. Coordinates are absolute in the 800x600 creation resolution; the
-engine rescales to the real display.
+processing. HUD coordinates use a 1280x720 reference; shell rectangles authored
+on the legacy canvas are uniformly scaled and centered within that reference.
 """
 import os
 import sys
 
 CB = "ControlBar.wnd"
+# Native HUD coordinates; legacy shell rectangles are centered without stretching.
+WIDE_COORDS = True
 
 def drawdata(bg, border=None, image=None):
     if border is None:
@@ -27,11 +29,18 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
            drawcb="[None]", inputcb="[None]", border=None, textcolor=None,
            fontsize=10, bold=0, hilitebg=None, image=None):
     x0, y0, x1, y1 = rect
+    if not WIDE_COORDS:
+        if rect == (0, 0, 800, 600):
+            x0, y0, x1, y1 = 0, 0, 1280, 720
+        else:
+            x0, x1 = round(x0 * 1.2 + 160), round(x1 * 1.2 + 160)
+            y0, y1 = round(y0 * 1.2), round(y1 * 1.2)
+        fontsize = max(12, round(fontsize * 1.2))
     if textcolor is None:
         textcolor = "255 255 255 255"
     body = f"""WINDOW
   WINDOWTYPE = {wtype};
-  SCREENRECT = UPPERLEFT: {x0} {y0}, BOTTOMRIGHT: {x1} {y1}, CREATIONRESOLUTION: 800 600;
+  SCREENRECT = UPPERLEFT: {x0} {y0}, BOTTOMRIGHT: {x1} {y1}, CREATIONRESOLUTION: 1280 720;
   NAME = "{CB}:{name}";
   STATUS = {status};
   STYLE = {wtype};
@@ -67,92 +76,63 @@ def grid(prefix, count, cols, x0, y0, w, h, px, py, **kw):
                           syscb="PassSelectedButtonsToParentSystem", **kw))
     return out
 
-DARK = "13 15 18 255"
+# Visual thesis: a restrained field console, with the battlefield dominant.
+# Content hierarchy: selected identity / orders and queue / economy and radar.
+# Interactions: existing command hover, queue progress, and context panels.
+DARK = "14 18 24 255"
 children = []
-# context panels (ControlBar shows/hides these per selection context) — all
-# borderless so idle contexts leave no chrome behind
-children.append(window("UnderConstructionWindow", (10, 440, 200, 590), bg=DARK, border=DARK,
-                       children=[window("UnderConstructionDesc", (16, 448, 194, 478),
-                                        wtype="STATICTEXT", status="ENABLED",
-                                        bg="16 18 21 255", border="70 76 84 255",
-                                        extra="  STATICTEXTDATA = CENTERED: 1;\n"),
-                                 window("ButtonCancelConstruction", (100, 486, 190, 514),
-                                        wtype="PUSHBUTTON", status="ENABLED",
-                                        syscb="PassSelectedButtonsToParentSystem",
-                                        bg="128 36 36 255", border="220 96 96 255",
-                                        extra='  TEXT = "WP:Cancel";\n')]))
-children.append(window("OCLTimerWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
-children.append(window("BeaconWindow", (10, 440, 200, 590), bg=DARK, border=DARK))
-# command grid and production queue get DISJOINT rects: overlapped, the
-# invisible queue buttons swallow command clicks while producing (a click on
-# queue slot 1 cancels production — reads as "my clicks do nothing").
-# Command grid: 3 rows of 6 (the engine derefs all 18 ButtonCommand windows;
-# command sets stop at slot 9, so row 3 never populates — its rect overlaps
-# the queue strip but stays inert). Queue strip below; both clear of the 3D
-# viewport overdraw (scene renders down to ~UI y465).
-children.append(window("CommandWindow", (210, 468, 590, 562), bg=DARK, border=DARK,
-                       syscb="PassSelectedButtonsToParentSystem",
-                       children=grid("ButtonCommand", 18, 6, 212, 470, 58, 44, 63, 47,
-                                     bg="34 38 44 255")))
-children.append(window("ProductionQueueWindow", (210, 566, 590, 598), bg=DARK, border=DARK,
-                       syscb="PassSelectedButtonsToParentSystem",
-                       children=grid("ButtonQueue", 9, 9, 212, 567, 30, 30, 34, 34,
-                                     bg="30 40 34 255")))
-children.append(window("ObserverPlayerListWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
-children.append(window("ObserverPlayerInfoWindow", (210, 440, 590, 590), bg=DARK, border=DARK))
-children.append(window("WinUnitSelected", (10, 440, 200, 470), bg=DARK, border=DARK))
-# portrait cameo: transparent when no image is set (during production the
-# engine intentionally nulls the portrait and shows the queue instead — an
-# opaque bg here reads as a broken black box)
-children.append(window("CameoWindow", (10, 475, 90, 565), bg="0 0 0 0", border="0 0 0 0"))
-children.append(window("PopupCommunicator", (762, 402, 790, 418), bg=DARK, border=DARK))
-children.append(window("BackgroundMarker", (0, 420, 8, 428), bg=DARK, border=DARK))
-children.append(window("WinUAttack", (0, 400, 8, 408), bg=DARK, border=DARK))
-children.append(window("RightHUD", (600, 560, 636, 596), bg=DARK, border=DARK,
-                       children=[window(f"UnitUpgrade{i}", (602 + 6 * (i - 1), 562,
-                                                           606 + 6 * (i - 1), 566),
-                                        bg=DARK, border=DARK)
-                                 for i in range(1, 6)]))
-# money readout + power sliver (InGameUI::update derefs both every frame)
-children.append(window("MoneyDisplay", (612, 426, 788, 442), wtype="STATICTEXT",
-                       status="ENABLED", bg="16 18 21 255", border="120 104 60 255",
-                       extra="  STATICTEXTDATA = CENTERED: 1;\n"))
-# Idle-worker jump button (engine-wired: ControlBarSystem's
-# buttonIdleWorker branch calls selectNextIdleWorker; InGameUI enables/
-# disables it with the idle count). Bottom-left corner BELOW the cameo —
-# it must not intrude on CameoWindow (10,475)-(90,565) or the portrait
-# renders with the glyph stamped on its corner.
-children.append(window("ButtonIdleWorker", (10, 567, 46, 597),
-                       wtype="PUSHBUTTON", status="ENABLED+IMAGE",
-                       syscb="PassSelectedButtonsToParentSystem",
-                       bg="26 30 38 255", border="58 66 80 255",
-                       image="WPGlyIdleWorker"))
+def hud_label(name, rect, text=None, size=12, color="188 199 211 255"):
+    extra = '  STATICTEXTDATA = CENTERED: 0;\n'
+    if text: extra += f'  TEXT = "{text}";\n'
+    return window(name, rect, wtype="STATICTEXT", status="ENABLED+NOFOCUS",
+                  bg="0 0 0 0", border="0 0 0 0", textcolor=color, fontsize=size, extra=extra)
 
-# Power meter: a decorative trough frame with the live meter as its child.
-# The child carries DRAWCALLBACK W3DPowerDraw (engine draw: log-scale tick
-# bar green/yellow/red by margin + consumption needle - images PowerPointG/
-# Y/R + PowerBarSlider on the glyph sheet). A draw callback REPLACES the
-# default bg/border paint, hence the split; neither window may carry
-# WIN_STATUS_IMAGE (image-flagged windows without an image paint nothing
-# and haunt the tooltip hit-test).
-# One window, no decorative sibling: an overlapping sibling wins the input
-# hit-test and eats the hover tooltip. W3DPowerDraw paints its own trough +
-# border around the window rect, then ticks + needle.
-children.append(window("PowerWindow", (613, 446, 787, 455), status="ENABLED+NOFOCUS",
-                       drawcb="W3DPowerDraw"))
-# radar draws into this window (engine hardcodes the name ControlBar.wnd:LeftHUD).
-# Square, so the square map fills it edge to edge.
-children.append(window("LeftHUD", (648, 456, 788, 596), bg="10 12 14 255",
-                       border="120 104 60 255",
-                       drawcb="W3DLeftHUDDraw", inputcb="LeftHUDInput"))
-
-# WPHudSwallowInput: the opaque bar consumes every click that no child
-# handled (disabled buttons, panel gaps) - without it those fall through
-# to the world as rally/move orders behind the HUD.
-parent = window("ControlBarParent", (0, 420, 800, 600),
-                status="ENABLED+IMAGE+NOFOCUS", syscb="ControlBarSystem",
-                inputcb="WPHudSwallowInput",
-                bg="10 11 13 255", border="10 11 13 255", children=children)
+# All required context windows remain, with mutually exclusive selection UI.
+children.append(window("UnderConstructionWindow", (20, 594, 368, 674), bg=DARK, border=DARK,
+    children=[hud_label("UnderConstructionDesc", (130, 606, 354, 630)),
+              window("ButtonCancelConstruction", (228, 637, 354, 669), wtype="PUSHBUTTON",
+                     status="ENABLED", syscb="PassSelectedButtonsToParentSystem",
+                     bg="61 30 30 255", border="124 62 62 255", extra='  TEXT = "WP:Cancel";\n')]))
+for name in ["OCLTimerWindow", "BeaconWindow"]:
+    children.append(window(name, (20, 594, 368, 674), bg=DARK, border=DARK))
+# Every command slot has a real, non-overlapping hit rectangle. Two rows of
+# nine include expansion slots without colliding with the nine-item queue.
+children.append(window("CommandWindow", (386, 582, 932, 678), bg=DARK, border=DARK,
+    syscb="PassSelectedButtonsToParentSystem",
+    children=grid("ButtonCommand", 18, 9, 390, 586, 44, 44, 60, 47,
+                  bg="30 39 48 255", border="57 69 82 255")))
+children.append(window("ProductionQueueWindow", (386, 681, 932, 716), bg=DARK, border=DARK,
+    syscb="PassSelectedButtonsToParentSystem",
+    children=grid("ButtonQueue", 9, 9, 390, 683, 30, 30, 39, 34,
+                  bg="29 45 41 255", border="65 88 79 255")))
+for name in ["ObserverPlayerListWindow", "ObserverPlayerInfoWindow"]:
+    children.append(window(name, (390, 586, 928, 714), bg=DARK, border=DARK))
+children.append(window("WinUnitSelected", (20, 566, 368, 592), bg=DARK, border=DARK))
+children.append(window("CameoWindow", (20, 605, 92, 677), bg="0 0 0 0", border="0 0 0 0"))
+children.append(window("PopupCommunicator", (1242, 543, 1266, 559), bg=DARK, border=DARK))
+children.append(window("BackgroundMarker", (0, 560, 8, 568), bg=DARK, border=DARK))
+children.append(window("WinUAttack", (0, 544, 8, 552), bg=DARK, border=DARK))
+children.append(window("RightHUD", (944, 684, 986, 712), bg=DARK, border=DARK,
+    children=[window(f"UnitUpgrade{i}", (946+8*(i-1),686,952+8*(i-1),692),bg=DARK,border=DARK) for i in range(1,6)]))
+children.append(window("MoneyDisplay", (944, 566, 1118, 588), wtype="STATICTEXT", status="ENABLED",
+    bg=DARK, border=DARK, textcolor="229 195 108 255", fontsize=16,
+    extra="  STATICTEXTDATA = CENTERED: 0;\n"))
+children.append(window("PowerWindow", (946, 599, 1117, 613), status="ENABLED+NOFOCUS", drawcb="W3DPowerDraw"))
+children.append(window("ButtonIdleWorker", (20, 684, 56, 716), wtype="PUSHBUTTON", status="ENABLED+IMAGE",
+    syscb="PassSelectedButtonsToParentSystem", bg="28 37 46 255", border="62 77 90 255", image="WPGlyIdleWorker"))
+children.append(window("LeftHUD", (1130, 570, 1270, 710), bg="9 13 17 255", border="109 101 71 255",
+    drawcb="W3DLeftHUDDraw", inputcb="LeftHUDInput"))
+# Persistent identity never disappears when the engine swaps cameo for queue.
+children.extend([
+    hud_label("SelectionTitle", (20, 570, 374, 595), "WP:SelectionHint", 15, "230 234 238 255"),
+    hud_label("SelectionDetail", (130, 608, 374, 629)),
+    hud_label("ArmySummary", (130, 642, 374, 663)),
+    hud_label("PowerSummary", (944, 622, 1118, 643), None, 12, "164 180 193 255"),
+    hud_label("OrdersTitle", (390, 565, 926, 581), "WP:OrdersLabel", 11, "131 146 160 255"),
+    hud_label("ControlsHint", (67, 691, 370, 711), None, 11, "133 147 161 255"),
+])
+parent = window("ControlBarParent", (0, 560, 1280, 720), status="ENABLED+NOFOCUS",
+    syscb="ControlBarSystem", inputcb="WPHudSwallowInput", bg=DARK, border=DARK, children=children)
 
 content = """FILE_VERSION = 2;
 STARTLAYOUTBLOCK
@@ -163,7 +143,6 @@ ENDLAYOUTBLOCK
 """ + parent
 
 targets = sys.argv[1:] or [
-    os.path.expanduser("~/GeneralsX/GeneralsZH/Window/ControlBar.wnd"),
     os.path.join(os.path.dirname(__file__), "..", "data", "Window", "ControlBar.wnd"),
 ]
 for t in targets:
@@ -172,28 +151,24 @@ for t in targets:
     print(f"wrote {t} ({len(content)} bytes)")
 
 # ---------- ControlBarPopupDescription.wnd (build-button hover tooltip) ----------
-# One seamless panel docked just above the command grid (grid top = 468).
+# One seamless panel docked just above the command grid (grid top = 586).
 # Engine contract (ControlBarPopupDescription.cpp): parent min height 102; the
 # description row is measured with word-wrap and BOTH desc + parent grow by the
 # overflow while the parent slides UP by the same amount — so the panel is
 # bottom-anchored: author the fixed look, long descriptions extend upward.
-PBG = "16 20 27 250"
-# Parent drops WIN_STATUS_IMAGE so its fill actually paints (the default draw
-# only color-fills without the flag) - otherwise the text rows float as bare
-# strips when the popup opens for money/power hovers.
-POPUP = window("PopupParent", (210, 352, 500, 454), status="ENABLED+NOFOCUS",
-               bg=PBG, border="58 66 80 255", children=[
-    window("StaticTextName", (218, 358, 492, 376), wtype="STATICTEXT", status="ENABLED",
-           bg="0 0 0 0", border="0 0 0 0", textcolor="215 180 90 255",
-           fontsize=12, bold=1,
-           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
-    window("StaticTextCost", (218, 380, 492, 396), wtype="STATICTEXT", status="ENABLED",
-           bg="0 0 0 0", border="0 0 0 0", textcolor="215 180 90 255",
-           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
-    window("StaticTextDescription", (218, 400, 492, 448), wtype="STATICTEXT", status="ENABLED",
-           bg="0 0 0 0", border="0 0 0 0", textcolor="199 206 218 255",
-           extra="  STATICTEXTDATA = CENTERED: 0;\n"),
-])
+PBG = "17 23 30 252"
+POPUP = window("PopupParent", (386, 438, 766, 550), status="ENABLED+NOFOCUS",
+    bg=PBG, border="67 80 91 255", children=[
+        window("StaticTextName", (399, 447, 753, 469), wtype="STATICTEXT", status="ENABLED",
+               bg="0 0 0 0", border="0 0 0 0", textcolor="225 191 107 255", fontsize=15, bold=1,
+               extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+        window("StaticTextCost", (399, 473, 753, 492), wtype="STATICTEXT", status="ENABLED",
+               bg="0 0 0 0", border="0 0 0 0", textcolor="225 191 107 255", fontsize=12,
+               extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+        window("StaticTextDescription", (399, 498, 753, 540), wtype="STATICTEXT", status="ENABLED",
+               bg="0 0 0 0", border="0 0 0 0", textcolor="201 211 221 255", fontsize=12,
+               extra="  STATICTEXTDATA = CENTERED: 0;\n"),
+    ])
 popup_content = ("FILE_VERSION = 2;\n"
                  "STARTLAYOUTBLOCK\n"
                  "  LAYOUTINIT = \"[None]\";\n"
@@ -206,6 +181,8 @@ for t in targets:
         f.write(popup_content)
     print("wrote", pt)
 
+
+WIDE_COORDS = False
 
 # ---------- match-result screens (ScriptActions loads these on VICTORY/DEFEAT) ----------
 def result_screen(fname, key, color):
@@ -273,6 +250,13 @@ def backdrop(alpha=255, name="ScreenBackdrop"):
     bg = f"10 12 16 {alpha}"
     return window(name, (0, 0, 800, 600), status="ENABLED+NOFOCUS",
                   bg=bg, border=bg)
+
+def menu_art():
+    # Original game-scene artwork; the mapped image crops its power-of-two
+    # texture to 16:9 so the full-screen native panel preserves composition.
+    return window("MenuArtwork", (0, 0, 800, 600),
+                  status="ENABLED+IMAGE+NOFOCUS", image="WPMenuBackdrop",
+                  bg="255 255 255 255", border="0 0 0 0")
 
 def frame_border(name="ScreenFrame"):
     # Inset 1px outline matching the page's framed-stage look (the window
@@ -372,24 +356,29 @@ message_box("QuitMessageBox", "QuitMessageBoxSystem")
 
 
 # ---------- In-engine shell screens (WPShell.cpp callbacks) ----------
-# The engine shell is the BETWEEN-MATCHES hub (post-match score, redeploy,
-# stand down). At boot the web page is the menu: its DEPLOY boots straight
-# into the picked faction's map via WP_BOOT_MAP. Styled to match the page.
+# The engine shell is the only match-launch hub. Web utilities provide
+# settings, briefing and progression around these native controls.
 
 main_children = [
-    backdrop(),
+    menu_art(),
+    backdrop(alpha=95),
+    # The artwork leaves open terrain on the left; this translucent field
+    # keeps the live wordmark and controls readable at any output resolution.
+    window("MenuTextField", (55, 127, 625, 453), status="ENABLED+NOFOCUS",
+           bg="10 12 16 165", border="10 12 16 165"),
     frame_border(),
-    # Two-tone wordmark like the page (WAR warm-white, POWERS gold): two
+    # Two-tone wordmark (WAR warm-white, POWERS gold): two
     # left-justified labels on one baseline; box origins hand-tuned to the
     # rendered glyph widths (checked via native frame dump).
-    label("TitleWar", (217, 158, 383, 210), "WP:TitleWar", size=36,
+    label("TitleWar", (90, 158, 256, 210), "WP:TitleWar", size=36,
           color="232 226 214 255", bold=1, centered=0),
-    label("TitlePowers", (363, 158, 720, 210), "WP:TitlePowers", size=36,
+    label("TitlePowers", (236, 158, 593, 210), "WP:TitlePowers", size=36,
           color=GOLD, bold=1, centered=0),
-    rule("TitleRule", (352, 218, 448, 221)),
-    label("TitleTag", (100, 232, 700, 252), "WP:Tagline", size=10, color=DIM),
-    btn("ButtonEngage",  (290, 312, 510, 352), "WP:Engage", "primary", size=13),
-    btn("ButtonQuit",    (290, 366, 510, 400), "WP:QuitGame", "danger"),
+    rule("TitleRule", (90, 218, 186, 221)),
+    label("TitleTag", (90, 239, 593, 279), "WP:Tagline", size=11,
+          color="172 183 199 255", centered=0),
+    btn("ButtonEngage",  (90, 312, 310, 352), "WP:Engage", "primary", size=13),
+    btn("ButtonQuit",    (90, 366, 310, 400), "WP:QuitGame", "ghost"),
     label("LabelVersion", (540, 576, 792, 594), "", size=9, color=DIM,
           centered=0),
 ]
@@ -404,37 +393,34 @@ menu_layout("MainMenu", MAINMENU, init="WPMainMenuInit",
 # deploy buttons. MapName/MapDesc text is filled by WPSkirmishInit /
 # the arrow handlers (winSetText / GadgetStaticTextSetText).
 sk_children = [
-    backdrop(),
-    frame_border(),
-    label("TitleDeploy", (100, 140, 700, 176), "WP:Deployment", size=22,
-          color="232 226 214 255", bold=1),
-    rule("DeployRule", (368, 184, 432, 186)),
-    label("DeployHint", (100, 196, 700, 212), "WP:DeployHint", size=10,
-          color=DIM),
-    label("BattlefieldLabel", (100, 230, 700, 243), "WP:BattlefieldLabel",
-          size=9, color=DIM),
-    btn("ButtonMapPrev", (252, 248, 288, 280), "WP:ArrowLeft", "ghost", size=13),
-    label("MapName", (296, 251, 504, 277), "", size=14, color=GOLD, bold=1,
-          bg="20 24 31 255"),
-    btn("ButtonMapNext", (512, 248, 548, 280), "WP:ArrowRight", "ghost", size=13),
-    label("MapDesc", (100, 284, 700, 298), "", size=9, color=DIM),
-    # Opponent difficulty: same cycler pattern as the battlefield picker;
-    # DiffName/DiffDesc are runtime-set by WPSkirmishInit / the arrows.
-    label("DifficultyLabel", (100, 310, 700, 323), "WP:DifficultyLabel",
-          size=9, color=DIM),
-    btn("ButtonDiffPrev", (252, 328, 288, 360), "WP:ArrowLeft", "ghost", size=13),
-    label("DiffName", (296, 331, 504, 357), "", size=14, color=GOLD, bold=1,
-          bg="20 24 31 255"),
-    btn("ButtonDiffNext", (512, 328, 548, 360), "WP:ArrowRight", "ghost", size=13),
-    label("DiffDesc", (100, 364, 700, 378), "", size=9, color=DIM),
-    label("FrontLabel", (100, 392, 700, 405), "WP:ChooseFront",
-          size=9, color=DIM),
-    btn("ButtonDeployMeridian", (240, 410, 560, 450), "WP:DeployMeridian",
-        "meridian", size=13),
-    btn("ButtonDeployJackal",   (240, 456, 560, 496), "WP:DeployJackal",
-        "jackal", size=13),
-    btn("ButtonBack", (330, 510, 470, 540), "WP:Back", "ghost"),
+    menu_art(), backdrop(alpha=235), frame_border(),
+    label("TitleDeploy", (70, 62, 730, 99), "WP:Deployment", size=25,
+          color="232 226 214 255", centered=0),
+    rule("DeployRule", (70, 112, 730, 114)),
 ]
+for idx, kind in enumerate(["Training", "Skirmish", "Operation", "Challenge"]):
+    x = 70 + idx * 166
+    sk_children.append(btn("ButtonMode" + kind, (x, 129, x+158, 161),
+                           "WP:MissionType" + kind, "ghost", size=11))
+sk_children.extend([
+    window("MapPreview", (70, 193, 326, 385), status="ENABLED+IMAGE+NOFOCUS",
+           image="WPMapPreviewFlats", bg="20 25 30 255", border=LINE),
+    btn("ButtonMapPrev", (345, 192, 375, 226), "WP:ArrowLeft", "ghost", size=13),
+    label("MapName", (388, 194, 687, 222), "", size=19, color=GOLD, bold=1, centered=0),
+    btn("ButtonMapNext", (700, 192, 730, 226), "WP:ArrowRight", "ghost", size=13),
+    label("MapDesc", (345, 239, 730, 301), "", size=12, centered=0),
+    label("DifficultyLabel", (345, 309, 730, 330), "WP:DifficultyLabel", size=10, color=DIM, centered=0),
+    btn("ButtonDiffPrev", (345, 338, 375, 370), "WP:ArrowLeft", "ghost", size=13),
+    label("DiffName", (388, 338, 687, 370), "", size=14, color=GOLD, bold=1, centered=0),
+    btn("ButtonDiffNext", (700, 338, 730, 370), "WP:ArrowRight", "ghost", size=13),
+    label("DiffDesc", (345, 378, 730, 410), "", size=11, color=DIM, centered=0),
+    label("ObjectiveHint", (70, 398, 326, 444), "WP:HQObjective", size=11, color=DIM, centered=0),
+    btn("ButtonDeployMeridian", (70, 462, 386, 502), "WP:DeployMeridian", "meridian", size=13),
+    btn("ButtonDeployJackal", (410, 462, 730, 502), "WP:DeployJackal", "jackal", size=13),
+    label("MeridianBrief", (70, 510, 386, 544), "WP:MeridianBrief", size=10, color=DIM, centered=0),
+    label("JackalBrief", (410, 510, 730, 544), "WP:JackalBrief", size=10, color=DIM, centered=0),
+    btn("ButtonBack", (70, 554, 175, 579), "WP:Back", "ghost", size=10),
+])
 SKIRMISH = window("SkirmishParent", (0, 0, 800, 600),
                   status="ENABLED+NOFOCUS", syscb="WPSkirmishSystem",
                   bg="0 0 0 0", border="0 0 0 0", children=sk_children)
@@ -457,8 +443,9 @@ for stat in ["StatUnits", "StatStructures", "StatMoney", "StatDuration"]:
     score_children.append(label(stat, (200, sy, 600, sy + 22), "", size=12,
                                 color=TEXT))
     sy += 30
-score_children.append(btn("ButtonContinue", (310, 386, 490, 422),
-                          "WP:Continue", "primary", size=13))
+score_children.append(btn("ButtonRetry", (200, 386, 395, 426), "WP:ScoreRetry", "primary", size=13))
+score_children.append(btn("ButtonChoose", (410, 386, 605, 426), "WP:ScoreChoose", "ghost", size=11))
+score_children.append(btn("ButtonContinue", (310, 447, 490, 479), "WP:Continue", "ghost", size=11))
 SCORE = window("ScoreParent", (0, 0, 800, 600),
                status="ENABLED+NOFOCUS", syscb="WPScoreSystem",
                bg="0 0 0 0", border="0 0 0 0", children=score_children)

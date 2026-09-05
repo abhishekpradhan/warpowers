@@ -2,484 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
+  <meta name="description" content="War Powers. A free browser strategy game. Command the Meridian Combine or the Jackal Front across the contested Meridian Strip.">
   <title>War Powers</title>
-  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%230d1117"/><path d="M32 10 L37 26 L54 26 L40 36 L45 52 L32 42 L19 52 L24 36 L10 26 L27 26 Z" fill="%23d7b45a"/></svg>'>
-  <style>
-    :root {
-      --bg: #0a0c10;
-      --panel: #10141b;
-      --line: #232a35;
-      --text: #c7ceda;
-      --text-dim: #6b7686;
-      --accent: #d7b45a;
-      --danger: #e05252;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: #000;
-      color: var(--text);
-      font: 15px/1.5 -apple-system, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .label {
-      font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      font-size: 11px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    /* ---- stage: canvas fills the viewport, letterboxed 4:3 ---- */
-    /* Seamless stage: the game frames itself (in-engine border); any page
-       chrome here reads as a stray line beside the letterboxed canvas in
-       fullscreen/wide windows. */
-    #stage {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 0;
-      position: relative;
-      padding: 0;
-      background: #000;
-    }
-    #frame {
-      position: relative;
-      aspect-ratio: 4 / 3;
-      max-width: min(100%, calc(100vh * 4 / 3));
-      max-height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: #000;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: #000;
-    }
-    /* ---- overlay control strip (volume, fullscreen) ---- */
-    #ctrlStrip {
-      position: absolute;
-      top: 10px; right: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 8px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(13,17,23,.78);
-      opacity: 0;
-      transition: opacity .18s ease;
-      z-index: 5;
-    }
-    #frame:hover #ctrlStrip, #ctrlStrip:focus-within { opacity: 1; }
-    .ctrlBtn {
-      width: 30px; height: 30px;
-      border: 0;
-      border-radius: 6px;
-      background: transparent;
-      color: var(--text-dim);
-      font-size: 15px;
-      line-height: 1;
-      cursor: pointer;
-      transition: color .18s ease, background .18s ease;
-    }
-    .ctrlBtn:hover { color: var(--text); background: rgba(255,255,255,.06); }
-    #muteBtn.muted { color: var(--danger); }
-    #ovVol {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 110px; height: 3px;
-      border-radius: 2px;
-      background: var(--line);
-      cursor: pointer;
-    }
-    #ovVol::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 0;
-    }
-    #ovVol::-moz-range-thumb {
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 0;
-    }
-
-    /* ---- loading / error overlay ---- */
-    #overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 26px;
-      background: linear-gradient(180deg, rgba(10,12,16,.97), rgba(10,12,16,.99));
-      transition: opacity .5s ease;
-      z-index: 10;
-    }
-    #overlay.hidden { opacity: 0; pointer-events: none; }
-    #tagline { letter-spacing: 0.18em; margin-bottom: 8px; }
-    .wordmark {
-      font-size: clamp(26px, 4.4vw, 40px);
-      font-weight: 750;
-      letter-spacing: .34em;
-      margin-right: -.34em; /* optical centering of tracked caps */
-      color: #e8ebf0;
-    }
-    .wordmark .accent { color: var(--accent); }
-    #meter {
-      width: min(340px, 70%);
-      height: 3px;
-      background: var(--line);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    #meterFill {
-      width: 0%;
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width .18s ease;
-    }
-    #phase { min-height: 1.2em; }
-    #errorBox { display: none; text-align: center; max-width: 420px; padding: 0 16px; }
-    #errorBox p { color: var(--danger); margin: 0 0 14px; font-size: 14px; }
-    #errorBox button {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: var(--text);
-      font: inherit;
-      padding: 8px 22px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #errorBox button:hover { border-color: var(--text-dim); }
-
-    /* ---- debug log (only with ?debug=1) ---- */
-    #log {
-      display: none;
-      height: 180px;
-      overflow-y: auto;
-      padding: 10px 14px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      border-top: 1px solid var(--line);
-      background: var(--panel);
-      font: 11px/1.5 ui-monospace, Menlo, monospace;
-      color: var(--text-dim);
-    }
-    body.debug #log { display: block; }
-  </style>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%230d1218' d='M0 0h64v64H0z'/%3E%3Cpath fill='%23d7b45a' d='m9 14 8 36h10l5-19 5 19h10l8-36H44l-3 22-4-16H27l-4 16-3-22z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="stage">
+  <main id="stage" aria-label="War Powers battlefield">
     <div id="frame">
-      <canvas id="canvas" width="1024" height="768" oncontextmenu="event.preventDefault()"></canvas>
-      <div id="ctrlStrip">
-        <button id="muteBtn" class="ctrlBtn" title="Mute">&#128266;</button>
-        <input id="ovVol" type="range" min="0" max="100" value="80" title="Volume">
-        <button id="fsBtn" class="ctrlBtn" title="Fullscreen">⛶</button>
-      </div>
-      <div id="overlay">
-        <div class="wordmark">WAR<span class="accent">POWERS</span></div>
-        <div id="tagline" class="label">A free browser RTS &mdash; build, defend, destroy.</div>
-        <div id="meter"><div id="meterFill"></div></div>
-        <div id="phase" class="label">Contacting command&hellip;</div>
-        <div id="errorBox">
-          <p id="errorMsg"></p>
-          <button onclick="location.reload()">Reload</button>
+      <canvas id="canvas" width="1600" height="900" tabindex="0" aria-label="Strategy game. Open Field Manual for keyboard and mouse controls."></canvas>
+      <nav id="utilityBar" aria-label="Game tools" hidden>
+        <button id="journalButton" title="Operation record">Operations <span id="completionCount" class="counter"></span></button>
+        <button id="helpButton" title="Controls and field manual">Field manual</button>
+        <button id="settingsButton" title="Audio, controls and display settings">Settings</button>
+        <span class="utilityDivider"></span>
+        <button id="muteButton" class="iconButton" aria-label="Mute audio" title="Mute audio">♪</button>
+        <button id="fullscreenButton" class="iconButton" aria-label="Enter fullscreen" title="Fullscreen">⛶</button>
+      </nav>
+      <section id="missionHud" aria-label="Current objective" hidden>
+        <div class="eyebrow"><span id="missionType">SKIRMISH</span><span id="matchClock">0:00</span></div>
+        <h1 id="missionTitle">The Meridian Strip</h1>
+        <p id="objectiveText">Destroy the enemy headquarters. Protect your own.</p>
+        <div class="objectiveMeta"><span id="objectiveProgress"></span><span id="objectiveTimer"></span></div>
+        <button id="briefingButton" class="textButton">Mission briefing <span aria-hidden="true">↗</span></button>
+      </section>
+      <aside id="guide" aria-label="Command guidance" hidden>
+        <div class="eyebrow">FIELD GUIDANCE <button id="dismissGuide" class="textButton" aria-label="Dismiss guidance">×</button></div>
+        <strong id="guideTitle"></strong><p id="guideBody"></p>
+      </aside>
+      <div id="toast" role="status" aria-live="polite" hidden></div>
+      <section id="boot" aria-label="Loading game" aria-live="polite">
+        <div class="bootGrid" aria-hidden="true"></div>
+        <div class="bootContent">
+          <p class="eyebrow">THE MERIDIAN STRIP · COMMAND NETWORK</p>
+          <div class="wordmark">WAR <span>POWERS</span></div>
+          <p class="bootTagline">Build your foothold. Choose your fight.</p>
+          <div class="bootProgress"><div id="bootFill"></div></div>
+          <div class="bootStatus"><span id="bootPhase">Connecting to command…</span><span id="bootPercent">0%</span></div>
+          <p id="bootHint">No install. No account. The battlefield is yours.</p>
+          <div id="bootError" hidden>
+            <p id="errorMessage"></p><code id="errorCode"></code>
+            <div class="actions"><button id="reloadButton" class="primary">Reload game</button><button id="diagnosticsButton">Copy diagnostics</button></div>
+          </div>
         </div>
-      </div>
+        <div class="bootFooter"><span>MERIDIAN COMBINE <span class="versus">/</span> JACKAL FRONT</span><a href="credits.html" target="_blank" rel="noopener">Credits &amp; licenses</a></div>
+      </section>
     </div>
-  </div>
-  <div id="log"></div>
-
-  <script>
-    'use strict';
-    var params = new URLSearchParams(location.search);
-    var DEBUG = params.get('debug') === '1';
-    if (DEBUG) document.body.classList.add('debug');
-
-    var logEl = document.getElementById('log');
-    function log(t) {
-      console.log(t);
-      if (DEBUG) {
-        logEl.textContent += t + '\n';
-        logEl.scrollTop = logEl.scrollHeight;
-      }
-    }
-
-    // ---- loading overlay state ----
-    var phaseEl = document.getElementById('phase');
-    var fillEl = document.getElementById('meterFill');
-    var overlayEl = document.getElementById('overlay');
-    var meterEl = document.getElementById('meter');
-    var failed = false;
-    var totals = { engine: 0, data: 0 };
-    var loaded = { engine: 0, data: 0 };
-    function setPhase(t) { if (!failed) phaseEl.textContent = t; }
-    function paint() {
-      var total = totals.engine + totals.data;
-      var done = loaded.engine + loaded.data;
-      if (total > 0) fillEl.style.width = Math.min(100, Math.round(done / total * 100)) + '%';
-    }
-    function fail(msg) {
-      failed = true;
-      log('FAILED: ' + msg);
-      meterEl.style.display = 'none';
-      phaseEl.style.display = 'none';
-      document.getElementById('errorMsg').textContent = msg;
-      document.getElementById('errorBox').style.display = 'block';
-    }
-    window.addEventListener('error', function(e) {
-      log('UNCAUGHT: ' + (e.error && e.error.stack ? e.error.stack : e.message));
-    });
-
-    // ---- overlay volume (drives the engine live via the exported
-    //      wpSetMasterVolume; persisted to the same key the boot seeds
-    //      WP_VOLUME from) ----
-    (function() {
-      var vol = document.getElementById('ovVol');
-      var mute = document.getElementById('muteBtn');
-      var last = parseInt(localStorage.getItem('wpVolume') || '80', 10);
-      if (isNaN(last)) last = 80;
-      vol.value = last;
-      function apply(v) {
-        try {
-          if (typeof Module !== 'undefined' && Module._wpSetMasterVolume)
-            Module._wpSetMasterVolume(v);
-        } catch (e) {}
-        try { localStorage.setItem('wpVolume', String(v)); } catch (e) {}
-        mute.classList.toggle('muted', v === 0);
-        mute.innerHTML = v === 0 ? '&#128263;' : '&#128266;';
-      }
-      vol.addEventListener('input', function() {
-        apply(parseInt(vol.value, 10) || 0);
-      });
-      mute.addEventListener('click', function() {
-        var v = parseInt(vol.value, 10) || 0;
-        if (v > 0) { mute.dataset.prev = v; vol.value = 0; apply(0); }
-        else {
-          var back = parseInt(mute.dataset.prev || '80', 10);
-          vol.value = back; apply(back);
-        }
-      });
-    })();
-
-    // ---- fullscreen ----
-    document.getElementById('fsBtn').addEventListener('click', function() {
-      var frame = document.getElementById('frame');
-      if (document.fullscreenElement) document.exitFullscreen();
-      else frame.requestFullscreen && frame.requestFullscreen();
-    });
-
-    // ---- byte-accurate fetch ----
-    function fetchBytes(url, onBytes) {
-      return fetch(url).then(function(r) {
-        if (!r.ok) throw new Error(url.split('?')[0] + ': HTTP ' + r.status);
-        if (!r.body || !onBytes) return r.arrayBuffer().then(function(b) {
-          if (onBytes) onBytes(b.byteLength);
-          return new Uint8Array(b);
-        });
-        var reader = r.body.getReader();
-        var chunks = [], size = 0;
-        function pump() {
-          return reader.read().then(function(step) {
-            if (step.done) {
-              var out = new Uint8Array(size), off = 0;
-              chunks.forEach(function(c) { out.set(c, off); off += c.length; });
-              return out;
-            }
-            chunks.push(step.value);
-            size += step.value.length;
-            onBytes(step.value.length);
-            return pump();
-          });
-        }
-        return pump();
-      });
-    }
-
-    // Manifest first, so the meter knows the full byte budget up front.
-    // Dev-loop cache-buster: forces fresh assets every boot. A public deploy
-    // should switch to content-hashed paths instead (publish checklist §5).
-    var bust = 'v=' + Date.now();
-    var manifestReady = fetchBytes('gamedata/manifest.json?' + bust, null).then(function(bytes) {
-      var files = JSON.parse(new TextDecoder().decode(bytes));
-      totals.data = files.reduce(function(a, e) { return a + e.s; }, 0) + 420000 /* font */;
-      paint();
-      return files;
-    });
-
-    // Menu-mode boot (D018 in-engine shell): no -file, the engine lands on its
-    // own main menu and matches start from the Deployment screen. ?map=
-    // restores the -file direct-load (quit-after-match) path for the harness;
-    // ?autotest= only sets WP_AUTOTEST and needs a match to act.
-    function buildArgs() {
-      var base = ['-win', '-noshellmap'];
-      var directMap = params.get('map');
-      if (directMap) base = base.concat(['-file', directMap]);
-      return base.concat(
-        (params.get('args') || '').split(',').filter(function(a) { return a.length > 0; }));
-    }
-    var Module = {
-      canvas: document.getElementById('canvas'),
-      locateFile: function(path) { return path + '?' + bust; },
-      arguments: buildArgs(),
-      print: log,
-      printErr: log,
-      onAbort: function(w) {
-        try { fetch('/wp-boot-fail?w=' + encodeURIComponent(String(w).slice(0, 80)) + '&ua=' + encodeURIComponent(navigator.userAgent.slice(0, 80))).catch(function(){}); } catch (e) {}
-        fail('The engine stopped unexpectedly. (' + w + ')');
-      },
-      instantiateWasm: function(imports, cb) {
-        setPhase('Downloading engine…');
-        fetch('GeneralsXZH.wasm?' + bust, { method: 'HEAD' }).then(function(r) {
-          totals.engine = parseInt(r.headers.get('Content-Length') || '11000000', 10); // fallback ~wasm size keeps the meter honest when HEAD omits Content-Length
-          paint();
-          return fetchBytes('GeneralsXZH.wasm?' + bust, function(n) { loaded.engine += n; paint(); });
-        }).then(function(bytes) {
-          setPhase('Preparing engine…');
-          return WebAssembly.instantiate(bytes, imports);
-        }).then(function(result) {
-          performance.mark('wpBoot:engineReady');
-          cb(result.instance, result.module);
-        }).catch(function(err) { fail('Engine download failed. ' + err.message); });
-        return {};
-      },
-      onEngineRunning: function() {
-        // First main-loop tick: the shell (or match, in direct-load mode) is
-        // live. Boot budget (D018): page load -> here in <=20s.
-        overlayEl.classList.add('hidden');
-        performance.mark('wpBoot:running');
-        try {
-          var m = function(a, b, name) {
-            performance.measure(name, a, b);
-            var e = performance.getEntriesByName(name).pop();
-            return Math.round(e.duration);
-          };
-          var report = {
-            engineDownloadMs: m('wpBoot:deploy', 'wpBoot:engineReady', 'wpBoot:engine'),
-            dataStageMs: m('wpBoot:engineReady', 'wpBoot:dataReady', 'wpBoot:data'),
-            engineInitMs: m('wpBoot:dataReady', 'wpBoot:running', 'wpBoot:init'),
-            totalMs: m('wpBoot:deploy', 'wpBoot:running', 'wpBoot:total')
-          };
-          window.wpBootReport = report;
-          log('[BOOT] engine ' + report.engineDownloadMs + 'ms, data ' +
-              report.dataStageMs + 'ms, init ' + report.engineInitMs +
-              'ms, total ' + report.totalMs + 'ms' +
-              (report.totalMs > 20000 ? ' (OVER 20s BUDGET)' : ''));
-          // Boot beacon: a throwaway GET that lands in any static server's
-          // access log — lets cross-browser boots (Safari/Firefox, where we
-          // have no console access) be verified from the server side.
-          try {
-            fetch('/wp-boot-ok?total=' + report.totalMs + '&ua=' +
-                  encodeURIComponent(navigator.userAgent.slice(0, 80)))
-              .catch(function(){});
-          } catch (e) {}
-        } catch (e) { /* marks missing on odd paths - report is best-effort */ }
-      },
-      onGameExit: function() {
-        // Only Stand Down (or a crash) lands here now — the shell handles
-        // everything else in-engine. The wasm runtime can't restart in
-        // place, so offer a reload.
-        failed = false;
-        meterEl.style.display = 'none';
-        overlayEl.classList.remove('hidden');
-        phaseEl.style.display = 'block';
-        setPhase('Session ended.');
-        var eb = document.getElementById('errorBox');
-        document.getElementById('errorMsg').textContent = '';
-        eb.querySelector('button').textContent = 'RE-ENTER';
-        eb.style.display = 'block';
-      },
-      preRun: [function() {
-        setPhase('Staging battlefield data…');
-        ENV.CNC_GENERALS_ZH_PATH = '/game';
-        ENV.CNC_GENERALS_PATH = '/game-base';
-        ENV.HOME = '/home/web_user';
-        if (DEBUG) { ENV.IG_TRACE = '1'; window.IG_TRACE = 1; }
-        // Forward the saved volume + URL diagnostic knobs into the engine env.
-        ENV.WP_VOLUME = localStorage.getItem('wpVolume') || '80';
-        if (params.get('autotest')) ENV.WP_AUTOTEST = params.get('autotest');
-        if (params.get('doztrace')) ENV.WP_DOZER_TRACE = '1';
-        if (params.get('aitrace')) ENV.WP_AI_TRACE = '1';
-        if (params.get('scenedump')) ENV.WP_SCENE_DUMP = params.get('scenedump');
-        FS.mkdir('/game');
-        FS.mkdir('/game-base');
-        FS.mkdir('/fonts');
-        // Loose-file asset root = process cwd (native runs cd into the game
-        // dir; the .big resolver only matters for archive datasets).
-        FS.chdir('/game');
-        // MEMFS is case-sensitive; macOS wasn't. The engine asks for
-        // lowercase 'data/Generals.str' & friends — alias it.
-        FS.symlink('/game/Data', '/game/data');
-        var userDir = '/home/web_user/.local/share/GeneralsX/GeneralsZH';
-        FS.mkdirTree(userDir);
-        var hud = DEBUG ? '8' : '0';
-        FS.writeFile(userDir + '/Options.ini',
-          'StaticGameLOD = Low\n' +
-          'UseShadowVolumes = no\n' +
-          'UseShadowDecals = no\n' +
-          'Resolution = 1024 768\n' +
-          'RenderFpsFontSize = ' + hud + '\n' +
-          'SystemTimeFontSize = ' + hud + '\n' +
-          'GameTimeFontSize = ' + hud + '\n');
-        addRunDependency('gamedata');
-        manifestReady.then(function(files) {
-          var pending = files.length + 1;
-          function done() {
-            if (--pending === 0) {
-              performance.mark('wpBoot:dataReady');
-              setPhase('Starting engine…');
-              // Let the overlay paint before main()'s synchronous load
-              // freezes the tab for a moment.
-              setTimeout(function() { removeRunDependency('gamedata'); }, 30);
-            }
-          }
-          fetchBytes('fonts/default.ttf?' + bust, function(n) { loaded.data += n; paint(); })
-            .then(function(bytes) { FS.writeFile('/fonts/default.ttf', bytes); done(); })
-            .catch(function(err) { fail('Font staging failed. ' + err.message); });
-          files.forEach(function(entry) {
-            fetchBytes('gamedata/' + entry.p + '?' + bust, function(n) { loaded.data += n; paint(); })
-              .then(function(bytes) {
-                var dest = '/game/' + entry.p;
-                FS.mkdirTree(dest.substring(0, dest.lastIndexOf('/')));
-                FS.writeFile(dest, bytes);
-                done();
-              })
-              .catch(function(err) { fail('Data staging failed. ' + err.message); });
-          });
-        }).catch(function(err) { fail('Could not reach the data manifest. ' + err.message); });
-      }]
-    };
-  </script>
-  <script>
-    (function() {
-      // Pure loader: boot starts immediately — the in-engine shell is the
-      // menu. Audio starts suspended and resumes on the user's first click
-      // (miniaudio's WebAudio glue installs the gesture handlers).
-      performance.mark('wpBoot:deploy');
-      var s = document.createElement('script');
-      s.src = 'GeneralsXZH.js?' + bust;
-      s.onerror = function() {
-        document.getElementById('errorMsg').textContent = 'Engine script failed to load.';
-        document.getElementById('errorBox').style.display = 'block';
-      };
-      document.body.appendChild(s);
-    })();
-  </script>
+  <dialog id="panel" aria-labelledby="panelTitle">
+    <header class="panelHeader"><div><p class="eyebrow" id="panelEyebrow">COMMAND NETWORK</p><h2 id="panelTitle">Settings</h2></div><button id="closePanel" class="closeButton" aria-label="Close panel">×</button></header>
+    <div id="panelBody"></div>
+    <footer class="panelFooter"><span id="storageStatus">Settings and operation record are saved on this device.</span><a href="credits.html" target="_blank" rel="noopener">Credits &amp; licenses</a></footer>
+  </dialog>
+  </main>
+  <pre id="debugLog" hidden></pre>
+  <pre id="testReport" aria-label="Native regression report" hidden></pre>
+  <noscript><div class="noscript">War Powers needs JavaScript and WebGL2 to run. Enable JavaScript, then reload this page.</div></noscript>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

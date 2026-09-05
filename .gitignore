@@ -12,3 +12,14 @@ build/
 /gamedata-local/
 webstage/
 __pycache__/
+
+# Local credentials, editor state and test output
+.env
+.env.*
+!.env.example
+.venv/
+.pytest_cache/
+coverage/
+playwright-report/
+test-results/
+*.sav

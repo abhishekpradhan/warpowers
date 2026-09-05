@@ -79,6 +79,32 @@ The diagnostic report is visibly retained in the page; verbose frame logs cannot
 roll its result out of view. Ordinary play shows no diagnostic report. Diagnostic outcomes do not write the player’s persistent operation record. Avoid
 `debug=1` unless tracing a specific engine problem: it produces verbose logs.
 
+Mission regression URLs use `/?map=Maps/<map>.map&autotest=mission` for
+success and `autotest=mission-defeat` for failure. Run both for each map:
+
+| Map | Mission | Additional failure check |
+|---|---|---|
+| `WPTraining` | Field Orientation | — |
+| `WPOp01` | First Light | — |
+| `WPOp02` | Cut Wire | — |
+| `WPOp03` | Long Watch | `mission-defeat-hq` |
+| `WPOp04` | War Powers | — |
+| `WPChallengeM` | Glass Rampart | `mission-defeat-hq` |
+| `WPChallengeJ` | Hostile Takeover | `mission-defeat-hq` |
+
+These fixtures create prerequisites, destroy named targets and advance timers
+to exercise native script branches. They assert intermediate counters and the
+actual native result callback, rather than recording a synthetic completion.
+Require `MISSION_RESULT PASS` and no `MISSION_CHECK FAIL`. They do not replace
+a human mission playthrough or prove balance. Direct-map sessions exit after a
+result; to verify debrief → report → retry/menu, open `/?autotest=mission`
+and deploy Field Orientation through the menu.
+
+For a roster scene, use `/?map=Maps/WPTest.map&review=1` (Meridian) or
+`WPTestJ` (Jackal). `review=stress` adds a bounded 120-unit encounter and
+reports render/logic timing and heap capacity. Run this separately from other
+active game tabs when recording performance.
+
 ## Remaining candidate checks
 
 Candidate `6375e6bfb189` contains the final roster/portraits, powered Meridian
@@ -93,6 +119,17 @@ claim is made while those checks are pending.
 
 Native mission end-to-end regressions, final in-engine art review, input-driven unit/combat
 coverage, final save/restore identity, fullscreen/settings recovery, a crowded
-performance run and final repository push/clone verification are in progress.
+performance run are pending. The root, engine and native DXVK branches have
+been pushed in child-first order. A fresh recursive GitHub clone at root
+`5ad409c`, engine `d04deed8` and DXVK `538cb703` passes all 12 tests and all
+content/gameplay/voice gates; its documented Emscripten configuration succeeds.
+The full 1,279-step clean engine build and subsequent staging also pass.
+That independently compiled candidate is `8b0a011a5989`, with a staged size
+of 66,729,527 bytes. Its compiled bytes differ from the primary candidate;
+this demonstrates a working clean build, not byte-identical compilation.
+The primary staged candidate remains `6375e6bfb189`. All its 471 manifest
+entries, engine files and font match their declared hashes and byte lengths.
+Local HTTP checks return the expected WASM/JavaScript MIME types, immutable
+hashed assets, revalidating HTML/build metadata and bundled notices.
 The separate human/browser/network release matrix remains in
 [publish-checklist.md](publish-checklist.md).

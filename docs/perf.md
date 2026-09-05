@@ -32,6 +32,9 @@ silently increase the loading budget.
 - Native supply/power and training checks ran through their required states;
   a dedicated crowded review scene now reports render timing, logic progress
   and WASM heap capacity. Heap capacity is not operating-system process RSS.
+- A fresh recursive GitHub checkout also configures, builds and stages:
+  `8b0a011a5989`, **66,729,527 bytes (63.638 MiB)**. This is build/size
+  evidence; it does not add browser performance or gameplay measurements.
 
 The currently staged `build.json` identifies each candidate and asset sizes.
 Settings → Copy diagnostics includes the build ID, browser and measured boot

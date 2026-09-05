@@ -15,8 +15,8 @@ engine and swappable dataset architecture remain the foundation (D018).
 | Opponent and maps | Paid economy/production, bounded composition responses, supply raids, authored scenery and route identities | All 17 map binaries pass cliff-clearance route checks; an AI HQ assault was observed; full match matrix pending |
 | Original art | All 41 roster models original; lifecycle/ownership/aiming contracts, environment kit, panorama and 44 rendered portraits | Export/import, hierarchy, texture and portrait checks pass; final in-engine readability review pending |
 | Product durability | Settings, key remapping, channel audio, pause ownership, IDBFS checkpoint, compatibility checking and visible error recovery | Web-state/packaging tests and initial durable checkpoint round-trip pass; final restore-identity/fullscreen checks pending |
-| Distribution | Content-hashed paths, stable build IDs, credits/notices in staged bundle, asset registry and staged checks | 63.638 MiB bundle passes enforced 64 MiB limit; fresh-checkout verification pending |
-| Open-source preparation | Root/engine/native-renderer build and contribution docs, fork routing, protected upstream remotes | Final provenance audit, commits, child-first pushes and remote gitlink verification pending |
+| Distribution | Content-hashed paths, stable build IDs, credits/notices in staged bundle, asset registry and staged checks | 63.638 MiB bundle passes enforced 64 MiB limit; fresh recursive clone builds and stages successfully |
+| Open-source preparation | Root/engine/native-renderer build and contribution docs, fork routing, protected upstream remotes | Provenance and bounded source checks pass; all three feature branches pushed, remote gitlinks verified by recursive clone |
 
 The [polish plan](product-polish.md) defines the intended player outcomes.
 The [publish checklist](publish-checklist.md) records the independent release

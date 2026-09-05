@@ -8,7 +8,7 @@ does not track is generated output.
 
 | Path | What it is | Tracked? |
 |---|---|---|
-| `data/` | All original game content: INI, maps, models, textures, audio, UI layouts, strings | yes (CC BY 4.0) |
+| `data/` | Original game rules, maps, models, textures, audio and layouts, plus attributed music and fonts | yes (project content CC BY 4.0; imports retain their licenses) |
 | `tools/` | Generators + gates: genmap, genwnd, genw3d, genrig, gentex, gensfx, genicons2, gencmdicons, genportraitsheet, genwebstage, lint_voices, tgadiff; `tools/blender/` hero-asset scripts | yes (MIT) |
 | `web/` | Loader + browser HUD, settings, field manual, operation record and persistent checkpoints | yes (MIT) |
 | `docs/` | vision, roadmap, decisions, engine-notes (landmine log), publish-checklist, parity, creative, perf, this file | yes |

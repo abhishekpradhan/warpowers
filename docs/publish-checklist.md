@@ -29,7 +29,7 @@ new art, HUD, scenarios or save system.
       or unavailable storage produces a recoverable explanation.
 - [ ] Original asset lifecycle and combat readability verified in-engine.
 - [ ] Final size budget, boot and crowded-battle performance recorded in perf.md.
-- [ ] Root/engine/DXVK commits pushed in child-first order; pinned commits
+- [x] Root/engine/DXVK commits pushed in child-first order; pinned commits
       reachable remotely; recursive checkout and local checks reproduce.
 
 ## Human and hardware checks before release

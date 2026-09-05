@@ -6,6 +6,11 @@ wasm-generals surface with zero player-supplied files, current content as
 the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
 Nothing ships or deploys until the user says go.
 
+The next-stage quality assessment and proposed work sequence are in
+[product-polish.md](product-polish.md) (2026-09-04). This proposal reviews the
+current game against the existing product objectives; it does not mark any
+new implementation milestones complete.
+
 ## Phases (2026-08-24 — the port surface is done; user-defined structure)
 
 **Phase 2 — Playability (DONE 2026-08-24):** make the one match we have feel right.

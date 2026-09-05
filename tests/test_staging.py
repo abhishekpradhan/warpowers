@@ -78,6 +78,45 @@ class StageTests(unittest.TestCase):
             self.stage()
         self.assertEqual((self.out / 'keep.txt').read_text(), 'user content')
 
+    def test_build_directory_and_ancestors_survive_legacy_marker(self):
+        # Exercise a custom compiler output outside the protected engine tree.
+        build_dir = self.root / 'custom-build' / 'compiler'
+        build_dir.mkdir(parents=True)
+        for name in ('GeneralsXZH.js', 'GeneralsXZH.wasm'):
+            (build_dir / name).write_bytes((self.build_dir / name).read_bytes())
+        (build_dir.parent / 'build.json').write_text('{}')
+        for destination in (self.build_dir, build_dir, build_dir.parent):
+            with self.subTest(destination=destination):
+                before = {p.relative_to(destination): p.read_bytes()
+                          for p in destination.rglob('*') if p.is_file()}
+                with self.assertRaises(ValueError):
+                    staging.stage_release(destination, build_dir, False)
+                self.assertEqual(before, {p.relative_to(destination): p.read_bytes()
+                                          for p in destination.rglob('*') if p.is_file()})
+
+    def test_source_subdirectories_and_repository_roots_survive_stage_markers(self):
+        for destination in (self.root / 'data' / 'Art', self.root / 'web',
+                            self.root / 'tools' / 'generated', self.root / 'another-repo'):
+            with self.subTest(destination=destination):
+                destination.mkdir(parents=True, exist_ok=True)
+                (destination / 'build.json').write_text('{}')
+                (destination / 'keep.txt').write_text('source content')
+                if destination.name == 'another-repo':
+                    # Git worktrees/submodules use a .git file, not a directory.
+                    (destination / '.git').write_text('gitdir: elsewhere')
+                with self.assertRaises(ValueError):
+                    staging.stage_release(destination, self.build_dir, False)
+                self.assertEqual((destination / 'keep.txt').read_text(), 'source content')
+                self.assertEqual((destination / 'build.json').read_text(), '{}')
+
+    def test_safe_custom_legacy_stage_can_be_replaced(self):
+        self.out.mkdir()
+        (self.out / 'GeneralsXZH.wasm').write_bytes(b'old staged engine')
+        (self.out / 'old.txt').write_text('old stage')
+        config = self.stage()
+        self.assertEqual(json.loads((self.out / 'build.json').read_text())['id'], config['id'])
+        self.assertFalse((self.out / 'old.txt').exists())
+
     def test_engine_glue_changes_identify_a_new_release(self):
         first = self.stage()
         (self.build_dir / 'GeneralsXZH.js').write_text('var Module = { updatedGlue: true };')

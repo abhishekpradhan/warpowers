@@ -35,7 +35,15 @@ def write_json(path: Path, value: object) -> bytes:
 
 def stage_release(destination: Path, build_dir: Path, run_checks: bool = True) -> dict:
     destination = destination.resolve()
-    if destination in (ROOT, ROOT / 'data', ROOT / 'engine', ROOT / 'web', Path('/')) or '.git' in destination.parts:
+    build_dir = build_dir.resolve()
+    root = ROOT.resolve()
+    protected = tuple(root / name for name in ('data', 'engine', 'web', 'dvijoke', 'tools', 'tests', 'docs', 'refs'))
+    # Legacy stages and compiler outputs can both contain GeneralsXZH.wasm.
+    # Check path ownership before trusting that marker and replacing a tree.
+    if (destination == root or destination in root.parents or '.git' in destination.parts
+            or (destination / '.git').exists() or (destination / '.git').is_symlink()
+            or destination == build_dir or destination in build_dir.parents or build_dir in destination.parents
+            or any(destination == source or source in destination.parents for source in protected)):
         raise ValueError('Choose a dedicated generated output directory.')
     if destination.exists() and not any((destination / marker).exists() for marker in ('build.json', 'GeneralsXZH.wasm')):
         if any(destination.iterdir()):

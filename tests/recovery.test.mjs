@@ -12,7 +12,7 @@ assert.ok(source.endsWith(`${bootstrap}\n`));
 const application = source.replace(/^import\s*\{[\s\S]*?\}\s*from '\.\/core\.js';/, '')
   .replace(bootstrap, '');
 
-function appFixture() {
+function appFixture(search = '') {
   const elements = new Map(), events = new Map(), timers = [];
   let nativeCalls = 0, storageWrites = 0, focus = '';
   function element(id) {
@@ -42,7 +42,7 @@ function appFixture() {
       addEventListener(type, callback) { events.set(`document:${type}`, callback); },
       createElement: element },
     navigator: { userAgent: 'test', clipboard: { async writeText() { throw new Error('clipboard denied'); } } },
-    location: { search: '', reload() {} }, matchMedia() { return { matches: false }; },
+    location: { search, reload() {} }, matchMedia() { return { matches: false }; },
     performance: { now: () => 100 }, console: { log() {} },
     setTimeout(callback) { timers.push(callback); return timers.length; }, clearTimeout() {},
     setInterval() { return 1; }, clearInterval() {},
@@ -55,6 +55,10 @@ function appFixture() {
       gameState = { inGame: true, map: 'WPTraining', frame: 300, objectiveStage: 1 };
       panelKind = 'settings'; panel.open = true; pauseReasons.add('panel');
       pendingResult = { won: true }; $('guide').hidden = false; $('missionHud').hidden = false;
+    },
+    primeResult() {
+      operations = { missions: [{ id: 'training', map: 'WPTraining', category: 'training' }] };
+      pendingResult = null; panelKind = ''; panel.open = false; pauseReasons.clear();
     },
     snapshot() { return { failed, runtimeReady, panelKind, pauseCount: pauseReasons.size, pendingResult }; }
   };`, context);
@@ -100,4 +104,18 @@ test('late callbacks and diagnostics keep recovery usable after native failure',
   assert.equal(fixture.element('boot').hidden, false);
   assert.equal(fixture.focus(), 'reloadButton');
   assert.equal(fixture.nativeCalls(), 0);
+});
+
+test('only the native Retry diagnostic bypasses the pausing web debrief', () => {
+  for (const [query, expectedDebrief, expectedWrites] of [
+    ['', true, 1], ['?autotest=defeat', true, 0], ['?autotest=retry', false, 0],
+  ]) {
+    const fixture = appFixture(query);
+    fixture.app.primeResult();
+    fixture.app.handleResult({ operationId: 'training', map: 'WPTraining', won: false, stats: { durationSeconds: 180 } });
+    assert.equal(!!fixture.app.snapshot().pendingResult, expectedDebrief, query);
+    assert.equal(fixture.storageWrites(), expectedWrites, query);
+    assert.equal(fixture.nativeCalls(), 0, 'result handling waits for the native score transition');
+    if (query) assert.match(fixture.element('testReport').textContent, /MATCH_RESULT/);
+  }
 });

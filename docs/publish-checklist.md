@@ -5,13 +5,25 @@ repository visibility. The owner authorized implementing the polish plan,
 preparing private repositories and committing/pushing work. A public release
 remains a separate decision (D013).
 
-Current local playtest candidate: `90c472ea661a`, 66,761,316 bytes. Build, web,
+Current local playtest candidate: `6631b2c96367`, 66,773,830 bytes. Build, web,
 packaging and content gates pass. Bounded observations from earlier candidates
 are explicitly identified in [verification.md](verification.md). A checked
 fixture is evidence for that fixture; broader release categories stay open
 where only some requirements have been exercised.
 
 ## Completed local checks
+
+- [x] `6631b2c96367`: repaired text overreads/nullable outputs, mip reference
+      ownership, retained surface storage and surface-copy bounds/pitches.
+      Release and native macOS builds, 28 web tests, nine packaging tests,
+      32 text, 71 mip ownership, 40 manual/40 GLI surface-copy, 27 renderer
+      resource and 16 keyboard checks pass. Two consecutive eight-minute
+      training matches pass native defeat → score → Retry, with tracing off;
+      both return a fresh selectable headquarters, and the second opening
+      completes normally. Separate ASan candidate `6c62a6a4a3d0` passes its
+      three-minute defeat/Retry cycle without reported memory errors. Normal
+      web debrief → battle report → pointer-click Retry also passes on the final
+      release, with the restarted match clock advancing and no browser errors.
 
 - [x] `90c472ea661a`: complete branch review, native build, 27 web tests,
       nine packaging tests, 16 keyboard regression cases and all content gates
@@ -20,7 +32,7 @@ where only some requirements have been exercised.
 - [x] `3b26e3104fcb`: 25 web tests, six packaging tests and all content gates
       pass; lost-builder recovery is covered. Ordinary final-build contrast,
       guidance reopening and overview checks pass. The retry diagnostic and
-      unresolved intermittent crash are documented separately in verification.md.
+      original intermittent crash and later repairs are documented separately in verification.md.
 - [x] `3d2812941130`: native command contrast, normal progression through five
       training guidance stages, live partial requirements, collapse/reopen,
       All steps, automatic-opening preference and 125% text checked. WASM
@@ -132,9 +144,11 @@ where only some requirements have been exercised.
 
 The earlier controls/power browser tabs reported empty console-error lists.
 The September 5 guidance follow-up subsequently reproduced an intermittent
-native surface-destruction crash on Retry after a 7:27 training loss. Resolve
-and repeat that longer retry flow before treating replay reliability as passed;
-short and 7:56 traced retry passes do not establish a fix.
+native surface-destruction crash on Retry after a 7:27 training loss. The
+subsequent confirmed lifetime/text/copy repairs and two eight-minute Retry
+passes on `6631b2c96367` are recorded in verification.md. These establish the
+bounded regression flow; the human, browser and hardware checks below remain
+separate release requirements.
 
 ## Human and hardware checks before release
 

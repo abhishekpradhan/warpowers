@@ -202,8 +202,8 @@ public:
     Surface8(UINT w, UINT h, D3DFORMAT f)
         : m_width(w), m_height(h), m_format(f), m_shadow(surfaceBytes(f, w, h)) {}
     // Level view
-    Surface8(Texture8* owner, UINT level, UINT w, UINT h, D3DFORMAT f)
-        : m_owner(owner), m_level(level), m_width(w), m_height(h), m_format(f) {}
+    Surface8(Texture8* owner, UINT level, UINT w, UINT h, D3DFORMAT f);
+    ~Surface8() override;
 
     ULONG AddRef() override { return addRef(); }
     ULONG Release() override { return release(); }
@@ -265,8 +265,6 @@ public:
         }
     }
     ~Texture8() override {
-        for (Surface8* s : m_levelSurfaces)
-            if (s) s->release();  // drop the owner ref
         if (m_handle) m_backend->destroyTexture(m_handle);
     }
 
@@ -291,17 +289,16 @@ public:
 
     HRESULT GetSurfaceLevel(UINT level, IDirect3DSurface8** surface) override {
         if (!surface || level >= m_levels) return D3DERR_INVALIDCALL;
-        // D3D8 contract: level surfaces are owned by the texture — a caller's
-        // Release() must not invalidate them while the texture lives. (The
-        // engine's D3DXFilterTexture releases a level then keeps using it as
-        // the next mip's source; a fresh-object-per-call here means
-        // use-after-free and garbage mip chains.)
+        // A live level view keeps its texture storage alive. The cache is weak:
+        // owning the surface here as well would create a reference cycle.
         if (m_levelSurfaces.empty()) m_levelSurfaces.resize(m_levels, nullptr);
         Surface8*& s = m_levelSurfaces[level];
-        if (!s)
+        if (!s) {
             s = new Surface8(this, level, std::max(1u, m_width >> level),
-                             std::max(1u, m_height >> level), m_format);  // owner ref
-        s->addRef();
+                             std::max(1u, m_height >> level), m_format);
+        } else {
+            s->AddRef();
+        }
         *surface = s;
         return D3D_OK;
     }
@@ -418,6 +415,7 @@ public:
     bool hasAlpha() const { return m_hasAlpha; }
 
 private:
+    friend class Surface8;
     IBackend* m_backend;
     UINT m_width, m_height, m_levels = 1;
     D3DFORMAT m_format;
@@ -428,8 +426,20 @@ private:
     UINT m_lockedLevel = 0;
     std::vector<std::vector<BYTE>> m_shadow;
     std::vector<BYTE> m_scratch;
-    std::vector<Surface8*> m_levelSurfaces;  // texture-owned level views
+    std::vector<Surface8*> m_levelSurfaces;  // non-owning; cleared by Surface8
 };
+
+Surface8::Surface8(Texture8* owner, UINT level, UINT w, UINT h, D3DFORMAT f)
+    : m_owner(owner), m_level(level), m_width(w), m_height(h), m_format(f) {
+    m_owner->AddRef();
+}
+
+Surface8::~Surface8() {
+    if (m_owner) {
+        m_owner->m_levelSurfaces[m_level] = nullptr;
+        m_owner->Release();
+    }
+}
 
 HRESULT Surface8::LockRect(D3DLOCKED_RECT* locked, const RECT* rect, DWORD flags) {
     if (!locked) return D3DERR_INVALIDCALL;
@@ -556,25 +566,41 @@ public:
         // Used by the engine to compose glyph surfaces into sentence textures.
         auto* src = static_cast<Surface8*>(srcSurf);
         auto* dst = static_cast<Surface8*>(dstSurf);
-        if (!src || !dst || src->format() != dst->format()) return D3DERR_INVALIDCALL;
+        if (!src || !dst || src == dst || src->format() != dst->format()) return D3DERR_INVALIDCALL;
         FormatInfo fi{};
         if (!formatInfo(src->format(), fi) || fi.bytesPerPixel == 0)
             return D3DERR_INVALIDCALL;  // block-compressed copies unsupported
         const UINT bpp = fi.bytesPerPixel;
         BYTE* sp = src->owner() ? src->owner()->levelPixels(src->level()) : src->pixels();
         BYTE* dp = dst->owner() ? dst->owner()->levelPixels(dst->level()) : dst->pixels();
-        const UINT spitch = src->width() * bpp, dpitch = dst->width() * bpp;
-        auto blit = [&](LONG sx, LONG sy, LONG w, LONG h, LONG dx, LONG dy) {
-            if (sx < 0 || sy < 0 || dx < 0 || dy < 0) return;
-            w = std::min({w, LONG(src->width()) - sx, LONG(dst->width()) - dx});
-            h = std::min({h, LONG(src->height()) - sy, LONG(dst->height()) - dy});
-            for (LONG row = 0; row < h; ++row)
+        const size_t spitch = size_t(src->width()) * bpp, dpitch = size_t(dst->width()) * bpp;
+        auto valid = [&](int64_t sx, int64_t sy, int64_t w, int64_t h, int64_t dx, int64_t dy) {
+            return sx >= 0 && sy >= 0 && dx >= 0 && dy >= 0 && w > 0 && h > 0 &&
+                   sx + w <= src->width() && sy + h <= src->height() &&
+                   dx + w <= dst->width() && dy + h <= dst->height();
+        };
+        // Validate the entire operation before modifying either surface. Clipping
+        // a rectangle beyond an edge used to produce a negative memcpy length.
+        const bool fullSurface = !rects || count == 0;
+        if (fullSurface) {
+            if (!valid(0, 0, src->width(), src->height(), 0, 0)) return D3DERR_INVALIDCALL;
+        } else {
+            for (UINT i = 0; i < count; ++i) {
+                const RECT& r = rects[i];
+                const LONG dx = points ? points[i].x : r.left;
+                const LONG dy = points ? points[i].y : r.top;
+                if (!valid(r.left, r.top, int64_t(r.right) - r.left,
+                           int64_t(r.bottom) - r.top, dx, dy)) return D3DERR_INVALIDCALL;
+            }
+        }
+        auto blit = [&](UINT sx, UINT sy, UINT w, UINT h, UINT dx, UINT dy) {
+            for (UINT row = 0; row < h; ++row)
                 std::memcpy(dp + size_t(dy + row) * dpitch + size_t(dx) * bpp,
                             sp + size_t(sy + row) * spitch + size_t(sx) * bpp,
                             size_t(w) * bpp);
         };
-        if (!rects || count == 0) {
-            blit(0, 0, LONG(src->width()), LONG(src->height()), 0, 0);
+        if (fullSurface) {
+            blit(0, 0, src->width(), src->height(), 0, 0);
         } else {
             for (UINT i = 0; i < count; ++i) {
                 LONG dx = points ? points[i].x : rects[i].left;

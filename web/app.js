@@ -12,12 +12,14 @@ const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
 const DIAGNOSTIC = params.has('autotest') || params.has('review');
+const RETRY_TEST = params.get('autotest') === 'retry';
 const USER_DIR = '/home/web_user/.local/share/GeneralsX/GeneralsZH';
 const SAVE_PATH = `${USER_DIR}/Save/wp-checkpoint.sav`;
 const SAVE_META = `${USER_DIR}/wp-checkpoint.json`;
 const pauseReasons = new Set();
 const logLines = [];
 const testLines = [];
+let sanitizerReport = false;
 let storage;
 try { storage = window.localStorage; } catch { storage = { getItem: () => null, setItem: () => { throw new Error('Storage is unavailable'); } }; }
 let settings = readSettings(storage, matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -53,7 +55,8 @@ function log(message) {
   console.log(text);
   // Keep bounded, visible diagnostic evidence even after verbose native frame
   // logs roll out of the browser console. Never shown during ordinary play.
-  if (DIAGNOSTIC && (/\[WP_(?:AUTO|TEST)\].*(?:ECONOMY|POWERS|MISSION|MECHANICS|PASS|FAIL|MATCH_RESULT)/.test(text) || text.includes('[WP_REVIEW]') || text.includes('[WP_SURFACE]'))) {
+  if (DIAGNOSTIC && /ERROR: AddressSanitizer|runtime error:/.test(text)) sanitizerReport = true;
+  if (DIAGNOSTIC && (sanitizerReport || /\[WP_(?:AUTO|TEST)\].*(?:RETRY|ECONOMY|POWERS|MISSION|MECHANICS|PASS|FAIL|MATCH_RESULT)/.test(text) || text.includes('[WP_REVIEW]') || text.includes('[WP_SURFACE]'))) {
     testLines.push(text); if (testLines.length > 80) testLines.shift();
     $('testReport').hidden = false; $('testReport').textContent = testLines.join('\n');
   }
@@ -464,6 +467,9 @@ function handleResult(result) {
   const mission = operations.missions.find(m => m.id === result.operationId || m.map === mapLeaf(result.map));
   if (mission) {
     persistProgress(recordResult(mergeLatestProgress(), { ...result, operationId: mission.id, seconds: result.stats?.durationSeconds }));
+    // The native Retry fixture must reach and render the score screen without
+    // this modal pausing it. Result telemetry still runs; normal play is unchanged.
+    if (RETRY_TEST) return;
     pendingResult = result;
     if (!gameState.inGame) setTimeout(showDebrief, 0);
   }
@@ -661,6 +667,11 @@ async function bootGame() {
       if (DEBUG) { env.IG_TRACE = '1'; window.IG_TRACE = 1; }
       for (const [parameter, key] of [['autotest', 'WP_AUTOTEST'], ['review', 'WP_REVIEW_SCENE'], ['scenedump', 'WP_SCENE_DUMP'], ['aitrace', 'WP_AI_TRACE'], ['doztrace', 'WP_DOZER_TRACE']])
         if (params.has(parameter)) env[key] = params.get(parameter) || '1';
+      if (RETRY_TEST) {
+        for (const [parameter, key] of [['retryruns', 'WP_RETRY_RUNS'], ['retryframes', 'WP_RETRY_FRAMES']])
+          if (params.has(parameter)) env[key] = params.get(parameter);
+      }
+      if (DIAGNOSTIC && params.get('surfacetrace') === '1') env.WP_SURFACE_TRACE = '1';
       fs.mkdirTree('/game'); fs.mkdirTree('/game-base'); fs.mkdirTree('/fonts'); fs.chdir('/game'); fs.symlink('/game/Data', '/game/data');
       Promise.all([
         stageFiles(manifest),

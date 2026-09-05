@@ -11,7 +11,9 @@ hosting still require the project owner's explicit decision.
 Use Python 3.10+, Node.js 20+ for the dependency-free tests, CMake, Ninja,
 and an activated Emscripten SDK. The current build is verified with
 Emscripten 6.0.8. Blender is needed only to regenerate model/portrait art;
-checked-in assets are sufficient to build and play.
+checked-in assets are sufficient to build and play. The focused text and renderer
+fixtures also need a native C++17/C++20 compiler with AddressSanitizer and
+UndefinedBehaviorSanitizer support (`CXX` selects it).
 
 ```sh
 git submodule update --init --recursive
@@ -22,6 +24,10 @@ cd ..
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 engine/scripts/qa/test-keyboard-modifiers.py
+python3 engine/scripts/qa/test-sentence-hotkeys.py
+python3 engine/scripts/qa/test-mip-filter.py
+python3 engine/scripts/qa/test-surface-copy.py
+python3 dvijoke/d8web/tests/test_resources.py
 python3 tools/lint_voices.py
 python3 tools/validate_gameplay.py
 python3 tools/check_content.py

@@ -1,5 +1,71 @@
 # Current polish verification
 
+## September 5 — completed text and texture repairs
+
+The unfinished crash investigation contained reproducible defects in shared text
+layout, D3DX mip generation and the browser renderer. The repaired source now
+keeps a mip surface referenced through its last copy, propagates failures, and
+retains texture storage while callers still hold level surfaces. Copies validate
+all rectangles before writing, honor separate row pitches and block rows, and
+reject overlapping frontend self-copies. Linux mip staging reads only level
+zero. Rectangular mip chains continue through their one-pixel tails. Text layout
+handles trailing ampersands and independently optional hotkey coordinates;
+centered hotkeys use their actual rendered line after wrapping. These are
+confirmed fixes, rather than additional surface-release logging.
+
+Release candidate `6631b2c96367` and the separate local ASan candidate
+`6c62a6a4a3d0` both compile and link. The final normal package is 66,773,830
+bytes (63.681 MiB), with all 471 data hashes plus engine/font hashes verified;
+the disposable sanitizer package is larger and is not a release package. The
+native macOS Zero Hour target also builds successfully (320-step incremental
+build, inherited warnings); a native gameplay run was not performed. The
+following production-code regressions pass:
+
+- 32 sentence-layout/glyph cases under ASan/UBSan; the previous revision
+  reproduces both trailing-ampersand overreads and both nullable-output errors.
+- 71 mip-filter ownership/error checks, with the previous revision failing the
+  same ownership assertions.
+- 40 surface-copy cases on the manual path and 40 with the real cached GLI
+  headers, including row padding, block-compressed regions and narrow mip tails.
+  The previous revision fails the row-copy negative control. Existing GLI
+  sampling/quantization behavior is retained; these tests are not a claim of
+  pixel-identical filtering across backends.
+- 27 browser-renderer copy/lifetime cases under ASan/UBSan, including retained
+  surfaces after texture release and invalid later rectangles leaving output
+  untouched; 16 existing keyboard cases also pass.
+- 28 web tests, nine packaging tests and all voice/content/17-map gates pass.
+
+In the Chromium in-app browser, the ASan build passes
+`/?autotest=retry&retryruns=1&retryframes=5400`: paid construction/production, a
+real Porter supply delivery, eight observed UI selections, stage 4, an
+explicitly injected headquarters loss at 3:00, the native defeat screen, Retry
+and a new stage-0 battlefield with a selected headquarters. The result is `RETRY
+PASS completed=1/1`; no sanitizer report or error-level browser log was
+observed. The final release retains the existing inter-word spacing adjustment;
+all 32 sanitizer text cases also pass on that final source. On the final
+release, `/?autotest=retry&retryruns=2&retryframes=14400` passes two consecutive
+eight-minute matches in one runtime, with ASan and surface tracing disabled.
+Both runs reach real supply, completed army and Directorate, training stage 4
+and the full `uiSelectionMask=0xff`. Each then injects headquarters loss at
+frame 14,400, reports defeat at 480 seconds, waits on the native score screen
+and invokes its Retry callback. The first restarted battlefield completes the
+entire opening again; the second Retry returns a fresh stage-0 map with selected
+headquarters and visible HUD: `RETRY PASS completed=2/2 phase=3 frame=90`. The
+final screenshot shows training step 1, $6,000 and an intact headquarters. No
+error-level browser logs or crash recovery screen appeared. These are controlled
+losses, with normal combat and hauling beforehand, not two human-played defeats.
+
+The normal web-debrief path also passes on `6631b2c96367`. With
+`/?autotest=defeat`, pointer/DOM input opens Operations → Field Orientation →
+Review deployment → Deploy Meridian Combine. The diagnostic injects a loss at
+0:10 and the ordinary OPERATION FAILED web debrief appears. Clicking Continue to
+battle report opens the native DEFEAT report; clicking its Retry button returns
+training step 1. The restarted clock advances to 0:19, and no error-level
+browser logs appear. Thus the Retry diagnostic's modal bypass does not hide a
+broken player-facing debrief flow. The final page is restored to the ordinary
+main menu, without diagnostic URL parameters. CPU checks and this bounded ASan
+run do not establish a complete human or cross-browser playtest.
+
 ## Review before merging to main
 
 The September 5 merge review covers the complete game, engine and native
@@ -21,7 +87,7 @@ It found and corrected two additional failures:
 The engine quick-start also now uses the standard `http://localhost:8322`
 URL and describes the MIME/cache headers the server actually sends. Engine
 lifecycle/rendering/input review found no additional confirmed blocker;
-the previously disclosed intermittent native Retry crash remains open.
+the previously disclosed intermittent native Retry crash was still open at that review; the later repairs and verification above supersede that status.
 
 Reviewed candidate `90c472ea661a` stages at 66,761,316 bytes (63.669 MiB),
 with engine `5f4f3417` and renderer `538cb703`. The native WebAssembly build,
@@ -100,8 +166,8 @@ normal 7:56 training battle in the same traced runtime completed all five
 guidance stages, built a Directorate and lost its headquarters to the enemy.
 Debrief → report → Retry again reached a live battlefield with guidance reset
 to step 1 and no trace violations or browser errors. Tracing changes allocation
-layout, and no corrective lifetime change has been identified; the original
-intermittent crash remains a known issue.
+layout; no corrective lifetime change had been identified at that point.
+The later confirmed repairs and current verification are recorded above.
 
 Candidate `3b26e3104fcb` retains that native build and adds a training recovery
 hint when a required structure is missing and the native builder count is zero.

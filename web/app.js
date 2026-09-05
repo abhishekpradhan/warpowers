@@ -131,6 +131,7 @@ function applyAppearance() {
   $('muteButton').setAttribute('aria-label', settings.master === 0 ? 'Unmute audio' : 'Mute audio');
 }
 function applyAudio() {
+  if (failed) return;
   if (runtimeReady && typeof window.Module?._wpSetAudioLevels === 'function')
     window.Module._wpSetAudioLevels(settings.master, settings.music, settings.effects, settings.voice);
   else if (runtimeReady && typeof window.Module?._wpSetMasterVolume === 'function')
@@ -143,11 +144,11 @@ function saveSettings() {
 }
 function setPause(reason, active) {
   if (active) pauseReasons.add(reason); else pauseReasons.delete(reason);
-  if (runtimeReady && window.Module?._wpSetWebPause) window.Module._wpSetWebPause(pauseReasons.size ? 1 : 0);
+  if (!failed && runtimeReady && window.Module?._wpSetWebPause) window.Module._wpSetWebPause(pauseReasons.size ? 1 : 0);
 }
 function closePanel() {
   if (panel.open) panel.close();
-  panelKind = ''; setPause('panel', false); canvas.focus({ preventScroll: true });
+  panelKind = ''; setPause('panel', false); (failed ? $('reloadButton') : canvas).focus({ preventScroll: true });
   updateGuide();
 }
 function openPanel(kind, title, eyebrow = 'COMMAND NETWORK') {
@@ -202,7 +203,7 @@ function syncSaves() {
   });
 }
 async function saveCheckpoint() {
-  if (checkpointBusy || !gameState.inGame || !window.Module?._wpSaveGame) return;
+  if (failed || checkpointBusy || !gameState.inGame || !window.Module?._wpSaveGame) return;
   checkpointBusy = true;
   const button = $('saveCheckpoint'); if (button) button.disabled = true;
   const fs = window.FS;
@@ -233,7 +234,7 @@ async function saveCheckpoint() {
   }
 }
 function loadCheckpoint() {
-  if (checkpointBusy || gameState.inGame) return;
+  if (failed || checkpointBusy || gameState.inGame) return;
   const metadata = checkpointMeta();
   if (!metadata || metadata.compatibility !== build.compatibility) { toast('This checkpoint belongs to another game version. Start a new battle.'); return; }
   closePanel();
@@ -361,12 +362,14 @@ function showJournal() {
   }
   if (gameState.inGame) appendHTML('<p class="settingsNote">Return to the main menu before choosing another operation.</p>');
   for (const button of $('panelBody').querySelectorAll('[data-mission]')) button.addEventListener('click', () => {
+    if (failed) return;
     const index = Number(button.dataset.mission); closePanel();
     if (window.Module?._wpShowMission) window.Module._wpShowMission(index);
     else toast('Choose this operation on the Deployment screen.');
   });
 }
 function showBriefing() {
+  if (failed) return;
   if (!currentMission) { showHelp(); return; }
   const mission = currentMission;
   openPanel('briefing', mission.title, mission.faction === 'jackal' ? 'JACKAL FRONT · OPERATIONS' : 'MERIDIAN COMBINE · OPERATIONS');
@@ -376,6 +379,7 @@ function showBriefing() {
   $('beginMission').addEventListener('click', closePanel);
 }
 function showDebrief() {
+  if (failed) return;
   const result = pendingResult; if (!result) return;
   const mission = operations.missions.find(m => m.id === result.operationId || m.map === mapLeaf(result.map));
   if (!mission) return;
@@ -393,10 +397,10 @@ function mapTitle(id) {
   return ({ WPTest: 'The Flats', WPRidge: 'Ridge Divide', WPScrap: 'Scrapyard', WPBasin: 'The Basin', WPRange: 'Trench Range' })[base] || 'The Meridian Strip';
 }
 function updateGuide() {
-  const visible = gameState.inGame && !guideDismissed && !panel.open;
+  const visible = !failed && gameState.inGame && !guideDismissed && !panel.open;
   $('guide').hidden = !visible;
   $('guidanceButton').setAttribute('aria-expanded', String(!!visible));
-  if (!gameState.inGame) return;
+  if (failed || !gameState.inGame) return;
   const guide = fieldGuidance(currentMission, gameState, bootSettings);
   const step = guide.total ? `Step ${guide.stage + 1} of ${guide.total}` : 'Battle tip';
   $('guidanceButton').textContent = guide.total ? `Guidance · ${guide.stage + 1}/${guide.total}` : 'Guidance';
@@ -423,6 +427,7 @@ function showGuidanceOverview() {
   $('returnGuidance').addEventListener('click', () => { guideDismissed = false; closePanel(); });
 }
 function updateGameState(state) {
+  if (failed) return;
   const newBattle = beginsNewBattle(gameState, state);
   gameState = state;
   const leaf = mapLeaf(state.map);
@@ -452,6 +457,7 @@ function updateGameState(state) {
   updateGuide();
 }
 function handleResult(result) {
+  if (failed) return;
   if (params.has('autotest')) log(`[WP_TEST] MATCH_RESULT ${JSON.stringify(result)}`);
   const key = `${result.map}:${result.stats?.durationSeconds}:${result.won}`;
   if (lastResultKey === key) return; lastResultKey = key;
@@ -477,12 +483,19 @@ async function copyDiagnostics() {
 }
 function fail(message, code = 'WP-RUNTIME') {
   if (failed) return; failed = true;
+  // A failing engine cannot be asked to release its pause. Keep recovery
+  // entirely in the browser, including later telemetry and dialog cleanup.
+  runtimeReady = false; pauseReasons.clear(); pendingResult = null; panelKind = '';
+  if (panel.open) panel.close();
   log(`${code}: ${message}`);
-  closePanel(); $('boot').hidden = false; $('boot').classList.remove('departing');
+  $('guide').hidden = true; $('missionHud').hidden = true;
+  $('guidanceButton').setAttribute('aria-expanded', 'false');
+  $('boot').hidden = false; $('boot').classList.remove('departing');
   $('bootError').hidden = false; $('bootPhase').textContent = 'Command connection interrupted';
   $('errorMessage').textContent = message; $('errorCode').textContent = `${code} · ${build?.id || 'initializing'}`;
   $('bootHint').textContent = 'Your saved operation record is preserved. Reload to return to command.';
   $('utilityBar').hidden = true;
+  $('reloadButton').focus({ preventScroll: true });
 }
 function setPhase(phase) { if (!failed) { $('bootPhase').textContent = phase; lastActivity = performance.now(); } }
 function progressBytes(bytes) {
@@ -607,8 +620,8 @@ async function bootGame() {
     onGameMessage: message => { if (message?.text) toast(message.text); },
     onAbort: reason => fail(`The engine stopped unexpectedly: ${String(reason).slice(0, 150)}`, 'WP-ENGINE'),
     onEngineRunning() {
-      runtimeReady = true; performance.mark('wpBoot:running');
       if (failed) return;
+      runtimeReady = true; performance.mark('wpBoot:running');
       const measures = [['deploy', 'engineReady', 'engineDownloadMs'], ['engineReady', 'dataReady', 'dataStageMs'], ['dataReady', 'running', 'engineInitMs'], ['deploy', 'running', 'totalMs']];
       window.wpBootReport = {};
       for (const [start, end, name] of measures) {
@@ -625,6 +638,7 @@ async function bootGame() {
       if (DEBUG) fetch(`/wp-boot-ok?total=${window.wpBootReport.totalMs}&build=${encodeURIComponent(build.id)}`).catch(error => log(`Diagnostic beacon unavailable: ${error.message}`));
     },
     onGameExit() {
+      if (failed) return;
       if (gameState.inGame && !lastResultKey) { fail('The battle was interrupted. Reload and resume your last checkpoint.', 'WP-EXIT'); return; }
       $('boot').hidden = false; $('boot').classList.remove('departing');
       $('bootPhase').textContent = 'Session complete'; $('bootHint').textContent = 'Your operation record is saved on this device.';

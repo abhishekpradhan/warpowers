@@ -12,11 +12,35 @@ Little-endian throughout.
 import os
 import struct
 import sys
+import argparse
+import json
+from pathlib import Path
+import subprocess
+
+ROOT = Path(__file__).resolve().parents[1]
+MISSIONS = json.loads((ROOT / "data/operations.json").read_text())["missions"]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("output", nargs="?", help="Destination .map (defaults to the repository dataset)")
+parser.add_argument("--layout", choices=("flats", "ridge", "scrap", "basin", "range"), default="flats")
+parser.add_argument("--faction", choices=("meridian", "jackal"), default="meridian")
+parser.add_argument("--mission", choices=[m["id"] for m in MISSIONS])
+parser.add_argument("--all", action="store_true", help="Rebuild all skirmishes and authored operations")
+args = parser.parse_args()
+if args.all:
+    for layout in ("flats", "ridge", "scrap", "basin", "range"):
+        for faction in ("meridian", "jackal"):
+            subprocess.run([sys.executable, __file__, "--layout", layout, "--faction", faction], check=True)
+    for mission in MISSIONS:
+        subprocess.run([sys.executable, __file__, "--mission", mission["id"]], check=True)
+    raise SystemExit(0)
+MISSION = next((m for m in MISSIONS if m["id"] == args.mission), None)
+if MISSION:
+    args.faction, args.layout = MISSION["faction"], MISSION["layout"]
+MISSION_ID = args.mission
 
 # --faction=jackal writes the mirrored WPTestJ map: the player starts as the
 # Jackal Front and the AI opponent is the Meridian Combine.
-if '--faction=jackal' in sys.argv:
-    sys.argv = [a for a in sys.argv if a != '--faction=jackal']
+if args.faction == 'jackal':
     F = dict(map_name=None, is_jackal=True,
              player_cc='WPJ_CommandPost', player_faction='FactionWPJ',
              enemy_cc='WP_CommandCenter', enemy_faction='FactionWP',
@@ -26,6 +50,8 @@ if '--faction=jackal' in sys.argv:
              enemy_power='WP_PowerArray', enemy_aa='WP_Skyspear',
              enemy_income='WP_Exchange', enemy_pad='WP_LaunchPad',
              player_income='WPJ_Racket', player_power='WPJ_Dynamo',
+             player_hauler='WPJ_Scavenger', player_tank='WPJ_Mongrel',
+             player_air='WPJ_Buzzard', player_strafer='WPJ_Gnat',
              raid_a='WP_Outrider',
              assault_a='WP_Tank', assault_b='WP_Zenith',
              assault_c='WP_Lancer', wave_air='WP_Kestrel',
@@ -37,9 +63,11 @@ else:
              guard='WPJ_Mongrel',
              wave_raider='WPJ_Mongrel', wave_pack_a='WPJ_Vulture', wave_pack_b='WPJ_Mongrel',
              enemy_factory='WPJ_ChopShop', enemy_tower='WPJ_Watchpost',
-             enemy_power='WPJ_Dynamo', enemy_aa='WPJ_Flakhut',
+             enemy_power='WPJ_Racket', enemy_aa='WPJ_Flakhut',
              enemy_income='WPJ_Racket', enemy_pad='WPJ_Roost',
              player_income='WP_Exchange', player_power='WP_PowerArray',
+             player_hauler='WP_Porter', player_tank='WP_Tank',
+             player_air='WP_Kestrel', player_strafer='WP_Shrike',
              raid_a='WPJ_Vulture',
              assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
              assault_c='WPJ_Sting', wave_air='WPJ_Buzzard',
@@ -72,12 +100,10 @@ LAYOUTS = {
                   ground="WPGroundAsh",
                   name="WPRange", jname="WPRangeJ"),
 }
-_layout_name = "flats"
-for _a in list(sys.argv):
-    if _a.startswith("--layout="):
-        _layout_name = _a.split("=", 1)[1]
-        sys.argv.remove(_a)
-LAY = LAYOUTS[_layout_name]
+_layout_name = args.layout
+LAY = dict(LAYOUTS[_layout_name])
+if MISSION:
+    LAY["name"] = LAY["jname"] = MISSION["map"]
 PLAYER_BASE = LAY["player"]
 ENEMY_BASE = LAY["enemy"]
 
@@ -251,16 +277,48 @@ for y in range(H):
         tile = tile_pick(x // 2, y // 2)
         tile_ndx += struct.pack("<h", (tile << 2) + 2 * (y & 1) + (x & 1))
 zeros16 = struct.pack("<h", 0) * N
+# Pathfinding reads this authored bitfield, not terrain slope. The visible
+# ridge footprints must therefore carry real cliffs; the wide low passes
+# remain clear. Keep basin rims walkable: they are elevation, not cliff walls.
+cliff_state = bytearray(H * FSW)
+for y in range(H - 1):
+    for x in range(W - 1):
+        wx, wy = (x - BORDER + 0.5) * 10, (y - BORDER + 0.5) * 10
+        blocked = any(_wall(wx, wy, LAY[key], fraction) > 3.0
+                      for key, fraction in (("ridge", 0.5), ("ridge2", 0.68)) if LAY.get(key))
+        if blocked:
+            cliff_state[y * FSW + (x >> 3)] |= 1 << (x & 7)
 blend_payload = struct.pack("<i", N)
 blend_payload += bytes(tile_ndx)          # tileNdxes
 blend_payload += zeros16                  # blendTileNdxes
 blend_payload += zeros16                  # extraBlendTileNdxes
 blend_payload += zeros16                  # cliffInfoNdxes
-blend_payload += bytes(H * FSW)           # cellCliffState
+blend_payload += cliff_state              # cellCliffState (real ridge barriers)
 blend_payload += struct.pack("<iiii", NUM_TILES + CONCRETE_NUM, 1, 1, 2)  # bitmapTiles, blendedTiles, cliffInfo, texClasses
 blend_payload += struct.pack("<iiii", 0, NUM_TILES, TILE_GRID_W, 0) + ascii_s(LAY.get("ground", "WPGround"))
 blend_payload += struct.pack("<iiii", CONCRETE_FIRST, CONCRETE_NUM, 4, 0) + ascii_s("WPConcrete")
 blend_payload += struct.pack("<ii", 0, 0)  # numEdgeTiles, numEdgeTextureClasses
+
+def clear_ridge_point(x, y):
+    """Keep playable fixtures off cliffs after a layout places its ridge wall."""
+    def clear(cx, cy):
+        for dx, dy in ((dx, dy) for dx in (-35, 0, 35) for dy in (-35, 0, 35)):
+            ix, iy = int((cx + dx) / 10) + BORDER, int((cy + dy) / 10) + BORDER
+            if not (BORDER <= ix < W - BORDER and BORDER <= iy < H - BORDER):
+                return False
+            if cliff_state[iy * FSW + (ix >> 3)] & (1 << (ix & 7)):
+                return False
+        return True
+    if clear(x, y):
+        return x, y
+    toward_home = math.atan2(PLAYER_BASE[1] - y, PLAYER_BASE[0] - x)
+    for radius in range(20, 201, 10):
+        for index in range(16):
+            angle = toward_home + index * math.pi / 8
+            candidate = x + math.cos(angle) * radius, y + math.sin(angle) * radius
+            if clear(*candidate):
+                return candidate
+    raise ValueError(f"no accessible fixture site near {x}, {y}")
 
 # ---------- WorldInfo v1 ----------
 world_payload = dict_pairs([
@@ -304,6 +362,7 @@ _rly = _off(-20.0, -130.0)        # attack-team gather point at the base front
 # missing (queueing a dozer from a build-list factory if none exists), so a
 # not-initially-built entry = the AI visibly expands to that spot in-match.
 def build_entry(template, x, y, angle=0.0, built=False, rebuilds=99):
+    x, y = clear_ridge_point(x, y)
     return (ascii_s("") + ascii_s(template)
             + struct.pack("<fff", x, y, 0.0) + struct.pack("<f", angle)
             + bytes([1 if built else 0]) + struct.pack("<i", rebuilds)
@@ -331,7 +390,7 @@ sides_payload += side([
     ("playerEnemies", D_ASCII, "PlayerB"),
     ("playerColor", D_INT, 0x2882FF),
     ("playerNightColor", D_INT, 0x2882FF),
-    ("playerStartMoney", D_INT, 10000),
+    ("playerStartMoney", D_INT, 7000 if MISSION_ID in ("op03", "challenge-meridian") else 6000),
     ("multiplayerStartIndex", D_INT, 0),
 ])
 sides_payload += side([
@@ -343,14 +402,15 @@ sides_payload += side([
     ("playerEnemies", D_ASCII, "PlayerA"),
     ("playerColor", D_INT, 0xFF3C28),
     ("playerNightColor", D_INT, 0xFF3C28),
-    ("playerStartMoney", D_INT, 10000),
+    ("playerStartMoney", D_INT, 4500 if MISSION_ID == "training" else 6000),
     ("multiplayerStartIndex", D_INT, 1),
 ], build_list=[
     # The AI expands to these during the match (dozer-built, rebuilt if razed).
     build_entry(F["enemy_power"], _bl_pow2[0], _bl_pow2[1], 3.4),
     build_entry(F["enemy_income"], _bl_inc2[0], _bl_inc2[1], 3.0),
+ ] + ([] if MISSION_ID == "training" else [
     build_entry(F["enemy_tower"], _bl_twf[0], _bl_twf[1], _toP),
-])
+ ]))
 # team dicts are collected first so the COUNT is derived, never hand-kept
 # (a stale hardcoded count silently desyncs every chunk after the team
 # list - the zero-objects-in-world failure).
@@ -415,12 +475,16 @@ attack_team("teamEcoRaid", "WP_ProdRaid", 28, 1,
 # aggression gets answered (normal/brutal only via the condition script).
 attack_team("teamPunish", "WP_ProdPunish", 40, 1,
             [(F["assault_a"], 3), (F["assault_b"], 2)],
-            on_create="WP_WaveHunt")
+            on_create="WP_PunishHunt")
 # Defense patrol: trained garrison replacement — guards the base front and
 # is rebuilt whenever it dies. Outranks every attack tier so the AI heals
 # its defense before it schedules offense.
 attack_team("teamDefensePatrol", "WP_ProdDefense", 45, 1,
             [(F["defender"], 2)], on_create="WP_HoldBase")
+# A bounded response to committed armor/air: native production pays for the
+# rocket squad, and a surviving squad prevents another instance being trained.
+attack_team("teamCounterSquad", "WP_ProdCounter", 35, 1,
+            [(F["assault_c"], 3)], on_create="WP_HoldBase")
 sides_payload += struct.pack("<i", len(_team_dicts))
 sides_payload += b"".join(_team_dicts)
 # nested PlayerScriptsList appended below (win/lose scripts), after its
@@ -428,6 +492,10 @@ sides_payload += b"".join(_team_dicts)
 
 # ---------- ObjectsList v3 with nested Object v3 chunks ----------
 def obj(x, y, angle, name, pairs):
+    if MISSION_ID == "training" and name in (F["enemy_tower"], F["enemy_aa"]):
+        return b""  # Orientation teaches mobile combat before fortified bases.
+    if not name.startswith(("WP_Prop", "*Waypoints/")):
+        x, y = clear_ridge_point(x, y)
     payload = struct.pack("<ffff", x, y, 0.0, angle)
     payload += struct.pack("<i", 0)  # flags
     payload += ascii_s(name)
@@ -487,6 +555,80 @@ objects_payload = b"".join(preview + [
         [("waypointID", D_INT, 5), ("waypointName", D_ASCII, "EnemyRally")]),
 ])
 
+# Environmental silhouettes frame clear movement corridors. The deterministic
+# placements stay outside base build zones; all scenery has small, honest
+# collision bounds instead of disguising invisible walls as open terrain.
+def lane(fraction, lateral=0.0):
+    dx, dy = EX - PX, EY - PY
+    length = (dx * dx + dy * dy) ** 0.5
+    return (PX + dx * fraction - dy / length * lateral,
+            PY + dy * fraction + dx / length * lateral)
+
+def placed(template, position, owner="team", name=None, angle=0.0):
+    pairs = [("originalOwner", D_ASCII, owner)]
+    if name:
+        pairs.append(("objectName", D_ASCII, name))
+    return obj(*position, angle, template, pairs)
+
+for i in range(18):
+    fraction = 0.16 + (i // 2) * 0.085
+    lateral = (255 + (i % 3) * 33) * (-1 if i % 2 else 1)
+    pos = lane(fraction, lateral)
+    if all(65 < v < PLAY * 10 - 65 for v in pos) and min(
+            ((pos[0] - b[0]) ** 2 + (pos[1] - b[1]) ** 2) ** 0.5 for b in BASES) > 240:
+        template = "WP_PropScrap" if _layout_name in ("scrap", "range") and i % 3 else "WP_PropRock"
+        objects_payload += placed(template, pos, angle=i * 0.73)
+for fraction, offset in ((0.31, -165), (0.69, 175)):
+    objects_payload += placed("WP_PropRelay", lane(fraction, offset), angle=_toP)
+    objects_payload += placed("WP_PropBarrier", lane(fraction, offset + 36), angle=_toP)
+
+# Finite supplies give expansions and raids a physical purpose. Home caches
+# are visible from the opening base; the two lateral caches reward map control.
+for name, pos in (("HomeSupplyA", lane(0.08, -155)), ("HomeSupplyB", lane(0.92, 155)),
+                  ("FieldSupplyA", lane(0.36, 215)), ("FieldSupplyB", lane(0.66, -215))):
+    objects_payload += placed("WP_SupplyCache", pos, name=name)
+if MISSION_ID != "training":
+    objects_payload += placed("WPJ_Scavenger" if F.get("is_jackal") else "WP_Porter",
+                              (PX - 65, PY + 55), "teamPlayerA")
+objects_payload += placed("WP_Porter" if F.get("is_jackal") else "WPJ_Scavenger",
+                          (_inc[0] + 20, _inc[1] + 45), "teamPlayerB")
+
+# Authored operations use named physical targets. Destruction conditions count
+# actual battlefield objects; objective completion never depends on a label or
+# a wall-clock timeout in the browser.
+if MISSION_ID == "op01":
+    objects_payload += placed("WP_MissionRelay", lane(0.65, -120), "teamPlayerB", "ObjectiveRelay")
+    objects_payload += placed("WPJ_Sting", lane(0.64, -80), "teamBaseGuards")
+elif MISSION_ID == "op02":
+    for name, template, pos in (
+            ("SupplyOfficeA", "WP_Exchange", lane(0.47, -230)),
+            ("SupplyOfficeB", "WP_Exchange", lane(0.60, 235)),
+            ("GridSubstation", "WP_PowerArray", lane(0.75, -125))):
+        objects_payload += placed(template, pos, "teamPlayerB", name)
+        objects_payload += placed("WP_Warden", (pos[0] + 30, pos[1] + 30), "teamBaseGuards")
+    for i in range(3):
+        objects_payload += placed("WPJ_Vulture", (PX - 55 + i * 26, PY + 95), "teamPlayerA")
+elif MISSION_ID in ("op03", "challenge-meridian"):
+    objects_payload += placed("WP_MissionRelay", lane(0.25), "teamPlayerA", "AlliedRelay")
+    for template, dx, dy in (("WP_Fabricator", -70, 65), ("WP_VehiclePlant", 105, 10),
+                              ("WP_Exchange", -85, -50), ("WP_PowerArray", 15, -100)):
+        objects_payload += placed(template, (PX + dx, PY + dy), "teamPlayerA")
+    for i, template in enumerate(("WP_Warden", "WP_Warden", "WP_Lancer", "WP_Tank")):
+        objects_payload += placed(template, lane(0.25, -60 + i * 32), "teamPlayerA")
+    if MISSION_ID == "challenge-meridian":
+        for i, side in enumerate((-105, 105), 1):
+            objects_payload += placed("WPJ_Lobber", lane(0.42, side), "teamPlayerB", f"SiegePit{i}")
+            objects_payload += placed("WPJ_Sting", lane(0.46, side), "teamBaseGuards")
+elif MISSION_ID == "op04":
+    for i, side in enumerate((-150, 150), 1):
+        objects_payload += placed("WP_Skyspear", lane(0.62, side), "teamPlayerB", f"AirDefense{i}")
+        objects_payload += placed("WP_Rampart", lane(0.67, side), "teamPlayerB")
+elif MISSION_ID == "challenge-jackal":
+    for i, template in enumerate(("WPJ_Vulture", "WPJ_Vulture", "WPJ_Mongrel", "WPJ_Sting", "WPJ_Sting")):
+        objects_payload += placed(template, (PX - 60 + i * 26, PY + 100), "teamPlayerA")
+    objects_payload += placed("WPJ_ChopShop", (PX + 100, PY), "teamPlayerA")
+    objects_payload += placed("WPJ_Racket", (PX - 85, PY - 50), "teamPlayerA")
+
 # ---------- GlobalLighting v3 ----------
 # Warm desert key + faint cool fill. Slot order per TOD:
 # TL[0], TOL[0], TOL[1], TOL[2], TL[1], TL[2] (terrain / object lights).
@@ -515,7 +657,8 @@ lighting_payload += tod_lights * 4
 # Condition/action chunks are v4/v2 so the engine rematches the type by its
 # internal-name key (we write ordinal 0); parameter type ordinals are fixed
 # by enum Parameter::ParameterType (UNIT = 14).
-P_UNIT = 14
+P_INT, P_REAL, P_TEAM, P_COUNTER, P_COMPARE, P_WAYPOINT = 0, 1, 3, 4, 6, 7
+P_TEXT, P_SIDE, P_UNIT, P_OBJTYPE, P_APS = 10, 11, 14, 15, 28
 
 def namekey(name):
     return struct.pack("<i", (toc.id(name) << 8) | D_ASCII)
@@ -534,29 +677,91 @@ def action(internal_name, params=()):
     return chunk("ScriptAction", 2, payload)
 
 def script(name, conditions, actions, one_shot=True, subroutine=False,
-           easy=True, normal=True, hard=True):
+           easy=True, normal=True, hard=True, alternatives=()):
     payload = ascii_s(name) + ascii_s("") * 3          # name + 3 comments
     payload += bytes([1, 1 if one_shot else 0,
                       1 if easy else 0, 1 if normal else 0, 1 if hard else 0,
                       1 if subroutine else 0])         # active, oneShot, easy, normal, hard, subroutine
     payload += struct.pack("<i", 0)                    # delayEvaluationSeconds
     payload += chunk("OrCondition", 1, b"".join(conditions))
+    for group in alternatives:
+        payload += chunk("OrCondition", 1, b"".join(group))
     payload += b"".join(actions)
     return chunk("Script", 2, payload)
 
-scripts_a = (
-    script("WP_Win",
-           [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="EnemyCC")])],
-           [action("VICTORY")])
-    + script("WP_Lose",
-             [condition("NAMED_DESTROYED", [parameter(P_UNIT, s="PlayerCC")])],
-             [action("DEFEAT")])
-)
-P_REAL, P_TEAM, P_COUNTER, P_WAYPOINT = 1, 3, 4, 7
-P_TEXT, P_SIDE = 10, 11
-P_INT = 0
-P_OBJTYPE = 15            # Parameter::OBJECT_TYPE (thing-template name)
-P_APS = 28                # Parameter::ATTACK_PRIORITY_SET (named set)
+def destroyed(name):
+    return condition("NAMED_DESTROYED", [parameter(P_UNIT, s=name)])
+
+def alive(name):
+    return condition("NAMED_NOT_DESTROYED", [parameter(P_UNIT, s=name)])
+
+def counter(name, value, compare=2):
+    return condition("COUNTER", [parameter(P_COUNTER, s=name), parameter(P_COMPARE, i=compare), parameter(P_INT, i=value)])
+
+def set_counter(name, value):
+    return action("SET_COUNTER", [parameter(P_COUNTER, s=name), parameter(P_INT, i=value)])
+
+def has(template, count=1):
+    return condition("PLAYER_HAS_OBJECT_COMPARISON", [parameter(P_SIDE, s="PlayerA"),
+                     parameter(P_COMPARE, i=3), parameter(P_INT, i=count), parameter(P_OBJTYPE, s=template)])
+
+def objective(stage, target=0):
+    key = f"WP:Objective_{MISSION_ID}_{stage}" if MISSION else "WP:HQObjective"
+    return [set_counter("WP_ObjectiveStage", stage),
+            set_counter("WP_ObjectiveProgress", 0), set_counter("WP_ObjectiveTarget", target),
+            action("DISPLAY_TEXT", [parameter(P_TEXT, s=key)])]
+
+def timer(name, seconds):
+    return action("SET_MILLISECOND_TIMER", [parameter(P_COUNTER, s=name), parameter(P_REAL, r=float(seconds))])
+
+def expired(name):
+    return condition("TIMER_EXPIRED", [parameter(P_COUNTER, s=name)])
+
+target_count = 3 if MISSION_ID == "op02" else 2 if MISSION_ID == "op04" else 0
+initial_actions = objective(0, target_count)
+hold_seconds = 480 if MISSION_ID == "op03" else 600 if MISSION_ID == "challenge-meridian" else 0
+if hold_seconds:
+    initial_actions += [timer("WP_ObjectiveTimer", hold_seconds)]
+if MISSION_ID == "challenge-jackal":
+    initial_actions += [timer("WP_ObjectiveTimer", 540)]
+scripts_a = script("WP_MissionStart", [condition("CONDITION_TRUE", [])], initial_actions)
+scripts_a += script("WP_Lose", [destroyed("PlayerCC")], [action("DEFEAT")])
+
+win_conditions = [destroyed("EnemyCC"), alive("PlayerCC")]
+if MISSION_ID == "training":
+    for step, requirements in enumerate((
+            [has("WP_Fabricator")], [has("WP_Exchange"), has("WP_PowerArray"), has("WP_Porter")],
+            [has("WP_VehiclePlant"), has("WP_Tank", 2)], [has("WP_Vigil")])):
+        scripts_a += script(f"WP_TrainingStep{step}", [counter("WP_ObjectiveStage", step)] + requirements,
+                            objective(step + 1))
+    win_conditions += [counter("WP_ObjectiveStage", 4)]
+elif MISSION_ID == "op01":
+    scripts_a += script("WP_FootholdReady", [counter("WP_ObjectiveStage", 0), has("WP_Exchange"), has("WP_VehiclePlant")], objective(1))
+    win_conditions = [destroyed("ObjectiveRelay"), counter("WP_ObjectiveStage", 1), alive("PlayerCC")]
+elif MISSION_ID == "op02":
+    targets = ("SupplyOfficeA", "SupplyOfficeB", "GridSubstation")
+    for name in targets:
+        scripts_a += script(f"WP_Sabotage_{name}", [destroyed(name)],
+                            [action("INCREMENT_COUNTER", [parameter(P_INT, i=1), parameter(P_COUNTER, s="WP_ObjectiveProgress")])])
+    win_conditions = [destroyed(name) for name in targets] + [alive("PlayerCC")]
+elif MISSION_ID in ("op03", "challenge-meridian"):
+    scripts_a += script("WP_RelayLost", [destroyed("AlliedRelay")], [action("DEFEAT")])
+    if MISSION_ID == "op03":
+        scripts_a += script("WP_RelayHeld", [expired("WP_ObjectiveTimer"), alive("AlliedRelay")], objective(1))
+        win_conditions += [counter("WP_ObjectiveStage", 1), alive("AlliedRelay")]
+    else:
+        win_conditions = [expired("WP_ObjectiveTimer"), alive("AlliedRelay"), alive("PlayerCC")]
+elif MISSION_ID == "op04":
+    for name in ("AirDefense1", "AirDefense2"):
+        scripts_a += script(f"WP_AADown_{name}", [destroyed(name)],
+                            [action("INCREMENT_COUNTER", [parameter(P_INT, i=1), parameter(P_COUNTER, s="WP_ObjectiveProgress")])])
+    scripts_a += script("WP_ScreenDown", [destroyed("AirDefense1"), destroyed("AirDefense2")], objective(1))
+    win_conditions += [destroyed("AirDefense1"), destroyed("AirDefense2")]
+elif MISSION_ID == "challenge-jackal":
+    scripts_a += script("WP_DeadlineMissed", [expired("WP_ObjectiveTimer"), alive("EnemyCC")], [action("DEFEAT")])
+    # HQ destruction on the expiry frame wins the tie. Keeping a separate
+    # positive-timer check would leave neither result eligible on that frame.
+scripts_a += script("WP_Win", win_conditions, [action("VICTORY")])
 
 # Fog-of-war start: force classic black shroud. No scripted home reveal —
 # own structures light the base themselves (CC ShroudClearingRange 300); a
@@ -578,6 +783,15 @@ def arm(name, counter, seconds, **flags):
     """one-shot timer-arm script; difficulty flags carry the per-difficulty
     escalation (a script disabled for the current difficulty never runs, so
     its counter never starts and TIMER_EXPIRED stays false = tier locked)"""
+    if MISSION_ID == "training":
+        if counter != "RaiderTimer":
+            return b""
+        seconds = 240
+    elif MISSION_ID == "op01" and counter == "AirWaveTimer":
+        return b""
+    else:
+        seconds *= {"op03": 0.85, "op04": 0.8, "challenge-meridian": 0.65,
+                    "challenge-jackal": 0.8}.get(MISSION_ID, 1.0)
     return script(name,
                   [condition("CONDITION_TRUE", [])],
                   [action("SET_MILLISECOND_TIMER",
@@ -593,7 +807,7 @@ scripts_b = (
     script("WP_AIProductionOn",
            [condition("CONDITION_TRUE", [])],
            [action("PLAYER_ENABLE_UNIT_CONSTRUCTION",
-                   [parameter(P_SIDE, s="PlayerB")])])
+                   [parameter(P_SIDE, s="PlayerB")]), timer("WP_PunishCooldown", 0)])
     # Escalation timers, per difficulty (deployment-screen OPPOSITION row →
     # MSG_NEW_GAME difficulty → script easy/normal/hard flags). Easy never
     # arms assault/air at all.
@@ -608,7 +822,7 @@ scripts_b = (
     + arm("WP_AirWaveArmN", "AirWaveTimer", 600, easy=False, normal=True, hard=False)
     + arm("WP_AirWaveArmH", "AirWaveTimer", 420, easy=False, normal=False, hard=True)
     + script("WP_ProdRaiders",
-             [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="RaiderTimer")])], [],
+             [expired("RaiderTimer")] + ([counter("WP_ObjectiveStage", 4, compare=3)] if MISSION_ID == "training" else []), [],
              one_shot=False, subroutine=True)
     + script("WP_ProdPack",
              [condition("TIMER_EXPIRED", [parameter(P_COUNTER, s="PackTimer")])], [],
@@ -621,13 +835,17 @@ scripts_b = (
              one_shot=False, subroutine=True)
     + script("WP_WaveAttack",
              [condition("CONDITION_TRUE", [])],
-             [action("TEAM_ATTACK_NAMED",
-                     [parameter(P_TEAM, s="<This Team>"), parameter(P_UNIT, s="PlayerCC")])],
+              [action("TEAM_ATTACK_NAMED",
+                     [parameter(P_TEAM, s="<This Team>"), parameter(P_UNIT, s="AlliedRelay" if hold_seconds else "PlayerCC")])],
              one_shot=False, subroutine=True)
     + script("WP_WaveHunt",
              [condition("CONDITION_TRUE", [])],
              [action("TEAM_HUNT",
                      [parameter(P_TEAM, s="<This Team>")])],
+             one_shot=False, subroutine=True)
+    + script("WP_PunishHunt",
+             [condition("CONDITION_TRUE", [])],
+             [action("TEAM_HUNT", [parameter(P_TEAM, s="<This Team>")]), timer("WP_PunishCooldown", 100)],
              one_shot=False, subroutine=True)
     # Eco-raid machinery: a one-shot script defines the attack-priority set
     # (default 1, the player's income/power heavily favored); the raid
@@ -637,6 +855,9 @@ scripts_b = (
              [condition("CONDITION_TRUE", [])],
              [action("SET_DEFAULT_ATTACK_PRIORITY",
                      [parameter(P_APS, s="WPRaidTargets"), parameter(P_INT, i=1)]),
+              action("SET_ATTACK_PRIORITY_THING",
+                     [parameter(P_APS, s="WPRaidTargets"),
+                      parameter(P_OBJTYPE, s=F["player_hauler"]), parameter(P_INT, i=75)]),
               action("SET_ATTACK_PRIORITY_THING",
                      [parameter(P_APS, s="WPRaidTargets"),
                       parameter(P_OBJTYPE, s=F["player_income"]), parameter(P_INT, i=60)]),
@@ -667,11 +888,16 @@ scripts_b = (
     + script("WP_ProdPunish",
              [condition("PLAYER_DESTROYED_N_BUILDINGS_PLAYER",
                         [parameter(P_SIDE, s="PlayerA"), parameter(P_INT, i=1),
-                         parameter(P_SIDE, s="PlayerB")])], [],
+                         parameter(P_SIDE, s="PlayerB")]), expired("WP_PunishCooldown")]
+             + ([counter("WP_ObjectiveStage", 99)] if MISSION_ID == "training" else []), [],
              one_shot=False, subroutine=True, easy=False)
     + script("WP_ProdDefense",
              [condition("CONDITION_TRUE", [])], [],
              one_shot=False, subroutine=True)
+    + script("WP_ProdCounter", [has(F["player_air"], 2)], [],
+             alternatives=([has(F["player_strafer"], 2)], [has(F["player_tank"], 4)]),
+             one_shot=False, subroutine=True, easy=False,
+             normal=MISSION_ID != "training", hard=MISSION_ID != "training")
 )
 scripts_payload = (
     chunk("ScriptList", 1, b"")            # index 0: neutral
@@ -695,8 +921,7 @@ chunks = (
 )
 
 MAP_NAME = LAY["jname"] if F.get("is_jackal") else LAY["name"]
-out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
-    "~/GeneralsX/GeneralsZH/Maps/%s/%s.map" % (MAP_NAME, MAP_NAME))
+out_path = args.output or str(ROOT / "data/Maps" / MAP_NAME / f"{MAP_NAME}.map")
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 with open(out_path, "wb") as f:
     f.write(toc.emit() + chunks)

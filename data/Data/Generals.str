@@ -141,7 +141,7 @@ TOOLTIP:TooltipCannotPurchaseBecauseQueueFull
 END
 
 WP:DescVector
-"Main battle tank. Sturdy, dependable, and happiest in groups."
+"Precision battle tank. Strong armor and long reach; vulnerable to rockets. Requires a Vehicle Plant."
 END
 
 WP:DescFabricator
@@ -149,7 +149,7 @@ WP:DescFabricator
 END
 
 WP:DescPowerArray
-"Generates power for the base. Production stalls without it."
+"Generates 12 power. A power shortage slows Combine production; keep a reserve."
 END
 
 WP:DescVehiclePlant
@@ -157,7 +157,7 @@ WP:DescVehiclePlant
 END
 
 WP:DescOutrider
-"Fast recon vehicle. Light gun, long sightlines, thin skin."
+"Fast recon car. Spots ambushes and suppresses infantry; avoid tanks."
 END
 
 WP:DescZenith
@@ -165,11 +165,11 @@ WP:DescZenith
 END
 
 WP:DescVulture
-"Jackal raider. Cheap, quick, and vicious in a pack."
+"Light raiding truck. Cheap and quick, with a gun for supply-line attacks. Fragile in a stand-up fight."
 END
 
 WP:DescMongrel
-"Jackal battle tank. Scrap-built, but it hits like the real thing."
+"Fast, affordable battle tank. Outnumbers expensive armor; keep rifles nearby. Requires a Chop Shop."
 END
 
 WP:DescRigger
@@ -177,7 +177,7 @@ WP:DescRigger
 END
 
 WP:DescBulwark
-"Automated defense turret. Holds the line while your armor is away."
+"Automated defense turret. Holds the line while your armor is away. Requires power to fire."
 END
 
 WP:DescChopShop
@@ -185,7 +185,7 @@ WP:DescChopShop
 END
 
 WP:DescWatchpost
-"Fortified tower. Watches the perimeter and fires on anything hostile."
+"Ground-defense tower. Holds off hostile ground units. Use Flakhuts against aircraft."
 END
 
 WP:DescCancelConstruction
@@ -531,7 +531,7 @@ WP:Lancer
 END
 
 WP:DescLancer
-"Anti-armor rocket specialist. Effective against vehicles, structures and aircraft; weak against infantry."
+"Anti-armor and anti-air rockets. Outranges tanks; vulnerable to rifle infantry. Support your armor with Lancers."
 END
 
 WP:BuildLancer
@@ -543,7 +543,7 @@ WP:Sting
 END
 
 WP:DescSting
-"Salvaged rocket rack on legs. Hits hard and slow - keep rifles nearby."
+"Affordable rocket specialist. Counters armor and aircraft; protect it from rifle infantry."
 END
 
 WP:BuildSting
@@ -583,7 +583,7 @@ WP:LaunchPad
 END
 
 WP:DescLaunchPad
-"Airfield platform. Deploys and reinforces Kestrel strike craft."
+"Airfield platform. Produces Kestrel missile craft and, with a Directorate, Shrike strafers."
 END
 
 WP:BuildLaunchPad
@@ -595,7 +595,7 @@ WP:Roost
 END
 
 WP:DescRoost
-"Scrap perch for Buzzard rigs."
+"Air production for Buzzards and, with a Den, Gnats. No power grid required."
 END
 
 WP:BuildRoost
@@ -607,7 +607,7 @@ WP:Exchange
 END
 
 WP:DescExchange
-"Trade hub. Generates a steady stream of credits."
+"Supply hub. Trains Porters and accepts their deliveries. Also earns $25 every five seconds. Build near a supply cache."
 END
 
 WP:BuildExchange
@@ -619,7 +619,7 @@ WP:Racket
 END
 
 WP:DescRacket
-"Off-the-books income. Nobody asks where it comes from."
+"Salvage hub. Trains Scavengers and accepts their deliveries. Earns $20 every five seconds without power. Build near a cache."
 END
 
 WP:BuildRacket
@@ -763,7 +763,7 @@ WP:Skyspear
 END
 
 WP:DescSkyspear
-"Anti-air battery. Long-reach flak; cannot target ground units."
+"Anti-air battery. Long-reach flak; cannot target ground units. Requires power to fire."
 END
 
 WP:BuildSkyspear
@@ -787,7 +787,7 @@ WP:Directorate
 END
 
 WP:DescDirectorate
-"Meridian technology center. Unlocks the Bastion and the Shrike."
+"Unlocks Bastions, Shrikes, Longbows and Precision Strike. The strike charges for 150 seconds. Requires 3 power; outages pause the strike."
 END
 
 WP:BuildDirectorate
@@ -799,7 +799,7 @@ WP:Den
 END
 
 WP:DescDen
-"Jackal think-tank, such as it is. Unlocks the Bruiser and the Gnat."
+"Unlocks Bruisers, Gnats, Lobbers and Tunnel Ambush. The ambush charges for 120 seconds. No power grid required."
 END
 
 WP:BuildDen
@@ -811,7 +811,7 @@ WP:Rampart
 END
 
 WP:DescRampart
-"Hardened pillbox. Anti-infantry ground defense."
+"Hardened pillbox. Anti-infantry ground defense. Requires power to fire."
 END
 
 WP:BuildRampart
@@ -895,7 +895,7 @@ WP:BuildLongbow
 END
 
 WP:DescLongbow
-"Long-range siege cannon. Devastating against structures and packed armor, but blind up close.\nRequires a Directorate. Drains 3 power."
+"Long-range siege cannon. Devastating against structures and packed armor, but blind up close.\nRequires a Directorate and 3 power to fire."
 END
 
 WP:Lobber
@@ -907,7 +907,7 @@ WP:BuildLobber
 END
 
 WP:DescLobber
-"Junk mortar with a huge blast radius. Shorter reach than the Longbow, but the shrapnel spread is wider.\nRequires a Den. Drains 3 power."
+"Junk mortar with a wide blast radius. Shorter reach than the Longbow; blind up close. Requires a Den. No power needed."
 END
 
 WP:IdleWorker
@@ -923,11 +923,11 @@ WP:DifficultyLabel
 END
 
 WP:DiffEasy
-"SKIRMISH"
+"RECRUIT"
 END
 
 WP:DiffEasyDesc
-"A lighter war. Raids come late and the enemy's heaviest gear stays home."
+"Learn the battlefield. Later raids, smaller threats, no advanced air or assault waves."
 END
 
 WP:DiffNormal
@@ -943,5 +943,251 @@ WP:DiffHard
 END
 
 WP:DiffHardDesc
-"Everything, sooner. The enemy war machine never slows down."
+"Early pressure, fast escalation. Scout, protect your income, and replace losses."
+END
+
+
+WP:MissionTypeSkirmish
+"SKIRMISH"
+END
+
+WP:MissionTypeOperation
+"OPERATIONS"
+END
+
+WP:MissionTypeTraining
+"FIELD TRAINING"
+END
+
+WP:MissionTypeChallenge
+"COMMANDER TRIALS"
+END
+
+WP:MeridianBrief
+"Precision armor. Strong defenses. Protect your power grid."
+END
+
+WP:JackalBrief
+"Mobile raiders. Cheap infrastructure. No power grid. Strike the supply line."
+END
+
+WP:HQObjective
+"Destroy their headquarters. Protect your own."
+END
+
+WP:MapLockedFaction
+"This operation has an assigned faction."
+END
+
+WP:ScoreRetry
+"RETRY"
+END
+
+WP:ScoreChoose
+"CHANGE BATTLEFIELD"
+END
+
+WP:ControlsHint
+"Select: left click / Order: right click / Groups: Ctrl + 1-9 / Pause: Esc"
+END
+
+WP:SelectionHint
+"SELECT A UNIT OR STRUCTURE"
+END
+
+WP:QueueLabel
+"PRODUCTION"
+END
+
+WP:OrdersLabel
+"ORDERS"
+END
+
+WP:MissionRelay
+"Communications Relay"
+END
+
+WP:PropRock
+"Weathered outcrop"
+END
+
+WP:PropScrap
+"Salvage pile"
+END
+
+WP:PropRelay
+"Abandoned relay"
+END
+
+WP:PropBarrier
+"Concrete barrier"
+END
+
+WP:MapTraining
+"Field Orientation"
+END
+
+WP:MapTrainingDesc
+"Welcome to the Strip, commander. Establish a small Combine outpost, learn to keep production supplied, then clear the hostile command post. Your operations officer will guide the opening; you control the pace."
+END
+
+WP:Objective_training_0
+"Train a Fabricator from your headquarters."
+END
+
+WP:Objective_training_1
+"Construct an Exchange and a Power Array, then train a Porter."
+END
+
+WP:Objective_training_2
+"Construct a Vehicle Plant and field two Vectors."
+END
+
+WP:Objective_training_3
+"Train a Vigil to scout the central approach."
+END
+
+WP:Objective_training_4
+"Destroy the hostile headquarters. Protect your own."
+END
+
+WP:MapOp01
+"01 - First Light"
+END
+
+WP:MapOp01Desc
+"The Combine calls this a restoration of service. The Jackal Front calls it an occupation. Their forward relay coordinates raids through the eastern ridge. Establish a productive foothold, then silence the relay before the next convoy enters the corridor."
+END
+
+WP:Objective_op01_0
+"Establish an Exchange and a Vehicle Plant."
+END
+
+WP:Objective_op01_1
+"Destroy the Front's forward relay. Protect headquarters."
+END
+
+WP:MapOp02
+"02 - Cut the Wire"
+END
+
+WP:MapOp02Desc
+"The Front cannot afford a straight fight with the new garrison. Its supply offices and grid substation are another matter. Strike three separated sites around the basin. Fast Vultures can exploit gaps; cheap Rackets fund replacements without a power grid."
+END
+
+WP:Objective_op02_0
+"Destroy both supply offices and the grid substation (0/3)."
+END
+
+WP:MapOp03
+"03 - The Long Watch"
+END
+
+WP:MapOp03Desc
+"One relay now carries every order north of the basin. Hold it for eight minutes while the Combine reroutes the network, then counterattack the Jackal command post. Losing the relay or your headquarters ends the operation. The Front is already moving through the trenches."
+END
+
+WP:Objective_op03_0
+"Defend the forward relay for eight minutes."
+END
+
+WP:Objective_op03_1
+"Destroy the enemy command post. Keep the relay and headquarters alive."
+END
+
+WP:MapOp04
+"04 - War Powers"
+END
+
+WP:MapOp04Desc
+"The Combine's occupation headquarters is dug into the scrapyard. Two air-defense sites cover the approach. Dismantle both, then finish the headquarters before the corridor becomes permanent. The Front's commanders promise this is their last emergency operation. Nobody puts it in writing."
+END
+
+WP:Objective_op04_0
+"Destroy the two marked air-defense sites (0/2)."
+END
+
+WP:Objective_op04_1
+"Destroy the occupation headquarters. Protect your command post."
+END
+
+WP:MapChallengeM
+"Commander Trial - Glass Rampart"
+END
+
+WP:MapChallengeMDesc
+"Jackal commander Rook has turned the trench line into a mortar range. Your supply relay must survive ten minutes. The headquarters alone will not save it. Build a layered defense, raid the mortar positions, and spend every repair interval wisely."
+END
+
+WP:Objective_challenge-meridian_0
+"Keep the supply relay and headquarters alive for ten minutes."
+END
+
+WP:MapChallengeJ
+"Commander Trial - Hostile Takeover"
+END
+
+WP:MapChallengeJDesc
+"Director Vale's requisition column arrives in nine minutes. Destroy the forward headquarters before the deadline and the contract collapses. The Combine is entrenched; the Front starts with a mobile raiding group and enough credit to choose between more armor and an air strike."
+END
+
+WP:Objective_challenge-jackal_0
+"Destroy the enemy headquarters within nine minutes."
+END
+
+WP:PrecisionStrike
+"Precision Strike"
+END
+
+WP:DescPrecisionStrike
+"Mark a target for a powerful strike after three seconds. Effective against packed armor and structures. Recharges in 150 seconds. Select explored ground."
+END
+
+WP:TunnelAmbush
+"Tunnel Ambush"
+END
+
+WP:DescTunnelAmbush
+"Bring three Scrappers and two Stings out of concealment at the target. Requires clear, explored ground. Recharges in 120 seconds."
+END
+
+WP:MissionLocked
+"Complete the previous operation in the campaign to deploy here."
+END
+
+
+WP:Porter
+"Porter"
+END
+
+WP:Scavenger
+"Scavenger"
+END
+
+WP:SupplyCache
+"Supply Cache"
+END
+
+WP:BuildPorter
+"Train Porter"
+END
+
+WP:BuildScavenger
+"Train Scavenger"
+END
+
+WP:DescPorter
+"Supply transport. Automatically carries four crates ($200) from caches to an Exchange. Protect the route; build hubs close to supplies."
+END
+
+WP:DescScavenger
+"Fast salvage truck. Carries two crates ($100) from caches to a Racket. Cheap and fragile; protect the route."
+END
+
+GUI:SupplyRemaining
+"Supplies remaining: %d"
+END
+
+TOOLTIP:SupplyWarehouse
+"\nSupplies remaining: $%d"
 END

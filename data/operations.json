@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "campaign": {
+    "id": "meridian-strip",
+    "title": "The Meridian Strip",
+    "description": "Four operations. Two accounts of the same undeclared war. Follow the Combine's advance and the Front's response through a contested industrial corridor."
+  },
+  "missions": [
+    {
+      "id": "training",
+      "map": "WPTraining",
+      "title": "Field Orientation",
+      "category": "training",
+      "faction": "meridian",
+      "layout": "flats",
+      "duration": "8–12 min",
+      "unlock": null,
+      "nextMission": "op01",
+      "briefing": "Welcome to the Strip, commander. Establish a small Combine outpost, learn to keep production supplied, then clear the hostile command post. Your operations officer will guide the opening; you control the pace.",
+      "objectives": [
+        {
+          "id": "builder",
+          "label": "Train a Fabricator from your headquarters.",
+          "hint": "Left-click the headquarters, then its Fabricator portrait. Right-click open ground to move selected units.",
+          "optional": false
+        },
+        {
+          "id": "economy",
+          "label": "Construct an Exchange and a Power Array, then train a Porter.",
+          "hint": "Select your Fabricator and build the Exchange near a supply cache. Train a Porter at the Exchange; it hauls crates automatically. The Power Array keeps production running.",
+          "optional": false
+        },
+        {
+          "id": "production",
+          "label": "Construct a Vehicle Plant and field two Vectors.",
+          "hint": "Tanks require a Vehicle Plant. Set its rally point with a right click. Click unit portraits to queue them; click a queue item to cancel.",
+          "optional": false
+        },
+        {
+          "id": "scout",
+          "label": "Train a Vigil to scout the central approach.",
+          "hint": "Recon reveals threats before your armor reaches them. Drag a box to select troops. Ctrl + 1 saves a control group; 1 recalls it.",
+          "optional": false
+        },
+        {
+          "id": "finish",
+          "label": "Destroy the hostile headquarters. Protect your own.",
+          "hint": "Use Attack Move to advance while engaging enemies. Lancers counter armor, Wardens counter infantry, and Vectors need support against rockets. Keep some defenders at home.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "Orientation complete. You built a working outpost and coordinated a first assault. The Strip's next engagement will demand those same fundamentals under pressure.",
+      "debriefLoss": "Your headquarters was lost. Try building income before a large army, scout the approach, and retain a defensive squad. Orientation can be restarted at any time."
+    },
+    {
+      "id": "op01",
+      "map": "WPOp01",
+      "title": "01 · First Light",
+      "category": "operation",
+      "faction": "meridian",
+      "layout": "ridge",
+      "duration": "10–15 min",
+      "unlock": null,
+      "nextMission": "op02",
+      "briefing": "The Combine calls this a restoration of service. The Jackal Front calls it an occupation. Their forward relay coordinates raids through the eastern ridge. Establish a productive foothold, then silence the relay before the next convoy enters the corridor.",
+      "objectives": [
+        {
+          "id": "foothold",
+          "label": "Establish an Exchange and a Vehicle Plant.",
+          "hint": "Protect your income and keep the power margin positive. The ridge has two approaches; scout before committing your armor.",
+          "optional": false
+        },
+        {
+          "id": "relay",
+          "label": "Destroy the Front's forward relay. Protect headquarters.",
+          "hint": "The relay stands beyond the central passes, ahead of the main enemy base. You can complete this operation without razing the entire base.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "The relay falls silent. Combine traffic moves again, and corporate broadcasts celebrate a restored corridor. Across the Strip, Jackal scouts identify the substations keeping that corridor alive.",
+      "debriefLoss": "The foothold collapsed before the relay was secured. Keep your first Exchange defended and use recon to choose a pass before advancing."
+    },
+    {
+      "id": "op02",
+      "map": "WPOp02",
+      "title": "02 · Cut the Wire",
+      "category": "operation",
+      "faction": "jackal",
+      "layout": "basin",
+      "duration": "12–18 min",
+      "unlock": "op01",
+      "nextMission": "op03",
+      "briefing": "The Front cannot afford a straight fight with the new garrison. Its supply offices and grid substation are another matter. Strike three separated sites around the basin. Fast Vultures can exploit gaps; cheap Rackets fund replacements without a power grid.",
+      "objectives": [
+        {
+          "id": "sabotage",
+          "label": "Destroy both supply offices and the grid substation (0/3).",
+          "hint": "Targets sit on opposite basin approaches and behind the rim. Split your raids or defeat the patrols together. Their headquarters is not the objective.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "Three precise disruptions strand an expensive army. The Front calls it a victory for local initiative. The Combine routes its remaining communications through a single exposed relay at the northern pass.",
+      "debriefLoss": "The raiders lost their command post. Use the Vulture's speed to leave bad fights, and invest in a defended Racket so the first losses do not end the operation."
+    },
+    {
+      "id": "op03",
+      "map": "WPOp03",
+      "title": "03 · The Long Watch",
+      "category": "operation",
+      "faction": "meridian",
+      "layout": "range",
+      "duration": "14–20 min",
+      "unlock": "op02",
+      "nextMission": "op04",
+      "briefing": "One relay now carries every order north of the basin. Hold it for eight minutes while the Combine reroutes the network, then counterattack the Jackal command post. Losing the relay or your headquarters ends the operation. The Front is already moving through the trenches.",
+      "objectives": [
+        {
+          "id": "hold",
+          "label": "Defend the forward relay for eight minutes.",
+          "hint": "Build overlapping defenses around the relay, then support them with mobile troops. Pair anti-infantry and anti-armor weapons. Keep a reserve for air threats.",
+          "optional": false
+        },
+        {
+          "id": "counterattack",
+          "label": "Destroy the enemy command post. Keep the relay and headquarters alive.",
+          "hint": "The network is rerouted. Push through a trench gap with a mixed force, leaving defenders at the relay.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "The signal holds and the counterattack breaks the Front's northern force. The Combine announces that the emergency is nearly over. Its final occupation headquarters has just activated a paired air-defense screen.",
+      "debriefLoss": "The relay or headquarters was destroyed. Static defenses buy time, but they need repairs, mixed support and a clear retreat route for the Fabricator."
+    },
+    {
+      "id": "op04",
+      "map": "WPOp04",
+      "title": "04 · War Powers",
+      "category": "operation",
+      "faction": "jackal",
+      "layout": "scrap",
+      "duration": "15–22 min",
+      "unlock": "op03",
+      "nextMission": null,
+      "briefing": "The Combine's occupation headquarters is dug into the scrapyard. Two air-defense sites cover the approach. Dismantle both, then finish the headquarters before the corridor becomes permanent. The Front's commanders promise this is their last emergency operation. Nobody puts it in writing.",
+      "objectives": [
+        {
+          "id": "airdefense",
+          "label": "Destroy the two marked air-defense sites (0/2).",
+          "hint": "Send ground units against flak. Their two positions cover different approaches; strike the weaker side first and keep Stings with the raiders.",
+          "optional": false
+        },
+        {
+          "id": "headquarters",
+          "label": "Destroy the occupation headquarters. Protect your command post.",
+          "hint": "With the air-defense sites gone, Buzzards can support a ground assault. Replace losses from your Rackets and avoid feeding units into the front one at a time.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "The occupation headquarters burns. The broadcasts stop for a moment. Then both factions announce that extraordinary powers must remain in force until stability returns. The Strip is quiet enough to hear the next convoy coming.",
+      "debriefLoss": "The Front's command post fell before the occupation headquarters. Break the air-defense screen with ground forces, preserve your income, and coordinate the final assault."
+    },
+    {
+      "id": "challenge-meridian",
+      "map": "WPChallengeM",
+      "title": "Commander Trial · Glass Rampart",
+      "category": "challenge",
+      "faction": "meridian",
+      "layout": "range",
+      "duration": "10 min",
+      "unlock": null,
+      "nextMission": null,
+      "briefing": "Jackal commander Rook has turned the trench line into a mortar range. Your supply relay must survive ten minutes. The headquarters alone will not save it. Build a layered defense, raid the mortar positions, and spend every repair interval wisely.",
+      "objectives": [
+        {
+          "id": "survive",
+          "label": "Keep the supply relay and headquarters alive for ten minutes.",
+          "hint": "Enemy mortars punish stationary clusters. Use recon to find their positions and fast Outriders to draw out defenders.",
+          "optional": false
+        },
+        {
+          "id": "mortars",
+          "label": "Destroy the two forward mortar pits to relieve pressure.",
+          "hint": "A counterattack can reduce the siege before the timer expires.",
+          "optional": true
+        }
+      ],
+      "debriefWin": "Rook's siege has run out of daylight. The relay still stands. The Combine would like the damage figures described as routine maintenance.",
+      "debriefLoss": "The siege broke your relay or headquarters. Spread out, repair between volleys, and remember that destroying a mortar is also a form of defense."
+    },
+    {
+      "id": "challenge-jackal",
+      "map": "WPChallengeJ",
+      "title": "Commander Trial · Hostile Takeover",
+      "category": "challenge",
+      "faction": "jackal",
+      "layout": "ridge",
+      "duration": "9 min",
+      "unlock": null,
+      "nextMission": null,
+      "briefing": "Director Vale's requisition column arrives in nine minutes. Destroy the forward headquarters before the deadline and the contract collapses. The Combine is entrenched; the Front starts with a mobile raiding group and enough credit to choose between more armor and an air strike.",
+      "objectives": [
+        {
+          "id": "deadline",
+          "label": "Destroy the enemy headquarters within nine minutes.",
+          "hint": "Scout the passes, disrupt income, and attack from more than one direction. A long siege favors Vale. Losing your command post also ends the trial.",
+          "optional": false
+        }
+      ],
+      "debriefWin": "The headquarters falls before the requisition column arrives. Vale's contract is terminated, and the Front acquires several useful trucks without signing anything.",
+      "debriefLoss": "The requisition deadline expired or your command post was destroyed. The next attempt needs a faster opening and a coordinated finishing attack."
+    }
+  ]
+}

@@ -1,0 +1,941 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "jakaa01",
+      "path": "data/Art/W3D/jakaa01.w3d",
+      "triangles": 1808,
+      "bytes": 240362,
+      "textures": [
+        "wp_flakhut.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakart01",
+      "path": "data/Art/W3D/jakart01.w3d",
+      "triangles": 1736,
+      "bytes": 243958,
+      "textures": [
+        "wp_lobber.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakcp01",
+      "path": "data/Art/W3D/jakcp01.w3d",
+      "triangles": 976,
+      "bytes": 136983,
+      "textures": [
+        "wp_jakcp.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakcs01",
+      "path": "data/Art/W3D/jakcs01.w3d",
+      "triangles": 468,
+      "bytes": 65863,
+      "textures": [
+        "wp_jakcs.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakex01",
+      "path": "data/Art/W3D/jakex01.w3d",
+      "triangles": 844,
+      "bytes": 118505,
+      "textures": [
+        "wp_racket.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakhaul01",
+      "path": "data/Art/W3D/jakhaul01.w3d",
+      "triangles": 2236,
+      "bytes": 301904,
+      "textures": [
+        "wp_scavenger.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakhvy01",
+      "path": "data/Art/W3D/jakhvy01.w3d",
+      "triangles": 1476,
+      "bytes": 206909,
+      "textures": [
+        "wp_bruiser.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakinf01",
+      "path": "data/Art/W3D/jakinf01.w3d",
+      "triangles": 96,
+      "bytes": 10576,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakinf02",
+      "path": "data/Art/W3D/jakinf02.w3d",
+      "triangles": 1356,
+      "bytes": 190123,
+      "textures": [
+        "wp_scrapper.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakjet01",
+      "path": "data/Art/W3D/jakjet01.w3d",
+      "triangles": 832,
+      "bytes": 116827,
+      "textures": [
+        "wp_buzzard.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakjet02",
+      "path": "data/Art/W3D/jakjet02.w3d",
+      "triangles": 2232,
+      "bytes": 309797,
+      "textures": [
+        "wp_gnat.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakpad01",
+      "path": "data/Art/W3D/jakpad01.w3d",
+      "triangles": 616,
+      "bytes": 80103,
+      "textures": [
+        "wp_roost.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakpill01",
+      "path": "data/Art/W3D/jakpill01.w3d",
+      "triangles": 1456,
+      "bytes": 204181,
+      "textures": [
+        "wp_nest.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakpwr01",
+      "path": "data/Art/W3D/jakpwr01.w3d",
+      "triangles": 1140,
+      "bytes": 156381,
+      "textures": [
+        "wp_dynamo.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakrig01",
+      "path": "data/Art/W3D/jakrig01.w3d",
+      "triangles": 296,
+      "bytes": 41785,
+      "textures": [
+        "wp_rigger.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakroc01",
+      "path": "data/Art/W3D/jakroc01.w3d",
+      "triangles": 1392,
+      "bytes": 195121,
+      "textures": [
+        "wp_sting.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jaksct01",
+      "path": "data/Art/W3D/jaksct01.w3d",
+      "triangles": 1296,
+      "bytes": 183617,
+      "textures": [
+        "wp_prowler.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jaktank01",
+      "path": "data/Art/W3D/jaktank01.w3d",
+      "triangles": 1264,
+      "bytes": 178397,
+      "textures": [
+        "wp_mongrel.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jaktank01d",
+      "path": "data/Art/W3D/jaktank01d.w3d",
+      "triangles": 1264,
+      "bytes": 178409,
+      "textures": [
+        "wp_mongrel_d.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jaktech01",
+      "path": "data/Art/W3D/jaktech01.w3d",
+      "triangles": 1308,
+      "bytes": 179967,
+      "textures": [
+        "wp_den.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakvul01",
+      "path": "data/Art/W3D/jakvul01.w3d",
+      "triangles": 1812,
+      "bytes": 257177,
+      "textures": [
+        "wp_vulture.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakvul01d",
+      "path": "data/Art/W3D/jakvul01d.w3d",
+      "triangles": 1812,
+      "bytes": 257205,
+      "textures": [
+        "wp_vulture_d.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "jakwp01",
+      "path": "data/Art/W3D/jakwp01.w3d",
+      "triangles": 532,
+      "bytes": 75410,
+      "textures": [
+        "wp_watchpost.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "locater01",
+      "path": "data/Art/W3D/locater01.w3d",
+      "triangles": 96,
+      "bytes": 10576,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "locater02",
+      "path": "data/Art/W3D/locater02.w3d",
+      "triangles": 24,
+      "bytes": 2704,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "meraa01",
+      "path": "data/Art/W3D/meraa01.w3d",
+      "triangles": 532,
+      "bytes": 75406,
+      "textures": [
+        "wp_skyspear.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merart01",
+      "path": "data/Art/W3D/merart01.w3d",
+      "triangles": 496,
+      "bytes": 69066,
+      "textures": [
+        "wp_longbow.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merbul01",
+      "path": "data/Art/W3D/merbul01.w3d",
+      "triangles": 356,
+      "bytes": 45362,
+      "textures": [
+        "wp_bulwark.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mercc01",
+      "path": "data/Art/W3D/mercc01.w3d",
+      "triangles": 752,
+      "bytes": 105623,
+      "textures": [
+        "wp_mercc.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merex01",
+      "path": "data/Art/W3D/merex01.w3d",
+      "triangles": 756,
+      "bytes": 106189,
+      "textures": [
+        "wp_exchange.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merhaul01",
+      "path": "data/Art/W3D/merhaul01.w3d",
+      "triangles": 2236,
+      "bytes": 301856,
+      "textures": [
+        "wp_porter.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merhvy01",
+      "path": "data/Art/W3D/merhvy01.w3d",
+      "triangles": 1476,
+      "bytes": 206909,
+      "textures": [
+        "wp_bastion.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merinf01",
+      "path": "data/Art/W3D/merinf01.w3d",
+      "triangles": 96,
+      "bytes": 10576,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merinf02",
+      "path": "data/Art/W3D/merinf02.w3d",
+      "triangles": 1356,
+      "bytes": 190095,
+      "textures": [
+        "wp_warden.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merjet01",
+      "path": "data/Art/W3D/merjet01.w3d",
+      "triangles": 1176,
+      "bytes": 164987,
+      "textures": [
+        "wp_kestrel.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merjet02",
+      "path": "data/Art/W3D/merjet02.w3d",
+      "triangles": 420,
+      "bytes": 59145,
+      "textures": [
+        "wp_shrike.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merout01",
+      "path": "data/Art/W3D/merout01.w3d",
+      "triangles": 1664,
+      "bytes": 236471,
+      "textures": [
+        "wp_outrider.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merout01d",
+      "path": "data/Art/W3D/merout01d.w3d",
+      "triangles": 1664,
+      "bytes": 236499,
+      "textures": [
+        "wp_outrider_d.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merpad01",
+      "path": "data/Art/W3D/merpad01.w3d",
+      "triangles": 684,
+      "bytes": 89631,
+      "textures": [
+        "wp_launchpad.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merpill01",
+      "path": "data/Art/W3D/merpill01.w3d",
+      "triangles": 184,
+      "bytes": 25783,
+      "textures": [
+        "wp_rampart.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merpp01",
+      "path": "data/Art/W3D/merpp01.w3d",
+      "triangles": 736,
+      "bytes": 103383,
+      "textures": [
+        "wp_merpp.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merroc01",
+      "path": "data/Art/W3D/merroc01.w3d",
+      "triangles": 1392,
+      "bytes": 195135,
+      "textures": [
+        "wp_lancer.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mersct01",
+      "path": "data/Art/W3D/mersct01.w3d",
+      "triangles": 1296,
+      "bytes": 183589,
+      "textures": [
+        "wp_vigil.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mersuv01",
+      "path": "data/Art/W3D/mersuv01.w3d",
+      "triangles": 260,
+      "bytes": 36749,
+      "textures": [
+        "wp_surveyor.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mertank01",
+      "path": "data/Art/W3D/mertank01.w3d",
+      "triangles": 1644,
+      "bytes": 231591,
+      "textures": [
+        "wp_vector.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mertank01d",
+      "path": "data/Art/W3D/mertank01d.w3d",
+      "triangles": 1644,
+      "bytes": 231603,
+      "textures": [
+        "wp_vector_d.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "mertech01",
+      "path": "data/Art/W3D/mertech01.w3d",
+      "triangles": 612,
+      "bytes": 84919,
+      "textures": [
+        "wp_directorate.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merwf01",
+      "path": "data/Art/W3D/merwf01.w3d",
+      "triangles": 344,
+      "bytes": 48503,
+      "textures": [
+        "wp_merwf.tga"
+      ],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merzen01",
+      "path": "data/Art/W3D/merzen01.w3d",
+      "triangles": 2044,
+      "bytes": 280949,
+      "textures": [
+        "wp_zenith.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "merzen01d",
+      "path": "data/Art/W3D/merzen01d.w3d",
+      "triangles": 2044,
+      "bytes": 280985,
+      "textures": [
+        "wp_zenith_d.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": true,
+      "muzzle": true,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpinf1",
+      "path": "data/Art/W3D/wpinf1.w3d",
+      "triangles": 0,
+      "bytes": 540,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpinf1die",
+      "path": "data/Art/W3D/wpinf1die.w3d",
+      "triangles": 0,
+      "bytes": 1596,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpinf1fir",
+      "path": "data/Art/W3D/wpinf1fir.w3d",
+      "triangles": 0,
+      "bytes": 408,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpinf1idl",
+      "path": "data/Art/W3D/wpinf1idl.w3d",
+      "triangles": 0,
+      "bytes": 1272,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpinf1wlk",
+      "path": "data/Art/W3D/wpinf1wlk.w3d",
+      "triangles": 0,
+      "bytes": 1248,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpmove01",
+      "path": "data/Art/W3D/wpmove01.w3d",
+      "triangles": 60,
+      "bytes": 6640,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpnode01",
+      "path": "data/Art/W3D/wpnode01.w3d",
+      "triangles": 24,
+      "bytes": 2704,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wprally01",
+      "path": "data/Art/W3D/wprally01.w3d",
+      "triangles": 48,
+      "bytes": 5328,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wprelay01",
+      "path": "data/Art/W3D/wprelay01.w3d",
+      "triangles": 844,
+      "bytes": 118871,
+      "textures": [
+        "wp_relay.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wprock01",
+      "path": "data/Art/W3D/wprock01.w3d",
+      "triangles": 120,
+      "bytes": 16537,
+      "textures": [
+        "wp_rock.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpruin01",
+      "path": "data/Art/W3D/wpruin01.w3d",
+      "triangles": 636,
+      "bytes": 89759,
+      "textures": [
+        "wp_ruinlarge.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpruin02",
+      "path": "data/Art/W3D/wpruin02.w3d",
+      "triangles": 636,
+      "bytes": 89759,
+      "textures": [
+        "wp_ruinsmall.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpscaf01",
+      "path": "data/Art/W3D/wpscaf01.w3d",
+      "triangles": 180,
+      "bytes": 19760,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpscaf02",
+      "path": "data/Art/W3D/wpscaf02.w3d",
+      "triangles": 180,
+      "bytes": 19760,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpscrap01",
+      "path": "data/Art/W3D/wpscrap01.w3d",
+      "triangles": 652,
+      "bytes": 91991,
+      "textures": [
+        "wp_scrap.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpshell01",
+      "path": "data/Art/W3D/wpshell01.w3d",
+      "triangles": 12,
+      "bytes": 1392,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpwall01",
+      "path": "data/Art/W3D/wpwall01.w3d",
+      "triangles": 228,
+      "bytes": 32629,
+      "textures": [
+        "wp_wall.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpwreck01",
+      "path": "data/Art/W3D/wpwreck01.w3d",
+      "triangles": 1632,
+      "bytes": 194637,
+      "textures": [
+        "wp_merwreck.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
+      "id": "wpwreck02",
+      "path": "data/Art/W3D/wpwreck02.w3d",
+      "triangles": 1252,
+      "bytes": 150077,
+      "textures": [
+        "wp_jakwreck.tga"
+      ],
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ repository visibility. The owner authorized implementing the polish plan,
 preparing private repositories and committing/pushing work. A public release
 remains a separate decision (D013).
 
-Current local playtest candidate: `66f4e32fcfab`, 66,740,374 bytes. Build, web,
+Current local playtest candidate: `3b26e3104fcb`, 66,760,647 bytes. Build, web,
 packaging and content gates pass. Bounded observations from earlier candidates
 are explicitly identified in [verification.md](verification.md). A checked
 fixture is evidence for that fixture; broader release categories stay open
@@ -13,6 +13,16 @@ where only some requirements have been exercised.
 
 ## Completed local checks
 
+- [x] `3b26e3104fcb`: 25 web tests, six packaging tests and all content gates
+      pass; lost-builder recovery is covered. Ordinary final-build contrast,
+      guidance reopening and overview checks pass. The retry diagnostic and
+      unresolved intermittent crash are documented separately in verification.md.
+- [x] `3d2812941130`: native command contrast, normal progression through five
+      training guidance stages, live partial requirements, collapse/reopen,
+      All steps, automatic-opening preference and 125% text checked. WASM
+      build, 23 web tests, six packaging tests and voice/content/map gates pass.
+- [x] One standard local server on 8322; default and documentation agree,
+      redundant 8321 listener stopped, duplicate-start error checked.
 - [x] `66f4e32fcfab`: full WASM build, 17 web-state/record tests, six packaging
       tests and voice/content/map gates pass. Metadata rejects access prerequisites.
 - [x] A 0/4 campaign record can launch operation 4 through the journal, deployment
@@ -116,8 +126,11 @@ where only some requirements have been exercised.
 - [ ] Complete the remaining both-faction asset lifecycle/combat-state coverage;
       the successful roster and crowded-scene observations do not cover every state.
 
-Both final browser tabs reported empty console-error lists. That
-observation does not replace the untested paths above.
+The earlier controls/power browser tabs reported empty console-error lists.
+The September 5 guidance follow-up subsequently reproduced an intermittent
+native surface-destruction crash on Retry after a 7:27 training loss. Resolve
+and repeat that longer retry flow before treating replay reliability as passed;
+short and 7:56 traced retry passes do not establish a fix.
 
 ## Human and hardware checks before release
 

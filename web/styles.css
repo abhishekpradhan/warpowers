@@ -74,15 +74,31 @@ button:disabled::before {
 #missionHud h1 { font-size: 15px; margin: 0 0 7px; font-weight: 700; letter-spacing: .03em; }
 #missionHud p { margin: 0; line-height: 1.45; }
 #missionHud button { pointer-events: auto; margin-top: 9px; }
+#guidanceButton { margin-left: 14px; color: var(--gold); }
 .objectiveMeta { display: flex; justify-content: space-between; gap: 16px; color: var(--gold); font-size: 11px; line-height: 1.5; margin-top: 5px; }
 #guide {
   position: absolute; right: 20px; top: 77px; max-width: 290px; background: rgba(11, 24, 31, .94);
+  max-height: calc(78% - 90px); overflow-y: auto;
   border-top: 2px solid var(--gold); padding: 14px 17px; font-size: calc(12px * var(--ui-scale));
   z-index: 4; animation: slideIn .3s ease-out;
 }
 #guide .eyebrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
 #guide strong { font-size: 13px; }
 #guide p { color: #aabbc5; line-height: 1.55; margin: 7px 0 0; }
+.guideStep { color: var(--gold); font-size: 10px; margin-bottom: 8px; }
+#guideChecklist { list-style: none; padding: 9px 0; margin: 10px 0; border-block: 1px solid var(--line); }
+#guideChecklist li { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: #e2e8eb; }
+#guideChecklist .complete { color: #93b4a2; }
+.requirementMark { width: 12px; }
+.requirementCount { margin-left: auto; font-variant-numeric: tabular-nums; }
+#guide .guideNote { font-size: 10px; color: var(--muted); margin-top: 10px; }
+#guideOverview { margin-top: 13px; color: var(--gold); }
+.guidanceSteps { list-style: none; padding: 0; margin: 24px 0; }
+.guidanceSteps li { padding: 16px 0 16px 18px; border-left: 2px solid var(--line); }
+.guidanceSteps li[aria-current] { border-color: var(--gold); background: #d7b45a08; }
+.guidanceSteps h3 { font-size: 15px; margin: 4px 0 8px; }
+.guidanceSteps p { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 #dismissGuide { font-size: 19px; line-height: 1; }
 #toast {
   position: absolute; left: 50%; top: 19%; transform: translateX(-50%); max-width: 460px;

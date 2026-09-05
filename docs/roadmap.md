@@ -5,12 +5,21 @@ polish plan on September 4, including repository preparation and ordinary
 commits/pushes. Publication and hosting remain separate decisions. The
 engine and swappable dataset architecture remain the foundation (D018).
 
-## Ready for local playtest
+## Current local playtest work
 
-Candidate `66f4e32fcfab` passes the full WASM build, 17 web-state tests,
+Candidate `3b26e3104fcb` passes the incremental WASM build, 25 web-state/guidance tests,
 six packaging tests and all content/gameplay/voice gates. The unchanged keyboard
 implementation retains the preceding 16-case regression evidence.
-The product polish pass is ready for local playtesting. Native evidence spans
+The latest feedback pass adds stronger active/disabled command contrast,
+live training requirement checklists, lost-builder recovery advice and an overview of
+all steps. Normal training reaches all five guidance stages; collapse/reopen
+and 125% overlay text checks pass. Development now uses one standard server
+at `http://localhost:8322`; the redundant QA listener was stopped.
+The feedback changes pass their focused checks. A subsequent Retry after a
+7:27 training loss exposed an intermittent native surface-destruction crash;
+diagnostic build `837ff8cec68f` investigates it. Both a short and a 7:56 traced
+retry pass, but no corrective lifetime change is proven. The intermittent
+failure remains open. Native evidence spans
 this candidate and preceding controls, faction-power, mission and hauling runs;
 [verification.md](verification.md) records which build exercised each flow.
 
@@ -40,7 +49,7 @@ legacy map IDs preserve their winning results alongside canonical mission IDs.
 | Opponent and maps | Paid economy/production, composition responses, supply raids, scenery and route identities | All 17 map binaries pass cliff-clearance route checks and an AI HQ assault was observed; full difficulty/faction balance matrix remains |
 | Original art | All 41 roster models original; lifecycle/ownership/aiming contracts, environment kit, panorama and 44 portraits | Export/import, hierarchy, texture and portrait checks pass; Meridian 23 / Jackal 22 fixture scenes have zero missing models and distinct silhouettes; steering, flight and several combat/wreck states observed; exhaustive lifecycle coverage remains |
 | Product durability | Settings, remapping, channel audio, pause ownership, IDBFS checkpoint, compatibility checks, recovery UI and optional operation-record JSON backup | Full reload/resume restores training identity, stage, time, economy, construction and HUD, including resumed Exchange completion and a later completed Power Array; fullscreen/Settings recovery, explicit pause ownership and I→J remapping pass; record download/restore/merge, malformed-file rejection and reload persistence pass; broader storage/error/input matrix remains |
-| Performance and distribution | Hashed paths, stable build IDs, bundled notices, registry and enforced 64 MiB staging limit | Current candidate 66f4e32fcfab stages at 63.649 MiB; isolated 120-unit attack-move fixture holds approximately 60 render / 30 logic for one minute on M1 Max/64 GB at Balanced; long soak, lower-end hardware and network/browser matrix remain |
+| Performance and distribution | Hashed paths, stable build IDs, bundled notices, registry and enforced 64 MiB staging limit | Current candidate 3b26e3104fcb stages at 63.668 MiB; isolated 120-unit attack-move fixture holds approximately 60 render / 30 logic for one minute on M1 Max/64 GB at Balanced; long soak, lower-end hardware and network/browser matrix remain |
 | Open-source preparation | Root/engine/native-renderer contribution/build docs, fork routing and protected upstream remotes | Initial completed polish root 0ab5819 / engine 05c81c9908d95f6428b14a96935694539b6c1b9d / DXVK 538cb703 are pushed; independent checkout passes tests, gates, incremental build and staging after its earlier 1,279-step clean build; recursive pins, manifest hashes and bounded hygiene review pass |
 
 The [polish plan](product-polish.md) defines intended player outcomes; the

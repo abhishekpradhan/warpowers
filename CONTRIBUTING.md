@@ -29,10 +29,13 @@ python3 tools/genwebstage.py
 python3 tools/serve.py
 ```
 
-Open http://127.0.0.1:8321. Start with Field Orientation from Operations.
+Open http://localhost:8322. Start with Field Orientation from Operations.
 Changes to data, the engine, or web sources need a new staging run; an
 engine source change also needs a rebuild. Refresh the browser afterward.
 The server is local-only and staging never publishes the game.
+Reuse this server and URL across playtests. A different hostname or port has
+separate browser storage; do not start a second server to work around an
+already occupied port. Browser QA can use a separate browser profile instead.
 
 ## A useful change
 

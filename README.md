@@ -43,10 +43,16 @@ python3 tools/genwebstage.py
 python3 tools/serve.py
 ```
 
-Open **http://127.0.0.1:8321** in a desktop browser with WebGL2 enabled.
+Open **http://localhost:8322** in a desktop browser with WebGL2 enabled.
 Choose **Operations → Field Orientation** for the guided first battle.
+Field Guidance shows each step's remaining requirements. Collapse it with ×,
+reopen it with **Guidance** beside the mission briefing, or use **All steps**
+to review the training sequence.
 The server listens only on this machine. Source updates require rebuilding
 when appropriate, staging again, and refreshing the browser.
+Keep the same URL between sessions: different hostnames or ports have separate
+browser records and checkpoints. Reuse a running server instead of starting
+another on a different port.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for tests and
 [docs/WORKSPACE.md](docs/WORKSPACE.md) for repository and native-build details.

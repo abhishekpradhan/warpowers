@@ -67,6 +67,45 @@ export function renderOptions(settings, debug = false) {
 }
 
 export function emptyProgress() { return { version: 1, missions: {} }; }
+
+/** Native objective stages remain authoritative, including checkpoint restores. */
+export function fieldGuidance(mission, state, controls = DEFAULT_SETTINGS) {
+  const objectives = mission?.objectives?.filter(objective => !objective.optional) || [];
+  if (objectives.length) {
+    const stage = bounded(state.objectiveStage, 0, objectives.length - 1, 0);
+    const objective = objectives[stage];
+    const checklist = (objective.requirements || []).map(requirement => {
+      const count = bounded(state.trainingCounts?.[requirement.template], 0, requirement.count, 0);
+      return { ...requirement, current: count, complete: count >= requirement.count };
+    });
+    const missing = checklist.find(item => !item.complete);
+    const needsReplacementBuilder = mission.category === 'training'
+      && missing?.requiresBuilder === true && state.builders === 0;
+    const orderText = text => controls.rightClickOrders === false
+      ? text.replace(/Right-click open ground/gi, 'Left-click open ground').replace(/with a right click/gi, 'with a left click') : text;
+    const body = needsReplacementBuilder
+      ? 'Your builder was lost. Train a Fabricator at headquarters, or wait for one already queued, then resume construction.'
+      : orderText(missing?.hint || objective.hint || '');
+    return { id: `${mission.id}:${stage}`, stage, total: objectives.length,
+      title: objective.label, body, overview: orderText(objective.hint || ''), checklist,
+      note: checklist.length ? (missing ? 'Completed units and structures count. Steps advance automatically.' : 'Requirements met. Moving to the next step…') : '',
+    };
+  }
+  if (!state.builders) return { id: 'builder', title: 'Keep a builder in the field',
+    body: `Select headquarters and train a builder. ${controls.bindings.VIEW_COMMAND_CENTER} returns your camera home.`, checklist: [] };
+  if (!state.incomeBuildings) return { id: 'income', title: 'Secure your income',
+    body: 'Build an Exchange or Racket beside a supply cache, then train a Porter or Scavenger there. Replace a lost hub to keep reinforcements funded.', checklist: [] };
+  if (!state.productionBuildings) return { id: 'production', title: 'Build your fighting force',
+    body: 'Train infantry at headquarters. Build a Vehicle Plant or Chop Shop for armor. Hover a locked order to see its prerequisites.', checklist: [] };
+  return { id: 'advance', title: 'Scout. Support. Advance.',
+    body: 'Combine anti-infantry and anti-armor units. Use Attack Move when advancing, and retain a reserve to protect your headquarters.', checklist: [] };
+}
+
+export function beginsNewBattle(previous, next) {
+  return !!next.inGame && (!previous.inGame || mapLeaf(previous.map) !== mapLeaf(next.map)
+    || (Number.isFinite(next.frame) && Number.isFinite(previous.frame) && next.frame < previous.frame));
+}
+
 const validMissionId = id => typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id)
   && !['__proto__', 'constructor', 'prototype'].includes(id);
 const emptyMissionRecord = () => ({ attempts: 0, wins: 0, bestSeconds: 0, bestDifficulty: 0, completedAt: '' });

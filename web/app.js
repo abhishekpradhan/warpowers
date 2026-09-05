@@ -4,6 +4,7 @@ import {
   emptyProgress, sanitizeProgress, recordResult, missionRecord, formatTime, mapLeaf,
   serializeOperationRecord, restoreOperationRecord, OPERATION_RECORD_MAX_BYTES,
   mergeProgressRecords, canonicalizeProgress,
+  fieldGuidance, beginsNewBattle,
 } from './core.js';
 
 const $ = id => document.getElementById(id);
@@ -28,6 +29,7 @@ let gameState = { inGame: false, map: '', seconds: 0 };
 let currentMap = '';
 let currentMission = null;
 let guideDismissed = false;
+let guideRenderKey = '';
 let runtimeReady = false;
 let persistenceReady = false;
 let checkpointBusy = false;
@@ -51,7 +53,7 @@ function log(message) {
   console.log(text);
   // Keep bounded, visible diagnostic evidence even after verbose native frame
   // logs roll out of the browser console. Never shown during ordinary play.
-  if (DIAGNOSTIC && (/\[WP_(?:AUTO|TEST)\].*(?:ECONOMY|POWERS|MISSION|MECHANICS|PASS|FAIL|MATCH_RESULT)/.test(text) || text.includes('[WP_REVIEW]'))) {
+  if (DIAGNOSTIC && (/\[WP_(?:AUTO|TEST)\].*(?:ECONOMY|POWERS|MISSION|MECHANICS|PASS|FAIL|MATCH_RESULT)/.test(text) || text.includes('[WP_REVIEW]') || text.includes('[WP_SURFACE]'))) {
     testLines.push(text); if (testLines.length > 80) testLines.shift();
     $('testReport').hidden = false; $('testReport').textContent = testLines.join('\n');
   }
@@ -146,12 +148,14 @@ function setPause(reason, active) {
 function closePanel() {
   if (panel.open) panel.close();
   panelKind = ''; setPause('panel', false); canvas.focus({ preventScroll: true });
+  updateGuide();
 }
 function openPanel(kind, title, eyebrow = 'COMMAND NETWORK') {
   panelKind = kind;
   $('panelTitle').textContent = title; $('panelEyebrow').textContent = eyebrow;
   $('panelBody').replaceChildren();
   if (!panel.open) { setPause('panel', true); panel.showModal(); }
+  updateGuide();
   panel.scrollTop = 0;
 }
 function appendHTML(html) { $('panelBody').insertAdjacentHTML('beforeend', html); }
@@ -178,7 +182,9 @@ function rangeSetting(key, label, min = 0, max = 100) {
 function checkboxSetting(key, label) {
   appendHTML(`<div class="settingRow"><label for="setting-${key}">${escapeHTML(label)}</label><input id="setting-${key}" type="checkbox" ${settings[key] ? 'checked' : ''}></div>`);
   $(`setting-${key}`).addEventListener('change', event => {
-    settings[key] = event.target.checked; saveSettings(); updateRestartNote(); updateGuide();
+    settings[key] = event.target.checked;
+    if (key === 'guide') guideDismissed = !settings.guide;
+    saveSettings(); updateRestartNote(); updateGuide();
     if (key === 'pauseWhenHidden') setPause('hidden', settings.pauseWhenHidden && document.hidden && !DIAGNOSTIC);
   });
 }
@@ -247,7 +253,7 @@ function showSettings() {
   rangeSetting('uiScale', 'Overlay text size', 85, 125); rangeSetting('cameraSpeed', 'Camera scroll speed');
   checkboxSetting('rightClickOrders', 'Right-click to issue orders');
   checkboxSetting('highContrast', 'High-contrast overlays'); checkboxSetting('reducedMotion', 'Reduce interface motion');
-  checkboxSetting('pauseWhenHidden', 'Pause when this tab is hidden'); checkboxSetting('guide', 'Show field guidance');
+  checkboxSetting('pauseWhenHidden', 'Pause when this tab is hidden'); checkboxSetting('guide', 'Open field guidance automatically');
   section('Keyboard');
   for (const [key, [label]] of Object.entries(BINDINGS)) {
     appendHTML(`<div class="settingRow"><label for="key-${key}">${escapeHTML(label)}</label><select id="key-${key}">${BINDING_KEYS.map(k => `<option value="${k}">${k}</option>`).join('')}</select></div>`);
@@ -387,39 +393,50 @@ function mapTitle(id) {
   return ({ WPTest: 'The Flats', WPRidge: 'Ridge Divide', WPScrap: 'Scrapyard', WPBasin: 'The Basin', WPRange: 'Trench Range' })[base] || 'The Meridian Strip';
 }
 function updateGuide() {
-  if (!gameState.inGame || !settings.guide || guideDismissed || panel.open) { $('guide').hidden = true; return; }
-  let title = '', body = '';
-  if (currentMission) {
-    const objectives = currentMission.objectives.filter(o => !o.optional);
-    const objective = objectives[Math.max(0, Math.min(objectives.length - 1, gameState.objectiveStage || 0))];
-    title = currentMission.category === 'training' ? 'Your next order' : 'Operations officer'; body = objective?.hint || '';
-    if (!bootSettings.rightClickOrders) body = body.replace(/Right-click open ground/gi, 'Left-click open ground').replace(/with a right click/gi, 'with a left click');
-  } else if (gameState.seconds < 30 && !gameState.builders) {
-    title = 'Establish your foothold'; body = `Select headquarters and train a builder. ${bootSettings.bindings.VIEW_COMMAND_CENTER} returns your camera home; Field manual explains the controls.`;
-  } else if (!gameState.incomeBuildings) {
-    title = 'Fund the next wave'; body = 'Build an Exchange or Racket beside a supply cache, then train a Porter or Scavenger at that hub. Haulers bring crates home to fund reinforcements.';
-  } else if (!gameState.productionBuildings) {
-    title = 'Bring in the armor'; body = 'A Vehicle Plant or Chop Shop unlocks armored units. Keep infantry nearby and scout before sending the army into the shroud.';
-  } else if (gameState.seconds < 150) {
-    title = 'Scout. Support. Advance.'; body = 'Combine anti-infantry and anti-armor units. Use Attack Move when advancing, and retain a reserve to protect your headquarters.';
-  }
-  $('guide').hidden = !body;
-  $('guideTitle').textContent = title; $('guideBody').textContent = body;
+  const visible = gameState.inGame && !guideDismissed && !panel.open;
+  $('guide').hidden = !visible;
+  $('guidanceButton').setAttribute('aria-expanded', String(!!visible));
+  if (!gameState.inGame) return;
+  const guide = fieldGuidance(currentMission, gameState, bootSettings);
+  const step = guide.total ? `Step ${guide.stage + 1} of ${guide.total}` : 'Battle tip';
+  $('guidanceButton').textContent = guide.total ? `Guidance · ${guide.stage + 1}/${guide.total}` : 'Guidance';
+  // Keep focus and DOM stable across native telemetry polls and selections.
+  const key = JSON.stringify(guide);
+  if (key === guideRenderKey) return;
+  guideRenderKey = key;
+  $('guideStep').textContent = step;
+  $('guideTitle').textContent = guide.title;
+  $('guideBody').textContent = guide.body;
+  $('guideNote').textContent = guide.note || '';
+  $('guideNote').hidden = !guide.note;
+  $('guideChecklist').hidden = !guide.checklist.length;
+  $('guideChecklist').innerHTML = guide.checklist.map(item => `<li class="${item.complete ? 'complete' : ''}"><span class="requirementMark" aria-hidden="true">${item.complete ? '✓' : '○'}</span><span>${escapeHTML(item.label)}</span><span class="requirementCount">${item.current}/${item.count}${item.complete ? '<span class="srOnly"> complete</span>' : ''}</span></li>`).join('');
+  $('guideOverview').textContent = currentMission ? 'All steps ↗' : 'Field manual ↗';
+}
+function showGuidanceOverview() {
+  if (!currentMission) { showHelp(); return; }
+  const guide = fieldGuidance(currentMission, gameState, bootSettings);
+  openPanel('guidance', 'Field guidance', currentMission.title);
+  appendHTML('<p class="muted">Steps follow the battlefield automatically. Collapse the guidance panel at any time; Guidance beside the mission briefing brings it back.</p>');
+  const objectives = currentMission.objectives.filter(objective => !objective.optional);
+  appendHTML(`<ol class="guidanceSteps">${objectives.map((objective, index) => `<li ${index === guide.stage ? 'aria-current="step"' : ''}><span class="eyebrow">${index < guide.stage ? 'COMPLETED' : index === guide.stage ? 'CURRENT STEP' : 'UPCOMING'} · ${index + 1}/${guide.total}</span><h3>${escapeHTML(objective.label)}</h3><p>${escapeHTML(fieldGuidance(currentMission, { ...gameState, objectiveStage: index }, bootSettings).overview)}</p></li>`).join('')}</ol><div class="actions"><button id="returnGuidance" class="primary">Show current guidance</button></div>`);
+  $('returnGuidance').addEventListener('click', () => { guideDismissed = false; closePanel(); });
 }
 function updateGameState(state) {
+  const newBattle = beginsNewBattle(gameState, state);
   gameState = state;
   const leaf = mapLeaf(state.map);
   $('missionHud').hidden = !state.inGame;
   if (!state.inGame) {
-    $('guide').hidden = true; currentMap = '';
+    updateGuide(); currentMap = ''; currentMission = null;
     // Let native victory/defeat cleanup reach the score screen before opening
     // a pausing web dialog. The result callback can precede that by seconds.
     if (pendingResult && panelKind !== 'debrief') setTimeout(showDebrief, 0);
     return;
   }
-  if (leaf !== currentMap) {
+  if (newBattle || leaf !== currentMap) {
     currentMap = leaf; currentMission = operations.missions.find(m => m.map === leaf) || null;
-    guideDismissed = false; lastResultKey = '';
+    guideDismissed = !settings.guide; guideRenderKey = ''; lastResultKey = '';
     $('missionTitle').textContent = currentMission?.title || mapTitle(leaf);
     $('missionType').textContent = (currentMission?.category || 'skirmish').toUpperCase();
     $('briefingButton').textContent = currentMission ? 'Mission briefing ↗' : 'Field manual ↗';
@@ -533,7 +550,11 @@ document.addEventListener('keydown', event => {
 canvas.addEventListener('contextmenu', event => event.preventDefault());
 $('settingsButton').addEventListener('click', showSettings); $('helpButton').addEventListener('click', showHelp);
 $('journalButton').addEventListener('click', showJournal); $('briefingButton').addEventListener('click', showBriefing);
-$('dismissGuide').addEventListener('click', () => { guideDismissed = true; $('guide').hidden = true; });
+$('dismissGuide').addEventListener('click', () => {
+  guideDismissed = true; updateGuide(); $('guidanceButton').focus({ preventScroll: true });
+});
+$('guidanceButton').addEventListener('click', () => { guideDismissed = !guideDismissed; updateGuide(); });
+$('guideOverview').addEventListener('click', showGuidanceOverview);
 $('reloadButton').addEventListener('click', () => location.reload());
 $('diagnosticsButton').addEventListener('click', copyDiagnostics);
 let volumeBeforeMute = settings.master || 80;

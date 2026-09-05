@@ -33,13 +33,18 @@ class GameHandler(SimpleHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--directory', type=Path, default=Path(__file__).resolve().parents[1] / 'webstage')
-    parser.add_argument('--port', type=int, default=8321)
+    parser.add_argument('--port', type=int, default=8322)
     parser.add_argument('--host', default='127.0.0.1')
     args = parser.parse_args()
     if not (args.directory / 'build.json').is_file():
         parser.error('No staged build found. Run python3 tools/genwebstage.py first.')
-    server = ThreadingHTTPServer((args.host, args.port), partial(GameHandler, directory=str(args.directory)))
-    print(f'War Powers ready at http://{args.host}:{args.port}', flush=True)
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), partial(GameHandler, directory=str(args.directory)))
+    except OSError as error:
+        parser.error(f'Cannot listen on {args.host}:{args.port}: {error}. Check whether the game server is already running; keep the same URL to retain browser records.')
+    display_host = 'localhost' if args.host == '127.0.0.1' else args.host
+    print(f'War Powers ready at http://{display_host}:{args.port}', flush=True)
+    print('Keep this URL: browser records and checkpoints are separate for each hostname and port.', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

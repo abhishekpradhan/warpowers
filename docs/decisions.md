@@ -269,3 +269,34 @@ The deployment presentation and backup format are our implementation choices
 in response to the user's concern, not a direct quotation or a requirement
 to introduce accounts or cloud saves. Browser record/restore/replay checks
 remain part of the release checklist.
+
+## D024 — Readable orders and recoverable guidance (2026-09-05)
+
+Player feedback found active and unavailable portraits too similar, and
+training guidance difficult to follow or recover after dismissal.
+
+The visual direction keeps the battlefield dominant and uses gold for an
+available action, brighter colored portraits, and a dark grayscale face with
+a padlock for unavailable orders. Existing hover, selection, queue and recharge
+overlays retain their roles. Guidance stays a compact secondary panel: current
+step, live requirements, one next action, then access to the full sequence.
+Collapse/reopen, step updates and existing reduced-motion-aware entrance
+behavior provide feedback without interrupting the battle.
+
+Native mission stages remain authoritative. Completed living template counts
+explain the current training gate; metadata is validated against the shipped
+map's actual prerequisites. Training does not advance because a player closes
+a tip or reviews a later step. The Guidance action stays available in the
+mission HUD, and its step indicator updates while the panel is collapsed.
+Settings controls automatic opening; manual opening remains available.
+New battles, including same-map retries detected by frame reset, start a fresh
+guidance session. Checkpoints recover their native saved objective stage.
+If a required structure is missing and the builder count is confirmed zero,
+training advises replacing the Fabricator without regressing completed steps.
+
+The duplicated local server was a QA process left running beside the player
+server. Standard development now uses `http://localhost:8322`; the redundant
+8321 listener was stopped. Documentation and the server default agree, and
+an occupied port reports a clear error instead of suggesting a second origin.
+The hostname and port are part of browser storage identity, so developers
+should reuse the standard URL and use separate browser profiles for QA.

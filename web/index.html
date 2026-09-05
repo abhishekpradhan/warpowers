@@ -27,10 +27,15 @@
         <p id="objectiveText">Destroy the enemy headquarters. Protect your own.</p>
         <div class="objectiveMeta"><span id="objectiveProgress"></span><span id="objectiveTimer"></span></div>
         <button id="briefingButton" class="textButton">Mission briefing <span aria-hidden="true">↗</span></button>
+        <button id="guidanceButton" class="textButton" aria-controls="guide" aria-expanded="false">Guidance</button>
       </section>
       <aside id="guide" aria-label="Command guidance" hidden>
-        <div class="eyebrow">FIELD GUIDANCE <button id="dismissGuide" class="textButton" aria-label="Dismiss guidance">×</button></div>
-        <strong id="guideTitle"></strong><p id="guideBody"></p>
+        <div class="eyebrow">FIELD GUIDANCE <button id="dismissGuide" class="textButton" aria-label="Collapse field guidance" title="Collapse; reopen with Guidance beside the mission briefing">×</button></div>
+        <div id="guideStep" class="guideStep"></div>
+        <strong id="guideTitle"></strong>
+        <ul id="guideChecklist" aria-label="Step requirements" hidden></ul>
+        <p id="guideBody"></p><p id="guideNote" class="guideNote" hidden></p>
+        <button id="guideOverview" class="textButton">All steps ↗</button>
       </aside>
       <div id="toast" role="status" aria-live="polite" hidden></div>
       <section id="boot" aria-label="Loading game" aria-live="polite">

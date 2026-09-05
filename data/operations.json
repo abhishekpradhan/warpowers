@@ -21,24 +21,39 @@
           "id": "builder",
           "label": "Train a Fabricator from your headquarters.",
           "hint": "Left-click the headquarters, then its Fabricator portrait. Right-click open ground to move selected units.",
+          "requirements": [
+            { "template": "WP_Fabricator", "count": 1, "label": "Fabricator", "hint": "Select your headquarters, then click the Fabricator portrait in Orders. Wait for training to finish." }
+          ],
           "optional": false
         },
         {
           "id": "economy",
           "label": "Construct an Exchange and a Power Array, then train a Porter.",
           "hint": "Select your Fabricator and build the Exchange near a supply cache. Train a Porter at the Exchange; it hauls crates automatically. The Power Array keeps production running.",
+          "requirements": [
+            { "template": "WP_Exchange", "count": 1, "label": "Exchange", "requiresBuilder": true, "hint": "Select your Fabricator, choose the Exchange in Orders, then place it beside a supply cache. Let construction finish." },
+            { "template": "WP_PowerArray", "count": 1, "label": "Power Array", "requiresBuilder": true, "hint": "Select your Fabricator and build a Power Array. The Exchange alone does not complete this step; your outpost also needs power." },
+            { "template": "WP_Porter", "count": 1, "label": "Porter", "hint": "Select the completed Exchange and train a Porter. It begins hauling automatically. A Fabricator builds structures; the Porter carries supplies." }
+          ],
           "optional": false
         },
         {
           "id": "production",
           "label": "Construct a Vehicle Plant and field two Vectors.",
           "hint": "Tanks require a Vehicle Plant. Set its rally point with a right click. Click unit portraits to queue them; click a queue item to cancel.",
+          "requirements": [
+            { "template": "WP_VehiclePlant", "count": 1, "label": "Vehicle Plant", "requiresBuilder": true, "hint": "Select your Fabricator and build a Vehicle Plant. Hover a locked portrait to see any missing prerequisites." },
+            { "template": "WP_Tank", "count": 2, "label": "Vectors", "hint": "Select the completed Vehicle Plant and train two Vectors. Keep both alive until this step completes; queued units do not count yet." }
+          ],
           "optional": false
         },
         {
           "id": "scout",
           "label": "Train a Vigil to scout the central approach.",
           "hint": "Recon reveals threats before your armor reaches them. Drag a box to select troops. Ctrl + 1 saves a control group; 1 recalls it.",
+          "requirements": [
+            { "template": "WP_Vigil", "count": 1, "label": "Vigil", "hint": "Select your headquarters and train a Vigil. When it is ready, send it ahead of your armor to reveal the central approach." }
+          ],
           "optional": false
         },
         {

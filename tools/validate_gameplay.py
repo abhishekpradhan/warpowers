@@ -124,7 +124,7 @@ def read_map(path):
                             entry.string()
                         active, once, easy, normal, hard, subroutine = entry.unpack("6B")
                         entry.unpack("i")
-                        script = dict(name=name, side=side_index, once=once, subroutine=subroutine,
+                        script = dict(name=name, side=side_index, active=active, once=once, subroutine=subroutine,
                                       enabled=(easy, normal, hard), conditions=[], actions=[])
                         for kind, _, body in entry.chunks(toc):
                             if kind == "OrCondition":
@@ -167,6 +167,55 @@ def combat_commands(buttons, command_sets):
             assert "NEED_TARGET_POS" in options, f"{name}: needs position targeting to consume the destination click"
         else:
             assert not any(option.startswith("NEED_TARGET_") for option in options), f"{name}: Stop must execute immediately without targeting"
+
+
+def training_requirements(mission, game_map, objects):
+    objectives = mission["objectives"]
+    assert len(objectives) >= 2 and all(not objective["optional"] for objective in objectives), "training guidance stages must match required objectives"
+    assert objectives[-1].get("requirements", []) == [], "training finish must not invent a construction gate"
+    gates = {}
+    for script in game_map["scripts"]:
+        if not script["name"].startswith("WP_TrainingStep"):
+            continue
+        match = re.fullmatch(r"WP_TrainingStep(\d+)", script["name"])
+        assert match, f"invalid training gate name: {script['name']}"
+        stage = int(match[1])
+        assert stage not in gates, f"duplicate training gate {stage}"
+        gates[stage] = script
+    assert set(gates) == set(range(len(objectives) - 1)), "training metadata stages differ from shipped native gates"
+    for stage, script in gates.items():
+        requirements = objectives[stage].get("requirements")
+        assert isinstance(requirements, list) and requirements, f"training stage {stage}: missing requirements"
+        described = set()
+        for requirement in requirements:
+            assert isinstance(requirement, dict), f"training stage {stage}: invalid requirement"
+            template, count = requirement.get("template"), requirement.get("count")
+            assert isinstance(template, str) and template in objects, f"training stage {stage}: unknown requirement template"
+            assert type(count) is int and count > 0, f"training stage {stage}: requirement count must be a positive integer"
+            assert type(requirement.get("requiresBuilder", False)) is bool, f"training stage {stage}: requiresBuilder must be boolean"
+            if requirement.get("requiresBuilder"):
+                assert re.search(r"(?m)^\s*KindOf\s*=.*\bSTRUCTURE\b", objects[template]), f"training stage {stage}: builder recovery requires a structure"
+            for field in ("label", "hint"):
+                assert isinstance(requirement.get(field), str) and requirement[field].strip(), f"training stage {stage}: requirement needs {field}"
+            assert template not in {item[0] for item in described}, f"training stage {stage}: duplicate requirement template"
+            described.add((template, count))
+        assert script["side"] == 1 and script["active"] and script["once"] and not script["subroutine"] and all(script["enabled"]), f"training stage {stage}: gate must run once for the player on every difficulty"
+        assert len(script["conditions"]) == 1, f"training stage {stage}: guidance cannot describe alternative native gates"
+        actual, counters = set(), []
+        for name, params in script["conditions"][0]:
+            if name == "COUNTER":
+                counters.append((params[0][3], params[1][1], params[2][1]))
+            else:
+                assert name == "PLAYER_HAS_OBJECT_COMPARISON", f"training stage {stage}: unrepresented native prerequisite {name}"
+                assert params[0][3] == "PlayerA" and params[1][1] == 3, f"training stage {stage}: requirements must test player-owned minimum counts"
+                pair = (params[3][3], params[2][1])
+                assert pair not in actual, f"training stage {stage}: duplicate native prerequisite"
+                actual.add(pair)
+        assert counters == [("WP_ObjectiveStage", 2, stage)], f"training stage {stage}: native gate listens to the wrong objective stage"
+        assert described == actual, f"training stage {stage}: metadata requirements {sorted(described)} differ from native gate {sorted(actual)}"
+        advances = [(params[0][3], params[1][1]) for name, params in script["actions"]
+                    if name == "SET_COUNTER" and params[0][3] == "WP_ObjectiveStage"]
+        assert advances == [("WP_ObjectiveStage", stage + 1)], f"training stage {stage}: gate must advance to the next guidance stage"
 
 
 def validate_links(game_map, objects, strings, templates):
@@ -408,6 +457,8 @@ def main():
         required = [o for o in mission["objectives"] if not o["optional"]]
         for stage in range(len(required)):
             assert f'WP:Objective_{mission["id"]}_{stage}' in strings
+        if mission["id"] == "training":
+            training_requirements(mission, maps[mission["map"]], objects)
         mission_scenarios(mission["id"], maps[mission["map"]])
     for name, obj in objects.items():
         if "Draw =" in obj:

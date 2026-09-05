@@ -1,9 +1,88 @@
 # Current polish verification
 
 Local evidence recorded 2026-09-05 in the Chromium in-app browser on the
-development Mac. The current local playtest candidate is `66f4e32fcfab`. Earlier
+development Mac. The current local candidate is `3b26e3104fcb`. Earlier
 candidate results are identified below; they are retained evidence, not a
 claim that every diagnostic was rerun after each subsequent change.
+
+## Command contrast, guidance and local server follow-up
+
+Candidate `3d2812941130` addresses the next player-feedback pass. Available
+command portraits have brighter color artwork and a gold rim. Unavailable
+portraits receive a separate dark veil because native grayscale rendering
+ignored the previous vertex tint. Their padlocks remain; recharge keeps its
+color and sweep, with a lighter veil. The opt-in image mode is implemented
+in both base and Zero Hour display paths, with batch transitions restoring
+normal modulation. The base native runtime was not exercised in this pass.
+
+In ordinary Field Orientation play at 1280×720:
+
+- Headquarters, builder, Exchange and Vehicle Plant orders visibly distinguish
+  available actions from locked technology and busy-builder commands.
+- A normally trained Fabricator advances guidance to step 2. An Exchange
+  foundation stays at 0/1; completing it shows 1/1 and changes the advice to
+  the Power Array. Completing that changes the advice to the missing Porter.
+- Training a Porter advances to step 3 while guidance is collapsed; the
+  persistent Guidance button updates to 3/5. The Vehicle Plant counts only
+  after completion. Two trained Vectors advance to step 4, and a trained
+  Vigil advances to the assault guidance at step 5. No test injections or
+  forced mission counters were used for this sequence.
+- Collapse/reopen, All steps, returning to current guidance and the automatic
+  opening setting behave consistently. Manual opening works with automatic
+  opening off; re-enabling it brings guidance back. The overview distinguishes
+  completed/current/upcoming steps and does not advance gameplay.
+- At 125% overlay text the full compound-economy checklist and its action are
+  readable. Guidance has a vertical scroll bound above the native command bar
+  for shorter viewports; smaller viewport dimensions were not exercised.
+- A normally built Directorate displays its recharge countdown, sweep and
+  padlock together at 1:11 remaining. The unattended assault subsequently
+  lost its headquarters; this pass does not claim a full training victory or
+  a newly verified transition to power readiness. No missing assets or browser
+  errors were observed during those checks. A subsequent Retry exposed the
+  intermittent native surface-destruction crash described below.
+- An isolated QA-origin checkpoint saved during step 2 survives a full reload
+  and restores the correct step and unmet economy requirements. The existing
+  checkpoint on the original test origin was left untouched.
+
+The 213-step incremental WASM build, 23 web tests, six packaging tests and
+voice/content/17-map gates pass. New tests cover partial and two-unit training
+requirements, native-stage authority after losses/restore, frame-reset battle
+identity, current controls and persistent battle tips. The map validator also
+checks guidance requirements against decoded native training gates. The stage
+is 66,748,532 bytes (63.656 MiB), below 64 MiB.
+
+After the normal training loss at 7:27, debrief → battle report → Retry failed
+with `SurfaceClass::~SurfaceClass` → `Render2DSentenceClass::Reset` → window
+destruction and a WASM `null function` exception. The same signature was
+recorded in August; the stack alone does not establish an over-release.
+Diagnostic `837ff8cec68f` adds opt-in outer-surface generation/vtable checks
+before virtual dispatch, without suppressing releases. Its short normal-menu
+training defeat → report → Retry sequence passes with tracing enabled. That
+short pass does not resolve the intermittent longer-run failure. A subsequent
+normal 7:56 training battle in the same traced runtime completed all five
+guidance stages, built a Directorate and lost its headquarters to the enemy.
+Debrief → report → Retry again reached a live battlefield with guidance reset
+to step 1 and no trace violations or browser errors. Tracing changes allocation
+layout, and no corrective lifetime change has been identified; the original
+intermittent crash remains a known issue.
+
+Candidate `3b26e3104fcb` retains that native build and adds a training recovery
+hint when a required structure is missing and the native builder count is zero.
+It advises training a replacement or waiting for an already queued Fabricator,
+without changing the mission stage. All 25 web tests, six packaging tests and
+voice/content/map gates pass; the stage is 66,760,647 bytes (63.668 MiB).
+Its ordinary menu/training view confirms the command contrast, collapse/reopen,
+all-steps overview and manual opening with automatic opening disabled. No
+browser errors occurred in that focused final-build check.
+The parent pins engine `b3c6f36ab554cd4f13e240633c0759e5028a8000`;
+the command/telemetry and diagnostic changes are separate engine commits.
+
+The two listeners were separate `tools/serve.py` processes serving the same
+stage: the earlier QA server on 8321 and the player server on 8322. The former
+was stopped; only 8322 remains. Server defaults, startup text and contributor
+instructions now use `http://localhost:8322`. A duplicate invocation exits with
+a readable occupied-port error. Browser storage belongs to an origin, so QA
+uses isolated origins/profiles without adding a second server.
 
 ## Open access and portable records
 

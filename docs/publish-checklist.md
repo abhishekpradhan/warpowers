@@ -5,7 +5,7 @@ repository visibility. The owner authorized implementing the polish plan,
 preparing private repositories and committing/pushing work. A public release
 remains a separate decision (D013).
 
-Current local playtest candidate: `1df03a19fdd9`, 66,730,332 bytes. Build, web,
+Current local playtest candidate: `66f4e32fcfab`, 66,740,374 bytes. Build, web,
 packaging and content gates pass. Bounded observations from earlier candidates
 are explicitly identified in [verification.md](verification.md). A checked
 fixture is evidence for that fixture; broader release categories stay open
@@ -13,6 +13,17 @@ where only some requirements have been exercised.
 
 ## Completed local checks
 
+- [x] `66f4e32fcfab`: full WASM build, 17 web-state/record tests, six packaging
+      tests and voice/content/map gates pass. Metadata rejects access prerequisites.
+- [x] A 0/4 campaign record can launch operation 4 through the journal, deployment
+      and briefing into its battlefield. Assigned-side operation navigation
+      hides the alternate action and returning to Skirmish restores both sides.
+- [x] Actual file-picker restore merges better records without losing existing
+      results; malformed input leaves them intact. A real downloaded JSON file
+      restores successfully, and the merged results survive full reload.
+- [x] Two open game tabs share new record entries; legacy map-key wins survive
+      canonical-key losses. Restoring an older backup preserves newer results,
+      and the final downloaded file contains canonical IDs without duplicate wins.
 - [x] `1df03a19fdd9`: menu frame/panel removed, explicit disabled-command and
       faction-deployment padlocks, web disabled styles; final WASM build and
       web/packaging/content gates pass. `15907462d540` normal training verifies
@@ -97,7 +108,8 @@ where only some requirements have been exercised.
       now have visible final-candidate evidence. The initial unsuccessful Precision
       Strike attempt was not reproduced and is no longer an unresolved defect.
 - [ ] Tutorial stages, changing objectives, deadlines, optional targets, debrief,
-      unlock and replay through ordinary play, beyond scripted branch regressions.
+      completion recording and replay through ordinary play, beyond scripted
+      branch regressions. Mission access never requires a previous result.
 - [ ] Exercise unavailable/incompatible storage and recoverable explanations in
       the browser, beyond successful save/resume/construction completion and
       automated storage-state tests.

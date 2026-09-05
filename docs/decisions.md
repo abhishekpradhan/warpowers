@@ -243,3 +243,29 @@ licensing, not just assets); this log restructured (numeric order,
 superseded entries compressed per D011); executed/stale docs deleted per
 D011 — fork-plan.md (plan fully executed), hosting.md (folded into D013),
 tools/patches/ (its one patch is committed in the vendored dvijoke).
+
+## D023 — Open mission access; optional portable operation record (2026-09-05)
+
+**User direction:** this browser game has no accounts, and losing browser data
+must never prevent someone from playing content. A local completion record
+cannot be a reliable access requirement when it may disappear with a browser
+reset, storage eviction or a change of device.
+
+**Implementation choice:** all seven authored missions—Field Orientation,
+four operations and two commander trials—are available immediately. Story
+order is recommended. Each authored mission keeps its assigned faction and
+shows only that faction's deployment action, without a misleading locked
+alternate. Skirmish continues to offer both factions. In-match technology
+requirements, costs and cooldowns retain their gameplay roles.
+
+We also chose an optional downloadable JSON backup of the operation record
+so players can carry their completions and best times between browsers.
+Restoring it performs an idempotent, non-destructive merge: existing
+completions remain and valid better times are retained. The backup excludes
+settings and battle checkpoints. It is a convenience for personal records;
+neither possession of a backup nor completion history controls access.
+
+The deployment presentation and backup format are our implementation choices
+in response to the user's concern, not a direct quotation or a requirement
+to introduce accounts or cloud saves. Browser record/restore/replay checks
+remain part of the release checklist.

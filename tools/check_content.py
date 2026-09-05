@@ -108,7 +108,9 @@ def audit(write_registry=False):
     for mission in operations['missions']:
         if not (DATA / 'Maps' / mission['map'] / f"{mission['map']}.map").exists():
             failures.append(f"Missing map for mission {mission['id']}")
-        for field in ('unlock', 'nextMission'):
+        if 'unlock' in mission:
+            failures.append(f"{mission['id']}: operation access must not depend on a browser record")
+        for field in ('nextMission',):
             if mission.get(field) and mission[field] not in ids:
                 failures.append(f"{mission['id']}: unknown {field} {mission[field]}")
     for failure in sorted(set(failures)):

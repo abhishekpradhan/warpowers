@@ -18,7 +18,9 @@ its product and release checks are completed.
 - Five skirmish battlefields, each available from either faction's side,
   with three opposition levels.
 - Guided Field Orientation, a four-operation campaign and two commander
-  trials with different objectives, briefings and persistent completion records.
+  trials, all available immediately, with different objectives and briefings.
+- Optional completion records and best times, with Download/Restore record
+  in Operations. No account or past wins are needed to access content.
 - Original low-poly vehicles, infantry, structures and environment art;
   a widescreen command interface, unit voices and an attributed music rotation.
 - Field manual, audio channels, control settings, pause and a browser-local

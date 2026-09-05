@@ -13,10 +13,10 @@ the original port-first baseline with supply, powers and authored missions.
 | Aircraft | Two per faction | Production, takeoff, attack, return and anti-air coverage |
 | Structures | Headquarters, production, supply, technology and layered defense | Placement, queues, prerequisites, power, construction and destruction |
 | Skirmish | Five layouts, each with both faction starts, three difficulties | Pathing, supply expansion, AI rebuilding, win/loss and replay |
-| Authored content | Training + four campaign operations + two commander trials | Native objectives, deadlines, warnings, failure and unlock/replay |
+| Authored content | Training + four campaign operations + two commander trials, all open immediately | Native objectives, deadlines, warnings, failure and replay without a completion record |
 | Powers | Precision Strike and Tunnel Ambush | Scouted targeting, warning/counterplay, effect and cooldown |
 | HUD and help | Widescreen command bar, minimap, objective clock, field guidance, manual | Picking, queue cancel, control groups and readable overlays |
-| Persistence | Device-local settings, mission record and checkpoint slot | Save → reload → resume; blocked storage and incompatible saves |
+| Persistence | Browser-local settings, portable mission record and checkpoint slot | Save → reload → resume; record download/restore/merge; blocked storage and incompatible saves |
 | Audio | Distinct unit voice pools, effects, ambience and six attributed tracks | Actual mix/listening pass; critical information also visible |
 | Provenance | Original runtime models and textures, credited music/font imports | Generator/ledger consistency and staged notices |
 

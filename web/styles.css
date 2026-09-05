@@ -163,7 +163,13 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--gold); jus
 .missionEntry h3 { margin: 0 0 5px; font-size: 16px; font-weight: 400; color: #e1e4df; }
 .missionEntry p { margin: 6px 0 0; color: #8fa6b2; line-height: 1.6; font-size: 12px; }
 .missionEntry .missionFaction { font-size: 9px; letter-spacing: .1em; color: #b4a773; text-transform: uppercase; }
-.missionStatus { font-size: 10px; white-space: nowrap; color: #85bfa5; padding-top: 4px; }
+.missionStatus { font-size: 10px; white-space: nowrap; color: var(--muted); padding-top: 4px; }
+.missionStatus.isComplete { color: #85bfa5; }
+.recordTools { padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.recordTools .actions { margin-top: 16px; }
+.recordTools .settingsNote { margin-bottom: 0; }
+#recordStatus { color: #a3cfb7; }
+#recordStatus.error { color: var(--danger); }
 .briefingLead { font-size: 17px; color: #e0e3db; line-height: 1.7; margin-top: 0; }
 .objectiveList { padding-left: 22px; }
 .objectiveList li { padding: 7px 0; color: #bdcdd6; line-height: 1.5; }

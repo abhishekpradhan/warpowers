@@ -110,6 +110,11 @@ Production needs an asset registry recording role, source, generator/export vers
 
 ## Scenarios, challenge ladder and campaign
 
+**2026-09-05 update:** [D023](decisions.md#d023--open-mission-access-optional-portable-operation-record-2026-09-05)
+sets open access for all missions in the account-free browser game. Story order
+is recommended; completion records are optional and can be downloaded/restored.
+This supersedes completion-based unlock rules proposed in the initial audit below.
+
 The content files for Campaign, ChallengeMode, Science, Rank and SpecialPower are currently stubs. The engine's history does not constitute an authored mission system ready for this pack. Build content tools and player-facing progression deliberately.
 
 1. **Reference skirmish:** one finished battlefield, both factions, a deliberately bounded roster, calibrated difficulty, a guided opening and complete result/retry loop. Preserve ordinary skirmish replayability.

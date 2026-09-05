@@ -1,9 +1,55 @@
 # Current polish verification
 
 Local evidence recorded 2026-09-05 in the Chromium in-app browser on the
-development Mac. The current local playtest candidate is `1df03a19fdd9`. Earlier
+development Mac. The current local playtest candidate is `66f4e32fcfab`. Earlier
 candidate results are identified below; they are retained evidence, not a
 claim that every diagnostic was rerun after each subsequent change.
+
+## Open access and portable records
+
+Candidate `4ebb625eb528` removes completion-based access requirements in the
+browser journal, metadata and native deployment callbacks. All seven authored
+missions are available immediately; story order is a recommendation (D023).
+Assigned-side missions show their actual faction and deployment action;
+skirmish retains both choices. In-match prerequisites, funds and cooldowns
+are unchanged. The earlier faction-lock presentation below is superseded.
+
+Observed through ordinary browser controls on the isolated QA origin:
+
+- With 0/4 campaign completions, all seven journal deployment actions were
+  enabled. Selecting operation 4 opened Jackal deployment, then its briefing
+  and actual battlefield with the correct air-defense objective. The QA
+  record already had a training result; no campaign prerequisite was satisfied.
+- Operation 1 showed only Meridian's button and brief. Advancing to operation
+  2 showed only Jackal's. Choosing Skirmish restored both buttons and briefs.
+- Importing a record fixture marked operation 2 complete at 10:20. Merging a
+  second fixture retained the existing training result, improved operation 2
+  to 9:50 and added operation 4 at 12:00. A malformed JSON file displayed an
+  error and left those results unchanged.
+- Download record produced a real 648-byte JSON file, validated against the
+  backup schema. Restoring that exact file preserved the three entries and
+  best times. Full reload retained the 2/4 campaign count and results. These
+  fixture results are QA data, not claims of completed human playthroughs.
+
+Candidate `66f4e32fcfab` retains the same native build and adds record
+preservation across game tabs and legacy map identifiers. On two isolated
+QA tabs, importing a legacy `WPOp01` win alongside a newer `op01` loss showed
+the preserved 11:00 completion in both journals. Importing operation 3 at
+11:40 in the second tab updated the first without a reload. Restoring the
+older three-entry download retained all five newer entries, and downloading
+again produced a validated 996-byte file with canonical IDs and one win per
+mission. A full reload retained the results. Both tabs reported no browser
+error-level logs. These imported completions remain QA fixtures.
+
+The WASM build, 17 web-state/record tests, six packaging tests and all content,
+voice and map gates pass. Record tests cover non-destructive/idempotent merge,
+round trips, invalid versions and fields, unsafe/inherited IDs, bounded stats
+and dates, 64 KiB files, the 128-mission union limit, legacy aliases and
+tolerant recovery from malformed local records. Final stage size is
+66,740,374 bytes (63.649 MiB), below 64 MiB. The parent branch pins engine
+revision `a12dc3d2c3afb7abbe51a1431b0c5fdfd133e2b8`. Record backups exclude
+settings and battle checkpoints; they do not provide account sync or recover
+files never backed up.
 
 ## Menu and disabled-state follow-up
 

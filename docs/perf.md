@@ -23,7 +23,7 @@ tracks. The stager enforces the size limit before replacing a working stage.
 
 ## Current candidate and build evidence
 
-- Candidate `1df03a19fdd9`: **66,730,332 bytes (63.639 MiB)** staged,
+- Candidate `66f4e32fcfab`: **66,740,374 bytes (63.649 MiB)** staged,
   including engine, data, UI and notices. This directory measurement was read
   from the current local stage; it is not compressed network transfer size.
 - An earlier repaired bridge reached the main loop in **542 ms** on one local

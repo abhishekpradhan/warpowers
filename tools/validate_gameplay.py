@@ -402,7 +402,7 @@ def main():
         maps[path.stem] = game_map
     assert len(maps) == 17
     for mission in metadata["missions"]:
-        assert mission["unlock"] is None or mission["unlock"] in ids
+        assert "unlock" not in mission, "Operation access must not depend on a browser record"
         assert mission["nextMission"] is None or mission["nextMission"] in ids
         assert mission["briefing"] and mission["debriefWin"] and mission["debriefLoss"]
         required = [o for o in mission["objectives"] if not o["optional"]]

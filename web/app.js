@@ -2,6 +2,8 @@ import {
   SETTINGS_KEY, PROGRESS_KEY, BINDINGS, BINDING_KEYS, DEFAULT_SETTINGS,
   sanitizeSettings, readSettings, applyBindings, renderOptions,
   emptyProgress, sanitizeProgress, recordResult, missionRecord, formatTime, mapLeaf,
+  serializeOperationRecord, restoreOperationRecord, OPERATION_RECORD_MAX_BYTES,
+  mergeProgressRecords, canonicalizeProgress,
 } from './core.js';
 
 const $ = id => document.getElementById(id);
@@ -19,8 +21,7 @@ let storage;
 try { storage = window.localStorage; } catch { storage = { getItem: () => null, setItem: () => { throw new Error('Storage is unavailable'); } }; }
 let settings = readSettings(storage, matchMedia('(prefers-reduced-motion: reduce)').matches);
 const bootSettings = structuredClone(settings);
-let progress;
-try { progress = sanitizeProgress(JSON.parse(storage.getItem(PROGRESS_KEY))); } catch { progress = emptyProgress(); }
+let progress = readStoredProgress();
 let operations = { missions: [] };
 let build;
 let gameState = { inGame: false, map: '', seconds: 0 };
@@ -81,6 +82,44 @@ function writeStorage(key, value) {
     return false;
   }
 }
+function readStoredProgress() {
+  try { return sanitizeProgress(JSON.parse(storage.getItem(PROGRESS_KEY))); }
+  catch { return emptyProgress(); }
+}
+function mergeLatestProgress(value = progress) {
+  return canonicalizeProgress(mergeProgressRecords(value, readStoredProgress()), operations.missions);
+}
+function persistProgress(value) {
+  progress = mergeLatestProgress(value);
+  const persisted = !DIAGNOSTIC && writeStorage(PROGRESS_KEY, progress);
+  updateRecordDisplay();
+  return persisted;
+}
+function missionStatusText(record) {
+  return record.wins ? `COMPLETED${record.bestSeconds ? ` · ${formatTime(record.bestSeconds)}` : ''}` : 'UNPLAYED';
+}
+function updateRecordDisplay() {
+  updateCompletionCount();
+  if (panelKind !== 'journal') return;
+  for (const status of $('panelBody').querySelectorAll('[data-record-mission]')) {
+    const mission = operations.missions.find(mission => mission.id === status.dataset.recordMission);
+    if (!mission) continue;
+    const record = missionRecord(progress, mission);
+    status.textContent = missionStatusText(record);
+    status.classList.toggle('isComplete', record.wins > 0);
+  }
+}
+window.addEventListener('storage', event => {
+  if (DIAGNOSTIC || (event.key !== PROGRESS_KEY && event.key !== null)) return;
+  if (event.newValue === null) { progress = emptyProgress(); updateRecordDisplay(); return; }
+  let incoming;
+  try { incoming = JSON.parse(event.newValue); } catch { return; }
+  const stored = canonicalizeProgress(readStoredProgress(), operations.missions);
+  progress = canonicalizeProgress(mergeProgressRecords(progress, incoming, stored), operations.missions);
+  // Converge overlapping writes from other tabs without an event/write loop.
+  if (JSON.stringify(progress) !== JSON.stringify(stored)) writeStorage(PROGRESS_KEY, progress);
+  updateRecordDisplay();
+});
 function applyAppearance() {
   document.documentElement.style.setProperty('--ui-scale', settings.uiScale / 100);
   document.documentElement.classList.toggle('reducedMotion', settings.reducedMotion);
@@ -262,19 +301,57 @@ function showHelp() {
   section('Production & survival');
   appendHTML('<p class="muted">Select a production building to view its units. A padlock marks unavailable orders; hover a portrait for cost, role and prerequisites. Queue units by clicking their available portraits; click a queued item to cancel it. Select a builder to place structures on revealed ground. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>');
 }
-function missionUnlocked(mission) {
-  if (!mission?.unlock) return true;
-  const prerequisite = operations.missions.find(m => m.id === mission.unlock);
-  return prerequisite ? missionRecord(progress, prerequisite).wins > 0 : false;
+function recordStatus(message, failed = false) {
+  if (panelKind !== 'journal') { toast(message); return; }
+  const status = $('recordStatus');
+  status.hidden = false;
+  status.classList.toggle('error', failed);
+  status.textContent = message;
+}
+function downloadRecord() {
+  try {
+    progress = mergeLatestProgress();
+    updateRecordDisplay();
+    const file = new Blob([serializeOperationRecord(progress)], { type: 'application/json' });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url; link.download = `war-powers-record-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    recordStatus('Record download started. Keep the file to restore your completions and best times.');
+  } catch (error) { recordStatus(`Record could not be downloaded: ${error.message}`, true); }
+}
+async function restoreRecord(file) {
+  if (!file) return;
+  const button = $('restoreRecord');
+  button.disabled = true; button.textContent = 'Restoring…';
+  try {
+    if (file.size > OPERATION_RECORD_MAX_BYTES) throw new Error('Choose an operation record smaller than 64 KB.');
+    const text = await file.text();
+    // Read progress after the file resolves, preserving any intervening result.
+    const restored = restoreOperationRecord(mergeLatestProgress(), text);
+    const persisted = persistProgress(restored);
+    recordStatus(persisted
+      ? 'Record restored. Your existing completions and better results are kept.'
+      : 'Record restored for this tab only. Keep your backup; this record has not been saved in the browser.');
+  } catch (error) { recordStatus(`Record not restored: ${error.message}`, true); }
+  finally { button.disabled = false; button.textContent = 'Restore record'; }
 }
 function showJournal() {
+  progress = mergeLatestProgress();
+  updateCompletionCount();
   openPanel('journal', 'Operations', 'THE MERIDIAN STRIP');
   appendHTML(`<p class="manualIntro">${escapeHTML(operations.campaign?.description || 'Training, operations and commander trials. Your record stays on this device.')}</p>`);
+  appendHTML('<p class="muted">Every mission is available from the start. Follow the order below for the story, or start anywhere. Skirmish lets you choose either side.</p><div class="recordTools"><div class="actions"><button id="downloadRecord">Download record</button><button id="restoreRecord">Restore record</button><input id="recordFile" type="file" accept=".json,application/json" aria-label="Operation record backup" hidden></div><p class="settingsNote">Completions and best times stay in this browser and may be cleared. Keep a backup to restore them or move browsers. Battle checkpoints are separate.</p><p id="recordStatus" class="settingsNote" role="status" hidden></p></div>');
+  $('downloadRecord').addEventListener('click', downloadRecord);
+  $('restoreRecord').addEventListener('click', () => $('recordFile').click());
+  $('recordFile').addEventListener('change', event => {
+    const file = event.target.files[0]; event.target.value = '';
+    restoreRecord(file);
+  });
   for (const [index, mission] of operations.missions.entries()) {
     const record = missionRecord(progress, mission);
-    const unlocked = missionUnlocked(mission);
-    const state = record.wins ? `COMPLETED · ${formatTime(record.bestSeconds)}` : unlocked ? 'AVAILABLE' : 'LOCKED';
-    appendHTML(`<article class="missionEntry"><span class="missionIndex">${String(index + 1).padStart(2, '0')}</span><div><span class="missionFaction">${escapeHTML(mission.faction === 'jackal' ? 'Jackal Front' : 'Meridian Combine')} · ${escapeHTML(mission.duration)}</span><h3>${escapeHTML(mission.title)}</h3><p>${escapeHTML(mission.briefing)}</p><button class="textButton" data-mission="${index}" style="margin-top:12px" ${gameState.inGame || !unlocked ? 'disabled' : ''}>Review deployment ↗</button>${!unlocked ? `<p>Complete ${escapeHTML(operations.missions.find(m => m.id === mission.unlock)?.title || 'the preceding operation')} to unlock.</p>` : ''}</div><span class="missionStatus">${state}</span></article>`);
+    appendHTML(`<article class="missionEntry"><span class="missionIndex">${String(index + 1).padStart(2, '0')}</span><div><span class="missionFaction">Play as ${escapeHTML(mission.faction === 'jackal' ? 'Jackal Front' : 'Meridian Combine')} · ${escapeHTML(mission.duration)}</span><h3>${escapeHTML(mission.title)}</h3><p>${escapeHTML(mission.briefing)}</p><button class="textButton" data-mission="${index}" style="margin-top:12px" ${gameState.inGame ? 'disabled' : ''}>Review deployment ↗</button></div><span class="missionStatus${record.wins ? ' isComplete' : ''}" data-record-mission="${escapeHTML(mission.id)}">${missionStatusText(record)}</span></article>`);
   }
   if (gameState.inGame) appendHTML('<p class="settingsNote">Return to the main menu before choosing another operation.</p>');
   for (const button of $('panelBody').querySelectorAll('[data-mission]')) button.addEventListener('click', () => {
@@ -363,9 +440,8 @@ function handleResult(result) {
   if (lastResultKey === key) return; lastResultKey = key;
   const mission = operations.missions.find(m => m.id === result.operationId || m.map === mapLeaf(result.map));
   if (mission) {
-    progress = recordResult(progress, { ...result, operationId: mission.id, seconds: result.stats?.durationSeconds });
-    if (!DIAGNOSTIC) writeStorage(PROGRESS_KEY, progress);
-    updateCompletionCount(); pendingResult = result;
+    persistProgress(recordResult(mergeLatestProgress(), { ...result, operationId: mission.id, seconds: result.stats?.durationSeconds }));
+    pendingResult = result;
     if (!gameState.inGame) setTimeout(showDebrief, 0);
   }
 }
@@ -486,7 +562,7 @@ async function bootGame() {
   performance.mark('wpBoot:deploy');
   build = await fetchJSON('build.json');
   const [manifest, missionData] = await Promise.all([fetchJSON(build.manifest), fetchJSON(build.operations)]);
-  operations = missionData; updateCompletionCount();
+  operations = missionData; progress = mergeLatestProgress(); updateCompletionCount();
   totalBytes = build.engine.wasm.size + build.font.size + manifest.reduce((sum, entry) => sum + entry.s, 0);
   const dimensions = { performance: [1280, 720], balanced: [1600, 900], high: [1920, 1080] }[bootSettings.quality];
   [canvas.width, canvas.height] = dimensions;
@@ -505,7 +581,6 @@ async function bootGame() {
     canvas, arguments: argumentsList,
     locateFile: path => path.endsWith('.wasm') ? build.engine.wasm.url : path,
     print: log, printErr: log,
-    isMissionUnlocked: id => missionUnlocked(operations.missions.find(m => m.id === id)),
     onGameState: updateGameState,
     onMatchResult: handleResult,
     onGameMessage: message => { if (message?.text) toast(message.text); },

@@ -975,8 +975,12 @@ WP:HQObjective
 "Destroy their headquarters. Protect your own."
 END
 
-WP:MapLockedFaction
-"This operation has an assigned faction."
+WP:ScenarioFactionMeridian
+"Play as the Meridian Combine."
+END
+
+WP:ScenarioFactionJackal
+"Play as the Jackal Front."
 END
 
 WP:ScoreRetry
@@ -1166,11 +1170,6 @@ END
 WP:DescTunnelAmbush
 "Bring three Scrappers and two Stings out of concealment at the target. Requires clear, explored ground. Recharges in 120 seconds."
 END
-
-WP:MissionLocked
-"Complete the previous operation in the campaign to deploy here."
-END
-
 
 WP:Porter
 "Porter"

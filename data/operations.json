@@ -14,7 +14,6 @@
       "faction": "meridian",
       "layout": "flats",
       "duration": "8–12 min",
-      "unlock": null,
       "nextMission": "op01",
       "briefing": "Welcome to the Strip, commander. Establish a small Combine outpost, learn to keep production supplied, then clear the hostile command post. Your operations officer will guide the opening; you control the pace.",
       "objectives": [
@@ -60,7 +59,6 @@
       "faction": "meridian",
       "layout": "ridge",
       "duration": "10–15 min",
-      "unlock": null,
       "nextMission": "op02",
       "briefing": "The Combine calls this a restoration of service. The Jackal Front calls it an occupation. Their forward relay coordinates raids through the eastern ridge. Establish a productive foothold, then silence the relay before the next convoy enters the corridor.",
       "objectives": [
@@ -88,7 +86,6 @@
       "faction": "jackal",
       "layout": "basin",
       "duration": "12–18 min",
-      "unlock": "op01",
       "nextMission": "op03",
       "briefing": "The Front cannot afford a straight fight with the new garrison. Its supply offices and grid substation are another matter. Strike three separated sites around the basin. Fast Vultures can exploit gaps; cheap Rackets fund replacements without a power grid.",
       "objectives": [
@@ -110,7 +107,6 @@
       "faction": "meridian",
       "layout": "range",
       "duration": "14–20 min",
-      "unlock": "op02",
       "nextMission": "op04",
       "briefing": "One relay now carries every order north of the basin. Hold it for eight minutes while the Combine reroutes the network, then counterattack the Jackal command post. Losing the relay or your headquarters ends the operation. The Front is already moving through the trenches.",
       "objectives": [
@@ -138,7 +134,6 @@
       "faction": "jackal",
       "layout": "scrap",
       "duration": "15–22 min",
-      "unlock": "op03",
       "nextMission": null,
       "briefing": "The Combine's occupation headquarters is dug into the scrapyard. Two air-defense sites cover the approach. Dismantle both, then finish the headquarters before the corridor becomes permanent. The Front's commanders promise this is their last emergency operation. Nobody puts it in writing.",
       "objectives": [
@@ -166,7 +161,6 @@
       "faction": "meridian",
       "layout": "range",
       "duration": "10 min",
-      "unlock": null,
       "nextMission": null,
       "briefing": "Jackal commander Rook has turned the trench line into a mortar range. Your supply relay must survive ten minutes. The headquarters alone will not save it. Build a layered defense, raid the mortar positions, and spend every repair interval wisely.",
       "objectives": [
@@ -194,7 +188,6 @@
       "faction": "jackal",
       "layout": "ridge",
       "duration": "9 min",
-      "unlock": null,
       "nextMission": null,
       "briefing": "Director Vale's requisition column arrives in nine minutes. Destroy the forward headquarters before the deadline and the contract collapses. The Combine is entrenched; the Front starts with a mobile raiding group and enough credit to choose between more armor and an air strike.",
       "objectives": [

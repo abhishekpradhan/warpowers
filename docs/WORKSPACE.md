@@ -10,11 +10,11 @@ does not track is generated output.
 |---|---|---|
 | `data/` | All original game content: INI, maps, models, textures, audio, UI layouts, strings | yes (CC BY 4.0) |
 | `tools/` | Generators + gates: genmap, genwnd, genw3d, genrig, gentex, gensfx, genicons2, gencmdicons, genportraitsheet, genwebstage, lint_voices, tgadiff; `tools/blender/` hero-asset scripts | yes (MIT) |
-| `web/` | `index.html` — the page-as-menu + boot harness (faction picker, volume, build badge) | yes (MIT) |
+| `web/` | Loader + browser HUD, settings, field manual, operation record and persistent checkpoints | yes (MIT) |
 | `docs/` | vision, roadmap, decisions, engine-notes (landmine log), publish-checklist, parity, creative, perf, this file | yes |
 | `engine/` | **Submodule** → GeneralsX fork (GPL-3.0). Native + wasm engine source and build trees | gitlink |
 | `dvijoke/` | **Vendored inline** (MIT, upstream meerzulee/dvijoke; full history subtree-merged 2026-08-31 from warpowers-dvijoke @ ba6791de). `d8web/` is the D3D8→WebGL2 layer the wasm build compiles in (`engine/cmake/wasm-deps.cmake` references `../dvijoke/d8web`) | yes (MIT; its own LICENSE) |
-| `refs/` | Third-party asset sources (Quaternius CC0 packs). Conversion inputs only; never shipped | yes |
+| `refs/` | Historical third-party source packs; retained provenance/reference inputs, excluded from web staging | yes |
 | `webstage/` | **Generated** web bundle (engine wasm + gamedata + page), output of `tools/genwebstage.py`. Serve this dir to play | ignored |
 
 Inside the engine submodule:
@@ -25,16 +25,18 @@ Inside the engine submodule:
   `tools/blender/` scripts. Reference checkout (gitlink).
 - `engine/build/macos-vulkan/`, `engine/build/wasm/` — build trees (ignored).
 
-## Outside the workspace
+## Native development
 
-| Path | What it is |
-|---|---|
-| `~/GeneralsX/GeneralsZH/` | The native **runtime dir**: deployed binary (`GeneralsXZH` + `run.sh`) plus `Data/`, `Maps/`, `Art/`, `Window/` synced FROM `data/` (`rsync -a data/<d>/ ~/GeneralsX/GeneralsZH/<d>/`). Deploy = `rm -f` + `cp` + `codesign -s - -f`. Not a repo; a deploy target only — the web stage reads the repo directly (since 2026-08-31) |
-| `~/MoltenVK-src` | MoltenVK source checkout for GPU debugging (not shipped) |
+The browser build and all content checks run from a fresh recursive clone;
+no runtime directory under a developer's home is required. Native macOS
+setup is documented in the engine README. Choose an explicit runtime path,
+then copy the repository's `Data`, `Maps`, `Art` and `Window` directories
+there. Generators write repository data or a requested output directory;
+deployment is a separate, deliberate action.
 
 ## GitHub repos (all private, all under abhishekpradhan)
 
-| Repo | Local path | Branch | Purpose |
+| Repo | Local path | Default branch | Purpose |
 |---|---|---|---|
 | `warpowers` | workspace root | `main` | primary repo |
 | `warpowers-engine` | `engine/` | `main` | engine fork |
@@ -61,15 +63,20 @@ ever add CI of our own.
 
 ## Push routine
 
-```
-git push origin main                                   # workspace (includes dvijoke/)
-git -C engine push origin main                         # engine fork
-git -C engine/references/fbraz3-dxvk push origin main  # dxvk fork (rarely changes)
+Use the active feature branch, not a hardcoded `main`. If all three
+repositories changed, publish their commits from the deepest child outward:
+
+```sh
+git -C engine/references/fbraz3-dxvk push -u origin HEAD
+# Commit the DXVK gitlink in engine, then:
+git -C engine push -u origin HEAD
+# Commit the engine gitlink in the root, then:
+git push -u origin HEAD
 ```
 
-Rule: after committing in a submodule, commit the updated gitlink in its
-parent and push both — a push whose gitlinks reference unpushed submodule
-commits breaks fresh clones. (Applies to workspace→engine and engine→dxvk.)
+Verify each referenced child commit is reachable on its remote before
+pushing its parent. Do not push to disabled upstream remotes. A regular
+push does not deploy this game or change repository visibility.
 
 ## Fresh clone
 
@@ -80,10 +87,15 @@ brings the workspace (dvijoke included inline) + the engine submodule.
 Build + play (matches the README quick start; needs emsdk active):
 
 ```
-cd engine && emcmake cmake --preset wasm        # ALWAYS emcmake — plain cmake
-cmake --build build/wasm --target GeneralsXZH.js  # silently uses the host compiler
-cd .. && python3 tools/genwebstage.py           # stages from data/ (repo truth)
-python3 -m http.server 8321 --directory webstage
+cd engine
+emcmake cmake --preset wasm
+cmake --build build/wasm --target GeneralsXZH.js
+cd ..
+python3 tools/genwebstage.py
+python3 tools/serve.py
 ```
 
 The native runtime dir is only needed for the native macOS build path.
+
+Use `emcmake` for initial configuration: plain CMake may select the host compiler.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for prerequisite versions and local tests.

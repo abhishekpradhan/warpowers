@@ -43,57 +43,75 @@ stays desaturated; units own the saturation.
   Iron Pact units sound heavy-mechanical (Ram, Anvil, Piston).
 - Formal trademark pass on everything pre-public (D006).
 
-## Slice rosters
+## Current playable roster
 
-> **Historical slice plan** — the shipped roster grew well past these lists
-> (Generals.str is the live roster). Kept as the original design intent.
+`data/Data/Generals.str` supplies display names; object and command-set INI
+files supply the authoritative available roster. Iron Pact remains internal.
 
-### Meridian Combine
-| Role | Name | Notes |
+| Role | Meridian Combine | Jackal Front |
 |---|---|---|
-| Builder | **Fabricator** | hover dozer, printing-scaffold build FX later |
-| Gatherer | **Porter** | supply drone |
-| Rifle infantry | **Warden** | |
-| AT infantry | **Lancer** | dodgeable missile |
-| MBT | **Vector** | the poster unit; raised chassis, gold canopy |
-| Recon | **Outrider** | fast drone, sight range |
-| Support | **Zenith** | artillery, arcing shells |
-| Structures | Command Center, **Power Array**, Barracks, Vehicle Plant, Supply Depot, **Bulwark** turret | grid-dependent |
+| Builder / supply | Fabricator / Porter | Rigger / Scavenger |
+| Rifle / anti-armor | Warden / Lancer | Scrapper / Sting |
+| Scout / heavy infantry | Vigil / Bastion | Prowler / Bruiser |
+| Armor / mobile fire support | Vector / Outrider / Zenith | Mongrel / Vulture |
+| Aircraft | Kestrel / Shrike | Buzzard / Gnat |
+| Economic identity | Larger cargo loads, precise costly armor, vulnerable power grid | Smaller fast supply runs, cheaper raiders, power-independent infrastructure |
+| Signature | Directorate Precision Strike, visible warning beacon | Den Tunnel Ambush, mixed infantry reinforcement at scouted ground |
 
-### Jackal Front
-| Role | Name | Notes |
-|---|---|---|
-| Builder | **Rigger** | welded half-truck |
-| Gatherer | **Scavenger** | |
-| Rifle infantry | **Irregular** | cheap, fast |
-| AT infantry | **Tankbuster** | |
-| Gun truck | **Vulture** | fast raider, the faction icon |
-| Tank | **Mongrel** | cheap, mismatched armor plates |
-| Support | **Hornet** | rocket buggy, area saturation |
-| Structures | Command Post, Hideout (barracks), **Chop Shop** (factory), Salvage Yard (supply), Watchpost (defense) | **no power structure** |
+Both sides build supply hubs and protect physical haulers. Caches are finite;
+contested lateral supplies create reasons to leave the starting base. Small
+hub income supports recovery but does not replace a protected supply route.
+Power, affordability, counter matchups and timings are gameplay contracts
+checked by `tools/validate_gameplay.py`; final balance needs player evidence.
 
-First **general powers** after the slice (the namesake mechanic): Meridian
-*Precision Strike* (target beacon, air-delivered) vs Jackal *Tunnel Ambush*
-(spawn a squad from anywhere previously scouted).
+## Production art specification
 
-## Art spec
+Painted, stylized low-poly models are the standard. The current production
+source is Blender and `tools/blender/`; the primitive part language remains
+useful for rigs, effects, scaffolds and utility assets. Historical swatch-only
+rules are superseded. Git history preserves earlier specifications.
 
-> **Revised by D015 (2026-08-22):** painted-detail baked textures are the
-> bar and the Blender hero pipeline (validated) is the production path;
-> genw3d part-language is demoted to placeholder/utility. The shared-swatch
-> spec below is the original, kept for history.
+- Readability at the actual RTS camera comes first. Recon reads as a scout
+  car; the gun truck has an exposed weapon bed; infantry roles differ by
+  silhouette, weapon and shoulder/pack shapes.
+- Vehicles use textured hulls and distinct **HOUSECOLOR** mesh regions for
+  ownership. Use named `TURRET` pivots and turret-relative `MUZZLE` attachments
+  where the weapon traverses. Cargo vehicles use a separate `CARGO` mesh.
+- Shared `WPINF1` infantry hierarchy preserves compatible walk, idle and
+  fire animation. New lifecycle states must be wired in the object's draw
+  block, not merely exported as unused files.
+- New unit textures normally use 512-square painted atlases; small props
+  use 256. Portraits render the runtime W3D model with consistent lighting,
+  framing and background, then pack into the two command sheets.
+- Model budgets are role-based and recorded with bounds/dependencies in
+  `data/asset-registry.json`. The hard validator ceiling is 12,000 triangles;
+  simple props should remain far below it. This is a ceiling, not a target.
+- Terrain stays subdued with clear routes, supply sites, rubble and industrial
+  landmarks. Units and order feedback own the strongest contrast.
+- Effects must preserve silhouettes and explain direction, impact, damage
+  and destruction. Test firing/construction/damage in the engine as well as
+  close-up source renders. Do not mark an asset approved from a render alone.
 
-- Low-poly faceted: units **300–800 tris**, structures **500–1500**.
-- **Palette atlas** texturing: one shared 64×64 swatch texture; every model
-  UVs onto flat swatches (faction colors, trims, neutrals). No painted
-  textures; identity from silhouette + palette (vision pillar 3).
-- Hierarchy: W3D HLod with named subobjects (hull/turret/barrel) so turrets
-  can traverse later.
-- Two pipelines: `tools/genw3d.py` **part-language** for procedural slice
-  models (reproducible, fast iteration), Blender + OpenSAGE plugin for
-  hand-crafted heroes once validated (spike pending).
-- VFX language: short-lived, high-contrast, silhouette-preserving; faction
-  tinted (gold tracers vs green rocket trails).
+See [ASSETS.md](../ASSETS.md) for provenance and the generator contracts in
+`tools/blender/polish_assets.json`. Changing a production asset requires
+updating its source and generated outputs together; legacy generators must
+not silently replace it.
+
+## Operations and tone
+
+Field Orientation teaches commands, supply, production, scouting and the HQ
+objective. The four-operation campaign alternates viewpoints through First
+Light, Cut the Wire, The Long Watch and War Powers. Each has a specific tactical
+pressure: establish a foothold, sabotage dispersed targets, hold a relay,
+and dismantle defenses before a final assault. Commander trials add timed
+holds and aggressive deadlines. `data/operations.json` owns briefings,
+objective hints, unlocks and debrief writing; `tools/genmap.py` owns native
+mission triggers. Validate both together.
+
+Commanders speak through concise operational messages, with institutional
+confidence or improvised pragmatism. Avoid lengthy interruption, real-world
+national caricatures and lore that obscures the immediate order. Objectives
+and warning timers must remain visible without relying on audio.
 
 ## Audio identity
 

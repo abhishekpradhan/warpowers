@@ -1,48 +1,34 @@
-# Content parity — ZH skirmish experience vs the bundled pack
+# Bundled content and experience coverage
 
-Companion to roadmap section 0 (D018). Parity target is the **skirmish
-experience** (what wasm-generals players actually play), not the campaign.
-Per class: where we are, the bar, and the **sourcing strategy** — because we
-do not have to generate everything ourselves.
+Updated 2026-09-05. War Powers targets a readable, complete two-faction RTS
+experience on the ported engine. Matching another game's roster counts is
+not the current release criterion. The owner-approved polish work extends
+the original port-first baseline with supply, powers and authored missions.
 
-## Sourcing tiers (license-vetted 2026-08-24)
-
-| Tier | What | License rule |
+| Area | Current implementation | Acceptance evidence required |
 |---|---|---|
-| **A. Generate** | Our pipeline: genw3d/gentex/gensfx/genmap/genwnd, Blender hero passes | ours, CC BY 4.0 |
-| **B. Import CC0** | Kenney (models+audio+UI), Quaternius (proven in our pipeline), KayKit (characters **with rigs/animations**), itch.io CC0 tag, Poly Pizza; always through the retint/re-UV/bake pipeline so it looks native | CC0 → ships under our CC BY |
-| **C. Import permissive-attribution assets** | Kevin MacLeod / incompetech (2000+ tracks, CC BY 4.0 — solved music), OpenGameArt/Free Music Archive/freesound CC0 + CC BY pools | per-file licensing (D019/D022): the file ships under its upstream license, ledger row + CREDITS.md; SA/GPL-art/NC would need a decision entry first |
-| **D. Community (post-publish)** | Nobody has built open replacement assets for the Generals GPL engine — OpenSAGE explicitly lists it as an unstarted "very long-term goal." **Our pack can be that project.** Publishing openly on a swappable data layer invites the OpenRA-style contribution dynamic | contributions under any D019-acceptable license, ledger row required |
-| **✗ Unusable** | Classic C&C mods (EA-derivative — illegal, nearly all of them), unlicensed rips, paid/proprietary packs, ND (pipeline modifies everything); NC only by explicit per-case decision | legality is the bar (D019) — nothing is excluded for mere license-mixing tidiness |
+| Factions | Meridian Combine and Jackal Front; distinct power/economy/combat characteristics | Several viable openings and understandable counterplay |
+| Vehicles | Builders, haulers, recon, gun truck, tanks and artillery | Every command, muzzle/turret, cargo and damage state exercised |
+| Infantry | Four roles per faction: rifle, anti-armor, scout, heavy | Readable roles and animation; equal-budget counter encounters |
+| Aircraft | Two per faction | Production, takeoff, attack, return and anti-air coverage |
+| Structures | Headquarters, production, supply, technology and layered defense | Placement, queues, prerequisites, power, construction and destruction |
+| Skirmish | Five layouts, each with both faction starts, three difficulties | Pathing, supply expansion, AI rebuilding, win/loss and replay |
+| Authored content | Training + four campaign operations + two commander trials | Native objectives, deadlines, warnings, failure and unlock/replay |
+| Powers | Precision Strike and Tunnel Ambush | Scouted targeting, warning/counterplay, effect and cooldown |
+| HUD and help | Widescreen command bar, minimap, objective clock, field guidance, manual | Picking, queue cancel, control groups and readable overlays |
+| Persistence | Device-local settings, mission record and checkpoint slot | Save → reload → resume; blocked storage and incompatible saves |
+| Audio | Distinct unit voice pools, effects, ambience and six attributed tracks | Actual mix/listening pass; critical information also visible |
+| Provenance | Original runtime models and textures, credited music/font imports | Generator/ledger consistency and staged notices |
 
-## The matrix
+`tools/validate_gameplay.py` independently decodes shipped map binaries and
+checks mission branches, native script signatures, faction contracts,
+paid AI responses and opening budgets. `tools/check_content.py` validates
+model/texture/icon/window references and builds the asset registry.
+`tools/lint_voices.py` checks distinct voice ownership. These complement,
+rather than replace, browser and player verification.
 
-| Class | ZH (approx) | Pack today (2026-08-31) | Parity bar (2 factions) | Source |
-|---|---|---|---|---|
-| Vehicles | ~12/faction ×3 | 7 total | 8/faction | A + B (military CC0 packs via conversion pipeline) |
-| Infantry | ~7/faction | 4 total (2/faction: rifle + rocket, **animated**) | 4/faction | A shipped the rig pipeline (tools/genrig.py); B upgrade path open |
-| Aircraft | ~5/faction | 2 total (1/faction VTOL) | 2/faction | A (hover class shipped; 2nd airframe pending) |
-| Structures | ~13/faction | ~20 total (airpads, income, defense incl.) | 10/faction | A (Blender kit is strong here) |
-| Unit animations | walk/attack/build/turret | walk/idle/fire (shared infantry rig) + turrets | walk cycles, buildups | A (procedural W3D hierarchy anims landed) |
-| Maps | ~40 MP | 10 (5 layouts × biomes, in-shell picker) | 8–10 varied — **met** | A (genmap --layout) |
-| Unit VO | ~10 lines/unit, acted | 19 voice sets, 4–7 lines each, synth | keep synth (D014), 8+ lines/unit | A (gensfx scales) |
-| EVA/announcer | full set | 6 events | +unit-ready, +superweapon set later | A |
-| Music | ~30 tracks | 6-track CC-BY rotation | 6–8 track rotation — **met** | C (Kevin MacLeod import, ledgered) |
-| SFX | hundreds | ~26 effects (191 wavs incl. VO) | ~40 | A + B (Kenney audio CC0, freesound CC0) |
-| Shell UI | full menu suite | page-as-menu + result banners | roadmap §0 | A (genwnd) |
-| General powers | 15+/faction | 0 | parked (D018) | A |
-| Superweapons | 3 | 0 | parked (D018) | A |
-| AI | 3 difficulties | real AIPlayer: builds, economy, reacts, 3 difficulties (Phase 4) | **met** | A |
-| Balance | 20 yrs of patches | first-pass numbers | playtested self-consistency | playtesting |
-
-## How the gap actually closes
-
-1. **The engine is ~half the nostalgia** (feel, controls, construction,
-   combat rhythm) and it's already ours.
-2. **Tooling makes breadth cheap** — a new unit (model, texture, portrait,
-   voice set, INI) is hours, not days; lints keep it shippable.
-3. **CC0/CC-BY imports cover the expensive classes** — rigged characters
-   (animations!), music, SFX bulk.
-4. **Community finishes the tail** — post-publish, position the pack as
-   *the* open asset replacement for the Generals GPL engine; the niche is
-   explicitly empty and named as a community wish.
+Current art direction and roster names live in [creative.md](creative.md).
+[ASSETS.md](../ASSETS.md) identifies actual per-file provenance. Suitable
+openly licensed imports remain allowed; source history retains the earlier
+prototype sourcing approach. A source mesh's availability does not establish
+its license or permission to redistribute modified content.

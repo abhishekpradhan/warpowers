@@ -1,6 +1,6 @@
-# War Powers — product polish assessment and proposed plan
+# War Powers — product polish plan
 
-Assessment: 2026-09-04. This is a living proposal for the next work, grounded in the current docs, source, asset inventory and a local browser walkthrough. It does not replace recorded project decisions or mark implementation work complete.
+Assessment baseline: 2026-09-04. The owner authorized implementing this plan, including preparing and pushing the private source repositories, later that day. This document records the problems and intended acceptance bar; [roadmap.md](roadmap.md) tracks current implementation and [publish-checklist.md](publish-checklist.md) tracks verified release readiness. Baseline observations below describe the pre-polish build, not current feature availability.
 
 ## Product direction
 

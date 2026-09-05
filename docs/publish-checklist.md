@@ -1,98 +1,81 @@
-# War Powers — publish checklist (Phase 5)
+# War Powers — release checklist
 
-Nothing on this list authorizes a public deploy. Publishing remains gated on
-an explicit user go (D013). Work through top to bottom; check items only with
-evidence (a log line, a screenshot, a URL).
+Updated 2026-09-05. This checklist does not authorize deployment or changing
+repository visibility. The owner authorized implementing the polish plan,
+preparing the private repositories and committing/pushing work. A public
+release remains a separate decision (D013).
 
-## 1. Product quality gate (D013 bar)
-- [x] In-engine shell end-to-end: menu → deployment (battlefield + opposition
-      + faction) → match → pause/restart/abandon → score → menu
-- [x] Real opponent: AIPlayer with base building, economy, escalation tiers,
-      difficulty, defense patrol / punish / eco-raid (Phase 4)
-- [x] Music rotation, ambient beds, VO, SFX (user-confirmed audible)
-- [ ] One full playthrough per difficulty by a human before go
-- [ ] Second-machine sanity run (different Mac / lower-end hardware)
+Check an item only with evidence for the current candidate. Earlier local
+boot and Safari smoke results are useful history, not certification of the
+new art, HUD, scenarios or save system.
 
-## 2. Performance budget
-- [x] Local boot: 5.5s cold total (165ms engine dl, 214ms data, 5.2s init) —
-      budget ≤20s
-- [x] Frame budget on M-series: 60/s sustained through early-match combat
-      (pump-rate measurement; see engine-notes Phase 5 entry)
-- [ ] Frame rate through a BRUTAL late game (assault + air + punish + player
-      army all fielded) — measure, don't assume
-- [ ] Real-network boot numbers from a CDN deploy (see §5)
-- [x] Bundle size: 55MB staged (11MB wasm + ~44MB gamedata incl. music) —
-      re-baselined ≤64MB (docs/perf.md); CDN brotli roughly halves wire
-      size, verify on the preview deploy
-- Known perf debt (acceptable at current scale): money-readout font surface
-  churn (W3DDisplayString rebuild) — revisit if late-game frames dip.
+## Local candidate
 
-## 3. Browser matrix
-- [x] Chromium (dev harness, daily driver)
-- [x] Safari — BOOTS (beacon total=751ms, full asset stage + engine main
-      loop reached); a human-played match remains a manual pre-go item
-- [ ] Safari — one human-played match
-- [ ] Firefox — not installed on this machine; boot beacon + match on a
-      machine that has it (or install with user ok)
-- Boot/fail beacons land in any static server's access log:
-  `/wp-boot-ok?total=…&ua=…` on success, `/wp-boot-fail?…` on engine abort.
+- [x] Web settings/progress tests, including corrupt or blocked storage,
+      duplicate key bindings, invalid mission records and bounded options.
+- [x] Packaging tests: deterministic content paths, references and sizes,
+      bundled notices, save compatibility and output-directory protection.
+- [x] Voice ownership lint and content model/texture/icon/window references.
+- [x] Independent binary validation of all 17 maps, seven objective
+      success/failure/edge cases, native script signatures and faction/AI rules.
+- [ ] Browser: boot → deployment → battle → result → retry/menu, both factions.
+- [ ] Input: selection, right-click orders, attack-move, groups, rally,
+      build placement, queue cancel, pause and fullscreen.
+- [ ] Supply: train, gather, return, credit income, deplete/reassign and raid.
+- [ ] Powers: prerequisites, scouted target, visible warning/effect and cooldown.
+- [ ] Operations: tutorial stages, changing objectives, deadlines, defeat,
+      optional targets, debrief, unlock and replay.
+- [ ] Checkpoint saved durably, reload/resume restores battle, incompatible
+      or unavailable storage produces a recoverable explanation.
+- [ ] Original asset lifecycle and combat readability verified in-engine.
+- [ ] Final size budget, boot and crowded-battle performance recorded in perf.md.
+- [ ] Root/engine/DXVK commits pushed in child-first order; pinned commits
+      reachable remotely; recursive checkout and local checks reproduce.
 
-## 4. Branding / trademark surfaces
-- [x] User-visible surfaces clean: tab/window title, page copy, all in-game
-      strings (Generals.str audited — zero EA marks), score/menu screens
-- [x] Attribution surfaces correct and REQUIRED: CREDITS.md, ASSETS.md,
-      LICENSING.md (engine lineage GeneralsX/GPL, CC-BY music, etc.)
-- [ ] Pre-go final sweep: `grep -riE "electronic arts|command & conquer|zero
-      hour" webstage/` must return only attribution files
-- Known + deliberate (devtools-visible only, not user-facing branding):
-  engine binary name `GeneralsXZH.js/.wasm`, `Generals.str` filename
-  (engine-hardcoded), `CNC_GENERALS_*` env names, GeneralsX console banner.
-  These are engine-lineage identifiers; renaming is cosmetic and deferred.
-- [ ] Formal trademark search + domain grab ("War Powers", e.g. warpowers.gg)
-      before M1 public
+## Human and hardware checks before release
 
-## 5. Hosting (Vercel, per D013)
-- [x] `vercel.json` + `.vercelignore` prepared: static serve of `webstage/`
-      only, wasm content-type, 1h asset cache (NOT immutable — asset paths
-      aren't content-hashed yet; bump genwebstage to hashed paths before
-      switching to immutable), no-cache HTML/manifest
-- [ ] PRIVATE preview deploy with Deployment Protection ON (user go required
-      even for this — it sends content to a third-party host)
-      — deploy via `vercel` CLI from the local tree: `.vercelignore` uploads
-      only `webstage/` + `vercel.json`, and NO GitHub↔Vercel integration is
-      installed or needed (Vercel never gets repo access; nothing auto-deploys
-      on push)
-- [ ] Boot budget on the preview URL from a real network (beacon totals)
-- [ ] Brotli/compression verified on .wasm and .js (Vercel default)
-- [ ] Re-run browser matrix against the preview URL
+- [ ] A full human-played match on each difficulty and each faction; record
+      confusing controls, first contact, viable openings and recovery.
+- [ ] Full training and campaign playthrough without coaching.
+- [ ] Audio listening pass: speech intelligibility, repetitions, volume balance,
+      weapon/impact timing and critical text alerts.
+- [ ] Safari full match including saving and fullscreen. Earlier build booted.
+- [ ] Firefox boot and full match including saving and fullscreen.
+- [ ] A second, lower-end desktop; document OS/GPU/browser and actual limits.
+- [ ] Crowded 30–45 minute stress run, restart/redeploy, memory and frame timings.
 
-## 6. Repos / licensing at go-time (D012)
-Current organization (verified + normalized 2026-08-31; see D012 addendum):
-- [x] Three private repos, all pushed and pinned: `warpowers` (workspace;
-      dvijoke vendored inline per D020, submodule → engine),
-      `warpowers-engine` (submodule → dxvk at `references/fbraz3-dxvk`),
-      `warpowers-dxvk`. (`warpowers-dvijoke` archived read-only.) Every
-      submodule URL points at OUR repo; every pinned SHA is reachable on
-      its remote — `clone --recursive` reproduces the tree.
-- [x] Remote scheme normalized in every checkout: `origin` = our private
-      repo, fork parents/upstreams present fetch-only with push URL set
-      to `DISABLED` (fbraz3/GeneralsX + TheSuperHackers + GeneralsXWeb on
-      engine; doitsujin + fbraz3 on dxvk; OpenSAGE plugin ref). "Never
-      push upstream" is now mechanically enforced.
-- [x] GitHub Actions DISABLED at repo level on all four (inherited
-      upstream CI burned private-repo minutes Aug 22–24: 9 runs on the
-      engine mirror, 8 on dxvk; workflow files already stripped from our
-      branches — the repo-level switch also covers future upstream-sync
-      branches). Re-enable per-repo only if we ever add CI of our own.
-- [ ] At go: create org; fork engine + dxvk publicly; push branches;
-      transfer workspace (dvijoke ships inline in it, D020); flip
-      submodule URLs (D012)
-- [ ] LICENSE / LICENSING.md / ASSETS.md / CREDITS.md land in the public repos
-- [ ] README pass for the public workspace: edit README.md in place —
-      add the hosted Play URL, drop "(working title)" if the name is
-      final, final tone once-over (README.draft.md was folded in and
-      deleted 2026-08-31 per D011 — no parallel draft to maintain)
+## Distribution and source
 
-## 7. After go
-- [ ] LAN/relay multiplayer track (wasm-generals parity)
-- [ ] Telemetry decision (even just beacon-level boot stats)
+- [x] Stager packages credits, asset ledger, license map, root code license,
+      engine license, browser-renderer license and font notice.
+- [x] Hashed engine/data/UI URLs permit immutable caching; HTML/build metadata
+      revalidate. Local server and prepared hosting headers reflect this.
+- [x] Final ledger/registry agrees with shipped files, generator versions and
+      remaining imported music/font notices.
+- [ ] Final source audit excludes credentials, private saves, local SDK paths,
+      proprietary game assets and misleading upstream project links.
+- [ ] Preserve the exact corresponding engine/renderer source and build
+      instructions for the distributed binary, plus required license notices.
+- [ ] Verify final public names/branding and the chosen domain before release.
+
+All maintained repositories currently remain private under the owner's
+account: `warpowers`, `warpowers-engine`, `warpowers-dxvk`. The former
+`warpowers-dvijoke` is archived; its history and source are vendored into the
+root. Follow the owner's eventual publication choice rather than creating
+an organization or transferring repositories automatically. Update source
+links/submodule URLs only when the destination is known and accessible.
+
+Upstream push URLs stay disabled. Inherited GitHub Actions stay disabled;
+ordinary pushes do not deploy anything. See [WORKSPACE.md](WORKSPACE.md).
+
+## Hosting after explicit authorization
+
+- [ ] Protected preview of the generated `webstage/` only.
+- [ ] Verify JS/WASM content types, compression, cache hit/revalidation
+      behavior and current credits/source links at the actual URL.
+- [ ] Measure first and repeat visits on a real network against the ≤20s
+      boot target; repeat the browser matrix against that candidate.
+- [ ] Confirm publication settings, public source availability and final Play URL.
+
+No account or hosted telemetry is required for the game. Debug boot reports
+are opt-in (`?debug=1`) and local diagnostics can be copied from Settings.

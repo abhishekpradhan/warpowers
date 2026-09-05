@@ -152,3 +152,51 @@ Everything visual degrades gracefully: missing W3D model → invisible object; m
 - **Phase 4 v2b: reactive behaviors (2026-08-26) — Phase 4 CLOSED.** Three new AI teams, all data + one engine stub implemented: (1) **Defense patrol** — priority-45 trained garrison replacement, `CONDITION_TRUE` production condition, on-create `TEAM_GUARD` at the base front; verified: fielded within the first minute of every match and re-fielded when killed (inst 1/1 maintained). (2) **Punish** — priority-40 retaliation squad whose production condition is `PLAYER_DESTROYED_N_BUILDINGS_PLAYER(PlayerA, 1, PlayerB)`. **That stock condition was an unimplemented stub** (`@todo CLH implement me! return FALSE`); implemented via a new `ScoreKeeper::getTotalBuildingsDestroyedOfPlayer(idx)` accessor over the existing per-victim `m_totalBuildingsDestroyed[]` buckets (fed by kill-credit in `Object::scoreTheKill`, gated on the victim's side being playable + our SCORE KindOf). Verified deterministically with the new `WP_AUTOTEST=strike` harness (4 tanks kill the AI's isolated forward tower): bldKilled bucket ticks, condition flips, retaliation team trains. **Scoring nuance: an UNDER-CONSTRUCTION building kill does not count** (stock gate) — a browser kill of the tower mid-rebuild flipped nothing and burned an hour as a phantom bug. (3) **Eco-raid** — priority-28 fast movers (Outrider/Vulture ×3) unlocked by RaidTimer (normal 7:00 / brutal 4:00, never on easy); on-create applies a named ATTACK_PRIORITY_SET (default 1, player's income 60 / power 40 — set up by a one-shot at match start via `SET_DEFAULT_ATTACK_PRIORITY` + `SET_ATTACK_PRIORITY_THING`, template-name based to stay enum-proof) then `TEAM_HUNT` — the hunt prefers the player's economy. Verified with a temporary 30s arm: team trains, APPLY executes, no crashes. Parameter ordinals used: OBJECT_TYPE=15, ATTACK_PRIORITY_SET=28. **AISkirmishPlayer/.scb path RETIRED** — the data-driven AIPlayer brain (build list + expansion + escalation tiers + difficulty + defense/punish/eco-raid) covers the Phase 4 bar without the skirmish-sides/scb integration cost; revisit only if stock skirmish behaviors (supply lines, multi-base) become requirements.
 - **Phase 5 opening pass (2026-08-31): budgets measured, matrix started, publish prep staged.** (1) **Frame budget on M-series: flat 60/s** sustained through a BRUTAL match's raider/pack/assault phases (measured by MainLoop pump-rate with rAF suspended — each `MainLoop.func()` is a full engine frame, so calls/sec = real frame capacity; 53.7/s only during match load-in). Deep-late-game mega-army stress remains an open checklist item; the money-readout font churn stays parked as perf debt with no measured symptom. (2) **Local boot 5.5s cold** (engine 165ms / data 214ms / init 5.2s — init dominates; a real-network CDN run will shift the download legs). (3) **Boot beacons**: the page now fires `GET /wp-boot-ok?total=…&ua=…` on reaching the main loop and `/wp-boot-fail?…` on engine abort — they land in ANY static server's access log, so browsers we can't drive (Safari/Firefox) are verifiable server-side. **Safari: boots clean, total=751ms** (AppleWebKit/605 UA in the log after the full manifest fetch). Firefox is not installed on this machine. (4) **Trademark audit**: user-visible surfaces (page copy, tab title, all of Generals.str, menus) carry zero EA marks; the devtools-visible engine-lineage identifiers (GeneralsXZH.js, Generals.str filename, CNC_GENERALS_* env names, GeneralsX console banner) are deliberate attribution-adjacent internals, documented in docs/publish-checklist.md. (5) **Vercel prep staged, NOT deployed** (deploys stay user-gated): vercel.json serves webstage/ only (.vercelignore excludes everything else), wasm content-type header, 1h asset cache — NOT immutable, because genwebstage paths aren't content-hashed yet (the `?v=` query on fetches is a page-side cache-buster, not a path hash); switch to immutable after hashed paths. docs/publish-checklist.md is the living gate list.
 - **Staging landmine (found 2026-08-31 during the polish sweep):** `tools/genwebstage.py` stages gamedata **from the runtime dir** (`~/GeneralsX/GeneralsZH`), not from `data/` — so repo edits to Data/Maps/Art/Window reach the browser only after the repo→runtime sync (`rsync -a data/<d>/ ~/GeneralsX/GeneralsZH/<d>/` for the four data dirs). It had silently not run since Aug 26; the tell was a five-day-old `Generals.str` inside a "fresh" stage. genmap's no-arg default also writes the runtime copy, which masks the staleness for maps. Fixed same day: genwebstage now stages straight from `data/`; the runtime dir is a native-deploy target only.
+
+## Player-experience integration (September 2026)
+
+The browser shell now consumes a versioned `Module.onGameState` snapshot
+from `WPShell.cpp` and receives actual `onMatchResult` / mission messages.
+Keep the telemetry observational: native map scripts decide objectives and
+results. The snapshot uses one contiguous numeric buffer plus string pointers;
+large scalar `EM_ASM` calls can compile yet fail when a referenced `$16` is not
+present in the generated JavaScript signature. Copy buffer values synchronously
+inside the callback and never retain a pointer into its stack frame.
+
+HTML panels acquire and release only their own pause via `wpSetWebPause`.
+Native Escape/P pauses must survive closing an HTML panel. Gameplay/rendering
+controls are written to `Options.ini` before startup; changing their settings
+requires restart. Channel audio and overlay appearance apply immediately.
+
+Checkpoint storage mounts IDBFS at the engine's synthetic browser user directory.
+A native save writes `Save/wp-checkpoint.sav`; a sidecar records compatibility
+and mission identity, then the page flushes to IndexedDB. Native portable map
+paths are lowercased in saves, so the bridge canonicalizes the known dataset
+map IDs after load. Restore the command bar position before a briefing can pause
+its entrance animation. Serialize save requests across panel reopenings.
+
+Every map-placed object with a Draw module needs a Body module, including
+noninteractive scenery. `Drawable::onLevelStart` asks that body for its damage
+state while preparing ambient sound. The original missing scenery bodies caused
+a WASM null-function exception on map load; the content validator now prevents
+this data error.
+
+Native test fixtures must complete normal Create-module lifecycle callbacks.
+In particular, `SupplyCenterCreate::onBuildComplete` registers a completed depot
+with the resource manager. Merely allocating a depot yields a misleading test
+where trucks collect but cannot discover a delivery destination. Identify newly
+produced trucks by producer ID; ordinary skirmish maps also have starting
+haulers. Map-placed War Powers haulers are explicitly put into their normal
+harvesting state on fresh game start, while restored saves retain their orders.
+
+`WP_AUTOTEST=mission` changes explicit prerequisites, target survival or timer
+expiry and observes native script counters/results. It never dispatches a
+victory action itself. The expected-result latch is separate from `inGame`:
+the latter remains true during the end-game banner. Diagnostic sessions must
+not persist their forced wins into a player's operation record.
+
+`WP_REVIEW_SCENE=1` creates a bounded faction roster review on the Flats;
+`stress` adds a bounded mixed-army encounter. These scenes bypass production
+for visual/performance inspection. They are separate from input-driven tests,
+normal matches and evidence about balance. See `docs/verification.md` in the
+parent workspace for current results and exact limitations.

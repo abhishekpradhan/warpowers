@@ -1,33 +1,47 @@
-# Web performance — budgets & measurements (updated 2026-08-31)
+# Web performance
 
-Current numbers are Phase 5 measurements (M-series Mac; boot via permanent
-`performance.mark` instrumentation in web/index.html, frame capacity via
-MainLoop pump-rate). The 2026-08-23 baseline is kept at the bottom.
+Updated 2026-09-05. Measure the current candidate; older 1024×768 prototype
+numbers do not certify the new widescreen build.
 
-## Measured (2026-08-31)
-- **Bundle: 55MB staged** (11MB wasm + ~44MB gamedata — the 6-track music
-  rotation added ~20MB by design). CDN brotli roughly halves wire size;
-  verify on the preview deploy (publish-checklist §5).
-- **Boot: 5.5s cold** (page load → engine main loop; 165ms engine dl /
-  214ms data / 5.2s init) against the ≤20s budget.
-- **Frame capacity: flat 60/s** through a BRUTAL match's raider/pack/assault
-  phases; logic locked at 30. Late-game mega-army stress still open
-  (checklist §2), as is the mid-laptop run (checklist §1 second machine).
-- Hidden tabs auto-pause (rAF suspension) — product behavior, documented in
-  engine-notes.
+## Budgets and implementation
 
-## Budgets
-- Bundle ≤ 64MB staged (re-baselined 2026-08-31: the old ≤35MB predates the
-  music import; wasm share ≤ 12MB unchanged). Watch texture growth.
-- Boot ≤ 20s on a mid laptop from a real network — MET locally; CDN
-  numbers pending the preview deploy.
-- Steady 60 render / 30 logic on a mid laptop at 1024×768 — M-series MET;
-  mid-laptop pending second machine.
+- Combined staged bundle: **≤64 MiB**. Content hashes deduplicate identical
+  bytes and make engine, data, fonts and UI resources cacheable across visits.
+- Desktop boot target: **≤20 seconds** on a midrange laptop over a real
+  network. Local staging checks only the local portion of that requirement.
+- Rendering choices: 1280×720 Performance, 1600×900 Balanced (default),
+  1920×1080 High. Native UI is authored at 1280×720 and scales as a unit.
+- Target steady 60 render / 30 logic updates per second, with usable input
+  during large fights. Report rendered frames and logic separately.
+- Keep ordinary hidden tabs paused. Diagnostic review/test sessions opt out
+  so their explicit simulation continues while inspected in the background.
 
-## Follow-ups
-- Hashed asset filenames for immutable CDN caching (publish-checklist §5).
-- Known perf debt: money-readout font surface churn (no measured symptom).
+The art optimizer strips opaque alpha, uses lossless TGA RLE when it saves
+space, and checks decoded pixels. Small atlases use explicit role-based size
+contracts. Music remains the six attributed tracks; additional art should not
+silently increase the loading budget.
 
-## Baseline for contrast (2026-08-23, pre-shell)
-26.5MB bundle, ~25–40s deploy-click boot dominated by synchronous engine
-init, 30–60 fps pane rendering. Everything above supersedes it.
+## Current local evidence
+
+- Candidate `6375e6bfb189`: **66,729,367 bytes (63.638 MiB)** staged,
+  including the complete original roster, engine and notices. The packaging
+  gate enforces the 64 MiB limit before replacing the previous working stage.
+- Repaired bridge candidate reached the main loop in **542ms** on one local
+  cached development-browser run (64 ms engine download/compile stage, 343 ms
+  data stage, 136 ms initialization). This is not a cold-network result.
+- Native supply/power and training checks ran through their required states;
+  a dedicated crowded review scene now reports render timing, logic progress
+  and WASM heap capacity. Heap capacity is not operating-system process RSS.
+
+The currently staged `build.json` identifies each candidate and asset sizes.
+Settings → Copy diagnostics includes the build ID, browser and measured boot
+phases. `?review=stress&map=Maps/WPTest.map` selects the explicit stress fixture;
+its output is a measurement, not an automatic declaration that a budget passed.
+
+## Remaining release evidence
+
+A 30–45-minute crowded run, a second/lower-end desktop, full Safari and Firefox
+matches, and real-network first/repeat loading remain separate release checks.
+A future protected hosting preview needs owner authorization. Verify actual
+compression and cache behavior at that URL; do not infer wire size from the
+uncompressed directory or assume a fixed compression ratio.

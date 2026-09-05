@@ -1,154 +1,42 @@
-# War Powers — road to publish readiness
+# War Powers — current roadmap
 
-Working roadmap; tick items as they land. Decisions referenced live in
-decisions.md. **Direction (D018): port-parity first** — publish bar: the
-wasm-generals surface with zero player-supplied files, current content as
-the bundled pack (Meridian vs Jackal; Iron Pact internal — D017).
-Nothing ships or deploys until the user says go.
+Updated 2026-09-05. The owner authorized implementation of the product
+polish plan on September 4, including repository preparation and ordinary
+commits/pushes. Publication and hosting remain separate decisions. The
+engine and swappable dataset architecture remain the foundation (D018).
 
-The next-stage quality assessment and proposed work sequence are in
-[product-polish.md](product-polish.md) (2026-09-04). This proposal reviews the
-current game against the existing product objectives; it does not mark any
-new implementation milestones complete.
+## Product polish in progress
 
-## Phases (2026-08-24 — the port surface is done; user-defined structure)
+| Area | Implemented | Verification / remaining work |
+|---|---|---|
+| Command experience | 16:9 layouts, selected-unit information, production queue, deployment previews, field manual and objective/guidance overlays | Training deployment, selection, native production and construction observed; final input matrix pending |
+| Entry and solo content | Field Orientation, four connected operations, two commander trials, native objective triggers and persistent operation record | Binary objective success/failure/edge cases pass; input walkthroughs in progress |
+| Economy and factions | Physical supply trucks and finite caches, power-independent Jackal, distinct armor costs/timings, counters and one power per faction | Supply/power native diagnostics passed; final wheel-locomotor harvesting and user targeting checks pending |
+| Opponent and maps | Paid economy/production, bounded composition responses, supply raids, authored scenery and route identities | All 17 map binaries pass cliff-clearance route checks; an AI HQ assault was observed; full match matrix pending |
+| Original art | All 41 roster models original; lifecycle/ownership/aiming contracts, environment kit, panorama and 44 rendered portraits | Export/import, hierarchy, texture and portrait checks pass; final in-engine readability review pending |
+| Product durability | Settings, key remapping, channel audio, pause ownership, IDBFS checkpoint, compatibility checking and visible error recovery | Web-state/packaging tests and initial durable checkpoint round-trip pass; final restore-identity/fullscreen checks pending |
+| Distribution | Content-hashed paths, stable build IDs, credits/notices in staged bundle, asset registry and staged checks | 63.638 MiB bundle passes enforced 64 MiB limit; fresh-checkout verification pending |
+| Open-source preparation | Root/engine/native-renderer build and contribution docs, fork routing, protected upstream remotes | Final provenance audit, commits, child-first pushes and remote gitlink verification pending |
 
-**Phase 2 — Playability (DONE 2026-08-24):** make the one match we have feel right.
-- [x] User playthrough passed with no balance notes ("looks good") — no
-      dedicated balance round needed; tuning rides along with Phase 3
-      content as new units land
-- [x] Start-money mismatch fixed (both maps deploy with $10000)
-- [x] Victory path witnessed live (WP_AUTOTEST=win + full both end in the
-      score screen)
-- [x] QoL tail: attack-move/guard/stop command-bar buttons (gencmdicons
-      glyph sheet) live in wasm; rally points end-to-end (locomotor probe +
-      WPNODE01/WPRALLY01 + line texture, set-message + flag verified)
-- [x] WP_AUTOTEST=full retune → real 4-tank fleet; gate all-green
-      (base/cycle/win/defeat/full)
-- [x] Polish debt: W3DFS_MISS spam killed (move-hint root cause + WPMOVE01),
-      voice pools 12/32, invisible-hoverable sweep (power meter paints,
-      popup panels opaque)
+The [polish plan](product-polish.md) defines the intended player outcomes.
+The [publish checklist](publish-checklist.md) records the independent release
+gates. A generated file or passing static validator alone does not mean a
+feature has passed a player test.
 
-**Phase 3 — Content to the parity bar (CURRENT)** (its own phase; the plan and
-per-class sourcing live in docs/parity.md):
-- [x] Skeletal animation unlocked — procedural W3D rigs (shared skeleton,
-      walk/idle/fire); KayKit import remains an optional fidelity upgrade
-- [x] Infantry to 4/faction: rifle, rocket (AA), scout (Vigil/Prowler),
-      heavy gunner (Bastion/Bruiser, tech-gated) — BAR MET
-- [x] Aircraft to 2/faction: Kestrel/Buzzard + Shrike/Gnat strafers
-      (tech-gated) — BAR MET (Buzzard/Gnat share the verified hover recipe
-      but haven't been individually flown)
-- [x] Structures to 9/faction: +AA (Skyspear/Flakhut), +tech
-      (Directorate/Den), +pillbox (Rampart/Nest), +Jackal power (Dynamo);
-      one shy of the 10 bar
-- [x] Maps: 5 layouts × 2 factions (flats/ridge/scrap/basin/range) with
-      the picker; biome tinting still pending
-- [x] Enemy waves upgraded: rocket infantry in assaults + a 10-minute air
-      wave; enemy bases carry AA and real power
-- [x] SFX toward ~40 (now ~26: +chaingun, +flak, +deny/click UI, +arty boom)
-- [x] VO depth (19 voice sets; newest 6 deepened to 3-deep sel/mov/atk = ~10 lines each)
-- [x] Music: 6-track CC-BY rotation (Kevin MacLeod, ~15MB re-encoded; engine rotation in GameEngine::update; native-verified, browser audibility = user ears)
-- [x] Biome tinting (ash on Scrapyard/Range) and 10th structure (Longbow/Lobber artillery, firing untested)
-- [x] Ambient sound beds (wind bed on CCs via SoundAmbient, power hum, factory loop — seamless generated loops)
+## Established foundation
 
-**Phase 4 — The real opponent** (v1 LANDED 2026-08-26): the enemy is a live
-AIPlayer — trains its own dozer, expands via a map build list (2nd power,
-2nd income, forward tower; rebuilds), and produces escalating attack teams
-with real money (raider/pack/assault/air tiers on 2/4/8/10-minute unlocks;
-economy counterplay: killing its income starves the waves). Timer-spawned
-waves are gone. v2a (2026-08-26): OPPOSITION
-difficulty row on the deployment screen — SKIRMISH/STANDARD/BRUTAL, persisted,
-pure data via difficulty-flagged timer-arm scripts (easy never fields
-assault/air; brutal escalates at 1/2.5/5/7 minutes). v2b (2026-08-26): reactive
-behaviors — trained defense patrol (regarrisons when killed), punish squad
-(unlocked the moment the player destroys an enemy structure; the stock
-script condition was a stub, now implemented via ScoreKeeper), and an
-eco-raid tier that hunts the player's income/power via attack-priority
-sets. AISkirmishPlayer/.scb RETIRED as unnecessary — **Phase 4 closed.**
+The browser engine boots without retail assets and supplies selection,
+orders, fog, construction, combat, a minimap, production and match results.
+The dataset supports Meridian Combine and Jackal Front (D017), while the
+native macOS port remains useful for engine development. Earlier progress
+and measurements are preserved in Git history and the engine worklog.
 
-**Phase 5 — Hardening + publish prep** (IN PROGRESS 2026-08-31; publishing
-itself stays gated on explicit go): fps budget MEASURED (flat 60/s through
-BRUTAL combat on M-series; late-game mega-army stress open), local boot 5.5s,
-boot/fail beacons added (server-log-visible cross-browser verification),
-Safari BOOTS (751ms; human match pending), Firefox not installed here,
-trademark audit clean on user surfaces, vercel.json/.vercelignore staged
-(1h cache until content-hashed paths), docs/publish-checklist.md is the
-gate list. Remaining: private protected deploy + real-network
-numbers (ON HOLD per user, 2026-08-31), Firefox, human playthroughs per
-difficulty, repo-publication steps at go-time; LAN/relay multiplayer after.
-Also landed this phase: repo consolidation (D020), faction canon (D021),
-full polish/comment sweep (69 findings), README rebuilt with screenshot,
-web stage now reads data/ directly.
+## After this polish pass
 
-## 0. Port parity (the working plan — D018)
-- [x] Overlay control strip (2026-08-24): hover pill over the canvas (mute + volume slider + fullscreen), page-styled, drives the engine live via the exported wpSetMasterVolume and persists to the WP_VOLUME boot key; the in-engine Options screen (its only content was the volume slider, which behaved poorly) is retired — pause menu is Return/Restart/Abandon
-- [x] Shell (final architecture 2026-08-24, rev 2): THE ENGINE SHELL is the only menu — the page is a pure auto-booting loader (wordmark + progress, no buttons; audio unlocks on first in-menu click). Boot lands on the in-engine main menu (two-tone wordmark, page-matched styling) → deployment picker → match; every exit returns in-engine (score screen on W/L, quit-to-menu on abandon). ESC pause unchanged. ?map= keeps the -file harness path
-- [x] Boot ≤20s: 8.7s local total; performance.mark marks + [BOOT] report permanent (re-measure on real hosting)
-- [x] QoL verified in browser: control groups (Ctrl+#/#/Shift/Alt), select-all, view-CC, stop/scatter, camera keys, pause key, force-attack/-move mod-holds (CommandMap.ini authored — was a 1-line stub, nothing was ever bound)
-  - [x] Attack-move + guard as command-bar buttons; rally-point live check (verified Phase 2 — §1)
-- [x] Pause menu / quit-to-menu flow: ESC pause (Return/Restart/Options/Abandon+confirm) → in-engine menu; match end → score → menu
-- [x] Fog-of-war start: classic black shroud (the "anomaly" was our own 450wu scripted home reveal; CC vision lights the base)
-- [ ] Later: LAN/relay multiplayer (wasm-generals parity)
-- Content track runs alongside (bar + per-class sourcing: docs/parity.md —
-  generate / import CC0+CC-BY / community post-publish; music is solved by
-  CC-BY import when unparked)
-- Parked until parity (game depth): economy loop, general powers, superweapons (AI landed Phase 4, music Phase 3)
-
-## 1. Combat juice — fights feel like Generals
-- [x] Real projectile on WP_TankGun (visible, dodgeable shells; ProjectileDetonationFX fires)
-- [x] Death FX: explosions, smoke, scorch decals (husks: later)
-- [x] Audio pipeline: cannon/explosion SFX + processed-radio unit barks wired (EVA announcer: later; audibility = user morning test)
-- [x] LocalDefeat path exercised (enemy razed an undefended CC mid-test); input-disable still needs an interactive check
-
-## 2. Base-building loop
-- [x] Ground context: aprons/pads so structures sit in bases, not on bare dunes
-- [x] Construction model decision (D016) implemented
-- [x] Economy structures: Meridian power + production (Jackal mirror pending)
-- [x] Money/power economy live (HUD already displays both)
-
-## 3. Roster breadth
-- [x] Convert remaining Quaternius tanks into distinct units (Outrider, Vulture, Zenith)
-- [x] Base defenses per faction (Bulwark, Watchpost)
-- [x] Second unit class per faction (recon/gun-truck/artillery)
-- [x] Infantry class per faction (Warden/Scrapper: models, portraits, own VO, SMALL_ARMS damage model)
-
-## 4. Opponent
-- [x] Scripted attack waves via map scripts
-- [x] Skirmish AI investigation — findings + implementation plan in engine-notes (build lists + AISkirmishPlayer + .scb; deferred)
-- [x] Scripted skirmish opponent: defended enemy base (factory/power/towers/defenders) + escalating assault tier; victory = raze it
-- [x] True skirmish AI (builds, reacts, expands) — landed Phase 4 via plain AIPlayer + map build lists/scripts (AISkirmishPlayer/.scb retired)
-
-## 5. UI/UX
-- [x] Radar/minimap live (terrain, shroud, view frustum; layout polish pending)
-- [x] Command bar complete: portraits, tooltips w/ descriptions, multi-queue with cancel, construction context
-- [x] Faction select on the menu (Meridian/Jackal, persisted); mirrored WPTestJ map
-- [x] Construction scaffolds (sites read as scaffolding, not ghost buildings)
-- [x] Main menu: the web page is the menu (DEPLOY gates boot + doubles as the WebAudio unlock gesture)
-
-## 6. Web hardening
-- [x] Boot time measured + instrumented (8.7s local; §0); fps budget pass still open
-- [x] Wasm logic-clock crawl under tab throttling fixed (catch-up: up to 10 updates/tick)
-- [x] Audio in the wasm build (two engine bugs found+fixed: zero-channel decode buffers, dead group routing; user-confirmed audible)
-- [x] Settings persistence (volume slider + faction choice, localStorage -> WP_VOLUME env)
-
-## 6b. Polish debt (from playtesting/debugging)
-- [x] Voice-limit tuning: voice pools 12/32 (landed Phase 2)
-- [x] W3DFS_MISS spam killed (landed Phase 2)
-- [ ] Audio mix pass once more content exists (levels: SFX 80% / voice 85% are first guesses)
-- [x] EVA announcer live (Eva.ini + command-net voice: base under attack, structure/unit lost, low power, funds)
-- [x] Interactive checks: placement flow (incl. the preview-leak root cause), DEFEAT screen verified on-screen
-- [x] Victory screen live-confirm (VICTORY banner witnessed via WP_FRAME_DUMP on the win gate; the shell score screen verified twice with real defeat stats)
-- [x] Full-autotest retune (4-tank fleet; full/base/wedge gates green on the dozer-fix build)
-- [x] Restart Battle + redeploy black screen FIXED (dangling mid-transition window: destroyed quit-menu windows unlink but the transition styles' update() deref'd the nulled m_win — native SIGSEGV, wasm silent low-memory writes corrupting the next match; 45 null-guards in GameWindowTransitionsStyles)
-- [x] Balance pass riding along with playtests (start-money fixed; three real matches played this sweep — home defense matters, waves punish all-in pushes: by design)
-- [ ] Known balance edge: artillery min-range dead zone means a lone battery can't defend itself or the CC — pillbox pairing is mandatory (documented, acceptable)
-
-## 7. Publish readiness (prepare only — nothing goes public without approval)
-- [x] Rebrand: window title + console banner clean (full audit pass still to run pre-publish)
-- [x] LICENSING.md (MIT code / CC BY 4.0 content / permissive per-file imports, D019/D022) + ledger + credits current
-- [x] Public-README content drafted (folded into README.md 2026-08-31, D011 —
-  no parallel draft file; engine fork README at D012 time)
-- [x] Fresh-clone reproducibility verified (clone --recursive + genmap/genwnd/Blender-from-clone; blender scripts de-absolutized; gentex single-arg mode quirk noted)
-- [x] D012 execution runbook written (docs/publish-checklist.md)
-- [ ] Upstream PR candidates (with user approval): wasm audio fixes (decode config, group routing), INI unknown-block diagnostics, icon null-guards
-- [x] Hosting decision: Vercel static now, Railway reserved for lobby (comparison folded into D013)
+- Human full matches on every difficulty and independent balance feedback.
+- Safari/Firefox and lower-end desktop verification, crowded late-game
+  performance, and real-network loading measurements.
+- Public source/hosting work only when authorized; retain source and notices
+  for the exact distributed build.
+- Multiplayer, Iron Pact, a larger campaign, superweapons and a broad
+  progression tree remain separate scope decisions.

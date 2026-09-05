@@ -132,8 +132,9 @@ Battlefield returned to the correct deployment screen. Final trial preview
 titles and summaries fit, with the full briefings preserved. These are navigation
 checks, not human mission completions. The diagnostic operation record remained
 0/4 because fixture outcomes do not write progression.
-The final independent stage also opened the ordinary main menu without
-diagnostics and with a fresh 0/4 operation record.
+The primary final stage also opened the ordinary main menu without
+diagnostics and with a fresh 0/4 operation record. The independent checkout
+provides build/staging evidence; its compiled candidate was not browser-tested.
 
 The Jackal native art review on `db2a99b4c142` contained 22 fixtures with zero
 missing models. Original structures, infantry, vehicles and both Jackal airframes

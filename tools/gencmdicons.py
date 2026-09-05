@@ -112,9 +112,16 @@ def write(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
-targets = sys.argv[1:] or [
-    os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Textures/wp_cmdglyphs.tga"),
-    os.path.join(os.path.dirname(__file__), "..", "data", "Art", "Textures", "wp_cmdglyphs.tga"),
-]
-for t in targets:
-    write(t)
+def main():
+    import argparse
+    from pathlib import Path
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('targets',nargs='*',type=Path)
+    parser.add_argument('--data',type=Path,default=Path(__file__).resolve().parents[1]/'data')
+    args=parser.parse_args()
+    targets=args.targets or [args.data/'Art/Textures/wp_cmdglyphs.tga']
+    for t in targets:
+        Path(t).parent.mkdir(parents=True,exist_ok=True)
+        write(t)
+
+if __name__=='__main__':main()

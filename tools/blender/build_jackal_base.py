@@ -14,7 +14,6 @@ import bpy
 
 PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
-OUT_DIR = '/tmp/hero'
 
 sys.path.insert(0, PLUGIN_REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +21,7 @@ import io_mesh_w3d  # noqa: E402
 io_mesh_w3d.register()
 import wp_pipeline  # noqa: E402
 
-os.makedirs(OUT_DIR, exist_ok=True)
+MODEL_DIR, TEXTURE_DIR = wp_pipeline.output_dirs()
 
 PAL = {
     'STEEL': (0.722, 0.761, 0.800, 1.0),
@@ -41,6 +40,11 @@ PAL = {
 
 
 def build(name, atlas, tga_name, fn, **comp):
+    # Articulated defenses moved to the production kit. This retained base
+    # builder may still regenerate Rigger/Chop Shop without regressing them.
+    if name in ('MERBUL01','JAKWP01'):
+        print(name+' is owned by build_polish.py; skipped')
+        return
     wp_pipeline.reset_scene()
     k = wp_pipeline.Kit(PAL, roughness=0.92)
     fn(k)
@@ -50,9 +54,9 @@ def build(name, atlas, tga_name, fn, **comp):
         return
     wp_pipeline.smart_uv(obj, 0.006)
     diff, ao, mask = wp_pipeline.bake_images(obj, atlas)
-    tga = os.path.join(OUT_DIR, tga_name + '.tga')
+    tga = os.path.join(TEXTURE_DIR, tga_name + '.tga')
     wp_pipeline.composite(diff, ao, mask, atlas, tga, **comp)
-    wp_pipeline.export_w3d(obj, tga, os.path.join(OUT_DIR, name.lower() + '.w3d'), tga_name)
+    wp_pipeline.export_w3d(obj, tga, os.path.join(MODEL_DIR, name.lower() + '.w3d'), tga_name)
     print(name + '_EXPORT_OK')
 
 
@@ -129,7 +133,7 @@ def watchpost(k):
 
 build('JAKRIG01', 256, 'wp_rigger', rigger,
       seed=51, shade_lo=0.50, shade_hi=0.50, grain=0.03, edge_strength=0.5, edge_radius=1)
-build('JAKCS01', 512, 'wp_jakcs', chopshop,
+build('JAKCS01', 256, 'wp_jakcs', chopshop,
       seed=52, shade_lo=0.50, shade_hi=0.50, grain=0.028, edge_strength=0.5,
       edge_radius=2, lowfreq=0.05)
 build('MERBUL01', 256, 'wp_bulwark', bulwark,

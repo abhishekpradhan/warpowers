@@ -1,125 +1,91 @@
 #!/usr/bin/env python3
-"""Pack Blender-rendered unit portraits into the command-icon sheet.
+"""Pack consistent model-rendered command portraits into both existing sheets.
 
-Reads 128px TGA portraits (WP_PORTRAIT_DIR renders, default /tmp/portraits),
-composites each over a faction plate, packs a 4x4 512px sheet ->
-wp_cmdicons.tga (same file the MappedImages already reference; coordinates
-regenerated to the 128px grid).
+python3 tools/genportraitsheet.py /tmp/warpowers-portraits --data data
+Preserves MappedImage names. Missing portraits fail before output is replaced.
 """
-import os
+import argparse
+from pathlib import Path
 import struct
-import sys
 
-SRC = sys.argv[1] if len(sys.argv) > 1 else '/tmp/portraits'
-CELL = 128
-GRID = 4
-SIZE = CELL * GRID
-
-MER = (46, 52, 60)
-JAK = (56, 46, 38)
-
-# icon name -> (portrait file, plate)
-SLOTS = [
-    ('WPIcoVector', 'vector', MER), ('WPIcoOutrider', 'outrider', MER),
-    ('WPIcoZenith', 'zenith', MER), ('WPIcoFabricator', 'surveyor', MER),
-    ('WPIcoMongrel', 'mongrel', JAK), ('WPIcoVulture', 'vulture', JAK),
-    ('WPIcoRigger', 'rigger', JAK), ('WPIcoPowerArray', 'merpp', MER),
-    ('WPIcoVehiclePlant', 'merwf', MER), ('WPIcoBulwark', 'bulwark', MER),
-    ('WPIcoChopShop', 'jakcs', JAK), ('WPIcoWatchpost', 'watchpost', JAK),
-    ('WPIcoCC', 'mercc', MER), ('WPIcoCP', 'jakcp', JAK),
-    ('WPIcoWarden', 'warden', MER), ('WPIcoScrapper', 'scrapper', JAK),
-]
-
+ROOT=Path(__file__).resolve().parents[1]
+FIRST=['Vector','Outrider','Zenith','Fabricator','Mongrel','Vulture','Rigger','PowerArray',
+ 'VehiclePlant','Bulwark','ChopShop','Watchpost','CC','CP','Warden','Scrapper']
+SECOND=['Lancer','Sting','Kestrel','Buzzard','LaunchPad','Roost','Exchange','Racket',
+ 'Vigil','Prowler','Bastion','Bruiser','Shrike','Gnat','Skyspear','Flakhut',
+ 'Directorate','Den','Rampart','Nest','Longbow','Lobber','Dynamo',
+ 'Porter','Scavenger','PrecisionStrike','TunnelAmbush','MissionRelay']
+JACKAL={'Mongrel','Vulture','Rigger','ChopShop','Watchpost','CP','Scrapper',
+ 'Sting','Buzzard','Roost','Racket','Prowler','Bruiser','Gnat','Flakhut','Den','Nest','Lobber','Dynamo',
+ 'Scavenger','TunnelAmbush'}
+CELL=128
 
 def read_tga(path):
-    d = open(path, 'rb').read()
-    idlen = d[0]
-    typ = d[2]
-    w, h = struct.unpack('<HH', d[12:16])
-    bpp = d[16]
-    desc = d[17]
-    off = 18 + idlen
-    n = w * h
-    px = []
-    if typ == 2:
-        step = bpp // 8
-        for i in range(n):
-            b = d[off + i * step:off + i * step + step]
-            px.append((b[2], b[1], b[0], b[3] if step == 4 else 255))
-    elif typ == 10:  # RLE
-        i = off
-        while len(px) < n:
-            hdrb = d[i]; i += 1
-            count = (hdrb & 0x7F) + 1
-            if hdrb & 0x80:
-                b = d[i:i + bpp // 8]; i += bpp // 8
-                px.extend([(b[2], b[1], b[0], b[3] if bpp == 32 else 255)] * count)
-            else:
-                for _ in range(count):
-                    b = d[i:i + bpp // 8]; i += bpp // 8
-                    px.append((b[2], b[1], b[0], b[3] if bpp == 32 else 255))
+    d=path.read_bytes();typ=d[2];w,h=struct.unpack_from('<HH',d,12);step=d[16]//8
+    if typ not in (2,10) or step not in (3,4):raise ValueError(f'Unsupported TGA {path}')
+    pos=18+d[0];px=[]
+    def pixel(at):
+        b=d[at:at+step]
+        return (b[2],b[1],b[0],b[3] if step==4 else 255)
+    if typ==2:px=[pixel(pos+i*step) for i in range(w*h)]
     else:
-        raise ValueError(f'tga type {typ}')
-    rows = [px[y * w:(y + 1) * w] for y in range(h)]
-    if not (desc & 0x20):     # bottom-up -> flip to top-down
-        rows = rows[::-1]
-    return rows, w, h
+        while len(px)<w*h:
+            header=d[pos];pos+=1;n=(header&127)+1
+            if header&128:
+                px.extend([pixel(pos)]*n);pos+=step
+            else:
+                px.extend(pixel(pos+i*step) for i in range(n));pos+=step*n
+    rows=[px[y*w:(y+1)*w] for y in range(h)]
+    return rows if d[17]&32 else rows[::-1]
 
-
-sheet = [[(16, 17, 20) for _ in range(SIZE)] for _ in range(SIZE)]
-ini = ['; War Powers original data — command button icons',
-       '; (model-rendered portraits packed by tools/genportraitsheet.py)']
-
-for ix, (name, fname, plate) in enumerate(SLOTS):
-    cx, cy = (ix % GRID) * CELL, (ix // GRID) * CELL
-    # plate with soft edge
+def resized(rows):
+    h=len(rows);w=len(rows[0]);out=[]
     for y in range(CELL):
+        row=[]
         for x in range(CELL):
-            e = min(x, y, CELL - 1 - x, CELL - 1 - y)
-            f = 1.18 if e < 3 else (1.0 + 0.06 * (1.0 - min(1.0, e / 40.0)))
-            sheet[cy + y][cx + x] = tuple(min(255, int(c * f)) for c in plate)
-    path = os.path.join(SRC, fname + '.tga')
-    rows, w, h = read_tga(path)
-    ox, oy = (CELL - w) // 2, (CELL - h) // 2
-    for y in range(h):
-        for x in range(w):
-            r, g, b, a = rows[y][x]
-            if a == 0:
-                continue
-            base = sheet[cy + oy + y][cx + ox + x]
-            af = a / 255.0
-            sheet[cy + oy + y][cx + ox + x] = (
-                int(r * af + base[0] * (1 - af)),
-                int(g * af + base[1] * (1 - af)),
-                int(b * af + base[2] * (1 - af)))
-    ini.append(f'''
-MappedImage {name}
-  Texture = wp_cmdicons.tga
-  TextureWidth = {SIZE}
-  TextureHeight = {SIZE}
-  Coords = Left:{cx} Top:{cy} Right:{cx + CELL} Bottom:{cy + CELL}
-End''')
+            sample=[rows[sy][sx] for sy in range(y*h//CELL,max(y*h//CELL+1,(y+1)*h//CELL))
+                    for sx in range(x*w//CELL,max(x*w//CELL+1,(x+1)*w//CELL))]
+            a=sum(p[3] for p in sample)
+            rgb=tuple(round(sum(p[c]*p[3] for p in sample)/a) if a else 0 for c in range(3))
+            row.append((*rgb,round(a/len(sample))))
+        out.append(row)
+    return out
 
-root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-targets = [os.path.expanduser('~/GeneralsX/GeneralsZH/Art/Textures/wp_cmdicons.tga'),
-           os.path.join(root, 'data', 'Art', 'Textures', 'wp_cmdicons.tga')]
-hdr = bytearray(18)
-hdr[2] = 2
-struct.pack_into('<HH', hdr, 12, SIZE, SIZE)
-hdr[16] = 24
-hdr[17] = 0x20
-body = bytearray()
-for row in sheet:
-    for (r, g, b) in row:
-        body += bytes((b, g, r))
-for t in targets:
-    with open(t, 'wb') as f:
-        f.write(bytes(hdr) + bytes(body))
-    print('wrote', t)
+def write_sheet(data,names,cols,texture,ini_name,portraits):
+    rows=(len(names)+cols-1)//cols;w=cols*CELL;h=rows*CELL
+    sheet=[[(19,25,29)]*w for _ in range(h)]
+    ini=['; Original War Powers portraits rendered from shipped W3D models.',
+         '; tools/blender/render_roster.py + tools/genportraitsheet.py']
+    for i,name in enumerate(names):
+        bx=(i%cols)*CELL;by=(i//cols)*CELL
+        plate=(48,43,36) if name in JACKAL else (34,45,53)
+        accent=(139,158,108) if name in JACKAL else (218,178,87)
+        for y in range(CELL):
+            for x in range(CELL):
+                edge=min(x,y,CELL-1-x,CELL-1-y)
+                glow=max(0,1-((x-56)**2+(y-53)**2)**.5/100)
+                base=tuple(round(v*(.75+.35*glow)) for v in plate)
+                if edge==0:base=tuple(round(v*.40) for v in accent)
+                if 3<=x<33 and 3<=y<5:base=accent
+                r,g,b,a=portraits[name][y][x]
+                af=a/255 if edge>=5 else 0
+                sheet[by+y][bx+x]=tuple(round(v*af+base[c]*(1-af)) for c,v in enumerate((r,g,b)))
+        ini.append(f'\nMappedImage WPIco{name}\n  Texture = {texture}\n  TextureWidth = {w}\n  TextureHeight = {h}\n  Coords = Left:{bx} Top:{by} Right:{bx+CELL} Bottom:{by+CELL}\n  Status = NONE\nEnd')
+    header=bytearray(18);header[2]=2;struct.pack_into('<HH',header,12,w,h);header[16]=24;header[17]=32
+    body=bytes(channel for row in sheet for r,g,b in row for channel in (b,g,r))
+    target=data/'Art/Textures'/texture
+    temporary=target.with_name('.'+target.name+'.tmp')
+    temporary.write_bytes(header+body);temporary.replace(target)
+    (data/'Data/INI/MappedImages/HandCreated'/ini_name).write_text('\n'.join(ini)+'\n')
+    print(f'PORTRAITS_PACKED {len(names)} -> {texture} ({w}x{h})')
 
-ini_targets = [os.path.join(root, 'data', 'Data', 'INI', 'MappedImages', 'HandCreated', 'WPCmdIcons.ini'),
-               os.path.expanduser('~/GeneralsX/GeneralsZH/Data/INI/MappedImages/HandCreated/WPCmdIcons.ini')]
-for t in ini_targets:
-    with open(t, 'w') as f:
-        f.write('\n'.join(ini) + '\n')
-    print('wrote', t)
+def main():
+    ap=argparse.ArgumentParser();ap.add_argument('source',type=Path)
+    ap.add_argument('--data',type=Path,default=ROOT/'data');args=ap.parse_args()
+    portraits={name:resized(read_tga(args.source/('WPIco'+name+'.tga'))) for name in FIRST+SECOND}
+    for path in (args.data/'Art/Textures',args.data/'Data/INI/MappedImages/HandCreated'):
+        path.mkdir(parents=True,exist_ok=True)
+    write_sheet(args.data,FIRST,4,'wp_cmdicons.tga','WPCmdIcons.ini',portraits)
+    write_sheet(args.data,SECOND,5,'wp_cmdicons2.tga','WPCmdIcons2.ini',portraits)
+
+if __name__=='__main__':main()

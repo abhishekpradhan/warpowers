@@ -6,7 +6,7 @@ with rust reinforcement, crate stacks under an oxide tarp, water tank,
 lattice watchtower with a crow's nest.
 
 Run: blender --background --python build_jakcp.py
-Outputs: /tmp/hero/jakcp01.w3d + /tmp/hero/wp_jakcp.tga
+Outputs: data/Art/W3D and data/Art/Textures; --data or --scratch selects an explicit destination.
 """
 import os
 import sys
@@ -15,8 +15,7 @@ import bpy
 
 PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
-OUT_DIR = '/tmp/hero'
-ATLAS = 512
+ATLAS = 256
 
 sys.path.insert(0, PLUGIN_REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +23,7 @@ import io_mesh_w3d  # noqa: E402
 io_mesh_w3d.register()
 import wp_pipeline  # noqa: E402
 
-os.makedirs(OUT_DIR, exist_ok=True)
+MODEL_DIR, TEXTURE_DIR = wp_pipeline.output_dirs()
 
 PAL = {
     'SAND': (0.788, 0.690, 0.541, 1.0),
@@ -103,11 +102,11 @@ if wp_pipeline.maybe_portrait_exit(structure, 'jakcp'):
     raise SystemExit
 wp_pipeline.smart_uv(structure, 0.006)
 diff, ao, mask = wp_pipeline.bake_images(structure, ATLAS)
-tga = os.path.join(OUT_DIR, 'wp_jakcp.tga')
+tga = os.path.join(TEXTURE_DIR, 'wp_jakcp.tga')
 wp_pipeline.composite(diff, ao, mask, ATLAS, tga, seed=17,
                       shade_lo=0.50, shade_hi=0.50,
                       grain=0.028, edge_strength=0.5, edge_radius=2,
                       lowfreq=0.05)
 print('TEXTURE_OK')
-wp_pipeline.export_w3d(structure, tga, os.path.join(OUT_DIR, 'jakcp01.w3d'), 'wp_jakcp')
+wp_pipeline.export_w3d(structure, tga, os.path.join(MODEL_DIR, 'jakcp01.w3d'), 'wp_jakcp')
 print('JAKCP_EXPORT_OK')

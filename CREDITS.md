@@ -14,9 +14,10 @@ used within its license terms; the full per-file ledger lives in ASSETS.md.
   carries its own LICENSE.
 
 ## Art
-- **Quaternius** — quaternius.com, CC0. Base meshes adapted into War Powers
-  units (retinted, re-UV'd, rebaked through our Blender pipeline). CC0 requires
-  no attribution; we credit anyway because the work is excellent.
+- **Quaternius** — quaternius.com, CC0. CC0 source packs used during prototyping; retained in the repository
+  as historical reference. The four former runtime adaptations have been
+  replaced by project-authored models. We retain this acknowledgement of
+  the work that helped establish the prototype.
 
 ## Fonts
 - **Liberation Sans** — Red Hat / liberationfonts, SIL OFL 1.1.

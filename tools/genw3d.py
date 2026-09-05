@@ -409,9 +409,19 @@ MODELS["MERINF01"] = trooper((225, 229, 234), (120, 128, 138))     # Meridian Wa
 MODELS["JAKINF01"] = trooper((196, 170, 128), (138, 90, 60))       # Jackal Scrapper: sand/rust
 
 def main():
-    out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
+    import argparse
+    import json
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    parser = argparse.ArgumentParser(description='Generate remaining original part-language models; finished assets are protected.')
+    parser.add_argument('output', nargs='?', type=Path, default=root/'data/Art/W3D')
+    args = parser.parse_args()
+    out_dir = args.output
+    protected = {name.upper() for name in json.loads((root/'tools/blender/polish_assets.json').read_text())}
     os.makedirs(out_dir, exist_ok=True)
     for model, parts in MODELS.items():
+        if model in protected:
+            continue  # Approved textured replacements come from build_polish.py.
         path = os.path.join(out_dir, model.lower() + ".w3d")
         data = build_w3d(model, parts)
         with open(path, "wb") as f:

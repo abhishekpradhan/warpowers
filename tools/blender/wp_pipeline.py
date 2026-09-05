@@ -1,6 +1,6 @@
 """Shared War Powers asset pipeline: bake, composite, export.
 
-Every model script (heroes and pack conversions alike) funnels through this
+Every painted model script funnels through this
 module so the painted look stays uniform and quality upgrades land on all
 assets at once.
 
@@ -12,16 +12,31 @@ Composite recipe (v2):
                                     edges -> reads as painted edge highlights)
   + low-frequency value noise    -- breaks up flat color fields
   + fine grain
-Team-color masking is deferred until the engine's house-color mechanism is
-mapped (docs/decisions.md D015 backlog).
+build_polish.py supplies separate HOUSECOLOR meshes after the texture bake;
+these receive the owning player's color through the native W3D asset manager.
 """
 import math
 import os
 import random
 import struct
+import sys
+from pathlib import Path
 
 import bpy
 import bmesh
+
+
+def output_dirs():
+    """Consistent explicit destinations for the retained original building kits."""
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--data',type=Path,default=Path(__file__).resolve().parents[2]/'data')
+    parser.add_argument('--scratch',type=Path,help='Explicit flat review directory for models and textures')
+    args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+    modeldir=args.scratch or args.data/'Art/W3D'
+    texturedir=args.scratch or args.data/'Art/Textures'
+    for path in (modeldir,texturedir):path.mkdir(parents=True,exist_ok=True)
+    return modeldir,texturedir
 
 
 class Kit:
@@ -55,7 +70,9 @@ class Kit:
         o = bpy.context.active_object
         o.name = name
         o.scale = (sx, sy, sz)
-        bpy.ops.object.transform_apply(scale=True)
+        # Keep the authored center: applying location before a later rotation
+        # rotates a part around the world origin (treads/plates flew off models).
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         if bevel > 0:
             md = o.modifiers.new('b', 'BEVEL')
             md.width = bevel
@@ -269,6 +286,8 @@ def export_w3d(obj, tga_path, w3d_path, image_name):
         export_mode='HM',
         force_vertex_materials=True,
     )
+    from legacy_contracts import apply
+    apply(w3d_path)
 
 def render_portrait(obj, out_path, size=128):
     """Render a 3/4-view cameo of the object (flat materials, transparent bg).

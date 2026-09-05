@@ -128,6 +128,19 @@ def fire_anim():
         channel(PIV["ARMR"], CH_Q, brace),
     ])
 
+def death_anim():
+    """A brief backward fall with a settled pose; played once before sinking."""
+    n=28
+    fall=[-1.48*(1-(1-min(1,i/19))**2) for i in range(n)]
+    # Small final impact avoids a hard discontinuity without looping the body.
+    fall[19:24]=[-1.48,-1.42,-1.47,-1.49,-1.48]
+    return animation_w3d('WPINF1DIE',n,24,[
+        channel(PIV['ROOTTRANSFORM'],CH_Q,[qy(a) for a in fall]),
+        channel(PIV['ROOTTRANSFORM'],CH_Z,[max(0,.40*math.sin(math.pi*min(1,i/19))) for i in range(n)]),
+        channel(PIV['ARML'],CH_Q,[qy(.30*min(1,i/12)) for i in range(n)]),
+        channel(PIV['ARMR'],CH_Q,[qy(-.20*min(1,i/12)) for i in range(n)]),
+    ])
+
 # ---- rigged bodies ----
 def rpart(bone, name, color, cx, cy, z, sx, sy, sz, **kw):
     """part authored in WORLD coords, stored bone-local."""
@@ -227,16 +240,22 @@ def rigged_w3d(model, parts):
     return meshes + hlod
 
 def main():
-    out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/GeneralsX/GeneralsZH/Art/W3D")
+    import argparse
+    from pathlib import Path
+    parser = argparse.ArgumentParser(description='Generate the shared WPINF1 skeleton and animations without replacing infantry bodies.')
+    parser.add_argument('output', nargs='?', type=Path, default=Path(__file__).resolve().parents[1]/'data/Art/W3D')
+    out_dir = parser.parse_args().output
     os.makedirs(out_dir, exist_ok=True)
     files = {
         "wpinf1.w3d": hierarchy_w3d(),
         "wpinf1wlk.w3d": walk_anim(),
         "wpinf1idl.w3d": idle_anim(),
         "wpinf1fir.w3d": fire_anim(),
+        "wpinf1die.w3d": death_anim(),
     }
-    for model, parts in RIGGED.items():
-        files[model.lower() + ".w3d"] = rigged_w3d(model, parts)
+    # The animated bodies now come from the painted Blender production pipeline.
+    # This generator owns the shared skeleton/animations; rerunning it must never
+    # silently replace finished infantry with the original block placeholders.
     for fname, data in files.items():
         path = os.path.join(out_dir, fname)
         with open(path, "wb") as f:

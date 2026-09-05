@@ -6,10 +6,11 @@ eSpeak NG synthesis (output unencumbered) pushed through a radio chain
 (bandpass, soft clip, noise floor, squelch clicks) per the D014 VO direction —
 "processed radio barks: any voice usable, personality lives in the writing."
 
-Outputs 22050 Hz 16-bit mono WAVs into data/Data/Audio/Sounds/ (repo) and the
-runtime dir. Run: python3 tools/gensfx.py
+Outputs 22050 Hz 16-bit mono WAVs into data/Data/Audio/Sounds/ (repo).
+A second output directory requires --runtime. Run: python3 tools/gensfx.py
 """
 import math
+import argparse
 import os
 import random
 import shutil
@@ -19,9 +20,9 @@ import tempfile
 import wave
 
 SR = 22050
-REPO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                    'data', 'Data', 'Audio', 'Sounds')
-RUNTIME = os.path.expanduser('~/GeneralsX/GeneralsZH/Data/Audio/Sounds')
+REPO = None
+RUNTIME = None
+ONLY_PREFIX = ()
 ESPEAK = shutil.which('espeak-ng') or '/opt/homebrew/bin/espeak-ng'
 
 # ---------------- DSP helpers ----------------
@@ -65,7 +66,11 @@ def write_wav(path, x):
     print('wrote', path)
 
 def out(name, x):
+    if ONLY_PREFIX and not name.startswith(ONLY_PREFIX):
+        return
     for d in (REPO, RUNTIME):
+        if d is None:
+            continue
         os.makedirs(d, exist_ok=True)
         write_wav(os.path.join(d, name + '.wav'), x)
 
@@ -164,10 +169,6 @@ def radio(text, voice, pitch, speed, seed, grit=1.0):
 
 # ---------------- the pack ----------------
 
-out('wp_cannon_01', cannon(11))
-out('wp_cannon_02', cannon(23))
-out('wp_boom_01', boom(31))
-out('wp_boom_02', boom(47))
 def rifle(seed):
     rng = random.Random(seed)
     n = int(SR * 0.22)
@@ -218,12 +219,6 @@ def uiclick(seed, freq=1900.0, dur=0.05):
         x[i] = (0.7 * math.sin(2 * math.pi * freq * t) + 0.3 * rng.uniform(-1, 1)) * env
     return x
 
-out('wp_ui_click', uiclick(11))
-out('wp_ui_hover', uiclick(23, freq=1400.0, dur=0.035))
-out('wp_ui_deny', uiclick(37, freq=520.0, dur=0.09))
-
-out('wp_impact_03', impact(151))
-out('wp_impact_04', impact(163))
 
 def chaingun(seed):
     """three-round small-arms burst for heavy gunners / strafers"""
@@ -334,24 +329,6 @@ def factoryloop(seed):
     x = _crossloop(x, int(SR * 0.4))
     return normalize(x, 0.5)
 
-out('wp_amb_wind', wind(1201))
-out('wp_amb_powerhum', powerhum())
-out('wp_amb_factory', factoryloop(1401))
-out('wp_arty_01', artyfire(611))
-out('wp_arty_02', artyfire(641))
-out('wp_chain_01', chaingun(411))
-out('wp_chain_02', chaingun(437))
-out('wp_flak_01', flak(521))
-out('wp_flak_02', flak(547))
-
-out('wp_rocket_01', rocket(311))
-out('wp_rocket_02', rocket(347))
-
-out('wp_rifle_01', rifle(71))
-out('wp_rifle_02', rifle(83))
-out('wp_bodyfall_01', bodyfall(91))
-out('wp_impact_01', impact(53))
-out('wp_impact_02', impact(61))
 
 # One voice per unit — every unit gets its own synth voice, pitch, cadence and
 # grit so nothing on the battlefield shares a throat. (Lesson learned: the
@@ -379,161 +356,201 @@ UNIT_STYLES = {
     'wp_bru': dict(voice='en-us+m1', pitch=20, speed=118, grit=1.5),    # Bruiser: gravel pit
     'wp_shr': dict(voice='en-gb+f3', pitch=52, speed=178, grit=0.8),    # Shrike pilot: crisp aviator
     'wp_gnt': dict(voice='en-us+m5', pitch=66, speed=210, grit=1.45),   # Gnat pilot: buzzing menace
+    'wp_por': dict(voice='en-us+f2', pitch=45, speed=163, grit=0.65),  # Porter logistics dispatcher
+    'wp_scv': dict(voice='en-gb+m6', pitch=37, speed=170, grit=1.15),  # Scavenger supply driver
 }
 
 def barks(prefix, lines, base_seed):
+    if ONLY_PREFIX and not prefix.startswith(ONLY_PREFIX):
+        return
     style = UNIT_STYLES[prefix]
     for key, texts in lines.items():
         for i, text in enumerate(texts):
             out(f'{prefix}_{key}_{i + 1:02d}',
                 radio(text, style['voice'], style['pitch'], style['speed'],
-                      base_seed + i * 7 + hash(key) % 97, style['grit']))
+                      base_seed + i * 7 + sum((j + 1) * ord(c) for j, c in enumerate(key)) % 97,
+                      style['grit']))
 
-barks('wp_vec', {
-    'sel': ['Vector online.', 'Standing by.', 'Crew reports green.'],
-    'mov': ['Moving out.', 'Course set.', 'Treads turning.'],
-    'atk': ['Engaging.', 'Target locked.', 'Main gun hot.'],
-    'rdy': ['Vector ready.'],
-}, 100)
-
-barks('wp_out', {
-    'sel': ['Outrider, eyes open.', 'Scout on the line.'],
-    'mov': ['On it.', 'Fast run.'],
-    'atk': ['Tagging them!', 'Peppering!'],
-    'rdy': ['Outrider ready.'],
-}, 300)
-
-barks('wp_zen', {
-    'sel': ['Zenith standing by.', 'Big gun listening.'],
-    'mov': ['Repositioning.', 'Hauling the piece.'],
-    'atk': ['Firing solution set.', 'Rain incoming.'],
-    'rdy': ['Zenith deployed.'],
-}, 400)
-
-barks('wp_fab', {
-    'sel': ['Fabricator.', 'Site crew here.'],
-    'mov': ['Rolling out.', 'On the clock.'],
-    'rdy': ['Fabricator ready.'],
-}, 500)
-
-barks('wp_mon', {
-    'sel': ['Mongrel here.', 'Talk to me.', 'Still running, barely.'],
-    'mov': ['Rolling.', 'Yeah yeah, going.', 'Kicking gravel.'],
-    'atk': ['Light them up!', 'Chew them down!', 'Bite time!'],
-    'rdy': ['Mongrel loose.'],
-}, 200)
-
-barks('wp_vul', {
-    'sel': ['Vulture!', 'Yeah, what?'],
-    'mov': ['Gone!', 'Zip zip.'],
-    'atk': ['Strip them down!', 'Get the shiny bits!'],
-    'rdy': ['Vulture out of the cage.'],
-}, 600)
-
-barks('wp_war', {
-    'sel': ['Warden reporting.', 'Rifle ready.', 'Standing to.'],
-    'mov': ['Boots moving.', 'On the double.', 'Covering ground.'],
-    'atk': ['Open fire!', 'Suppressing!', 'Targets marked!'],
-    'rdy': ['Warden ready.'],
-}, 750)
-
-barks('wp_scr', {
-    'sel': ['Scrapper!', 'Yeah boss?', 'What now?'],
-    'mov': ['Leggin it.', 'Going going.', 'Dust up!'],
-    'atk': ['Perforate them!', 'Eat pellets!', 'Scrap fight!'],
-    'rdy': ['Scrapper on the yard.'],
-}, 780)
-
-barks('wp_lan', {
-    'sel': ['Lancer set.', 'Launcher shouldered.'],
-    'mov': ['Repositioning.', 'Finding an angle.'],
-    'atk': ['Rocket out!', 'Backblast clear!'],
-    'rdy': ['Lancer ready to hunt.'],
-}, 810)
-
-barks('wp_stg', {
-    'sel': ['Sting here!', 'Rack is hot!'],
-    'mov': ['Dragging the rack.', 'Yeah, moving!'],
-    'atk': ['Send it screaming!', 'Big one away!'],
-    'rdy': ['Sting is loaded!'],
-}, 840)
-
-barks('wp_kes', {
-    'sel': ['Kestrel airborne.', 'Skies are mine.'],
-    'mov': ['Vectoring.', 'On the wind.'],
-    'atk': ['Talons out!', 'Diving in!'],
-    'rdy': ['Kestrel off the pad.'],
-}, 870)
-
-barks('wp_buz', {
-    'sel': ['Buzzard up!', 'Still flying, somehow!'],
-    'mov': ['Rattling over.', 'Hold together, girl!'],
-    'atk': ['Dump the rack!', 'Rain scrap on them!'],
-    'rdy': ['Buzzard off the roost!'],
-}, 890)
-
-barks('wp_vig', {
-    'sel': ['Vigil here.', 'Eyes open.', 'Watching everything.'],
-    'mov': ['Ghosting ahead.', 'Scouting.', 'No one sees me.'],
-    'atk': ['Spotting fire!', 'Marking them!', 'Contact, engaging light!'],
-    'rdy': ['Vigil on watch.'],
-}, 910)
-
-barks('wp_prw', {
-    'sel': ['Prowler.', 'What you need?', 'Keep it quick.'],
-    'mov': ['Sliding out.', 'Quick look.', 'Back alleys, got it.'],
-    'atk': ['Pop pop!', 'Tagging them!', 'Say goodnight!'],
-    'rdy': ['Prowler loose.'],
-}, 930)
-
-barks('wp_bas', {
-    'sel': ['Bastion.', 'Wall is here.', 'Nothing gets past.'],
-    'mov': ['Advancing.', 'One pace at a time.', 'Ground taken is kept.'],
-    'atk': ['Cutting them down.', 'Sweep and clear.', 'Suppressing!'],
-    'rdy': ['Bastion deployed.'],
-}, 950)
-
-barks('wp_bru', {
-    'sel': ['Bruiser here.', 'Point me at it.', 'Who needs flattening?'],
-    'mov': ['Stomping over.', 'Yeah, yeah, walking.', 'Heavy coming through.'],
-    'atk': ['Grind them up!', 'Chew! Chew!', 'Big gun says hello!'],
-    'rdy': ['Bruiser is up.'],
-}, 970)
-
-barks('wp_shr', {
-    'sel': ['Shrike on station.', 'Guns are warm.', 'Skies are mine.'],
-    'mov': ['Repositioning.', 'On the deck.', 'Vectoring in.'],
-    'atk': ['Strafing run!', 'Walking the line!', 'Guns guns guns!'],
-    'rdy': ['Shrike airborne.'],
-}, 990)
-
-barks('wp_gnt', {
-    'sel': ['Gnat! Bzzt!', 'Still buzzing!', 'Swat me if you can!'],
-    'mov': ['Zip zip zip!', 'Going going!', 'Wheee-hee-hee!'],
-    'atk': ['Sting them up!', 'Annoy and destroy!', 'Bite bite bite!'],
-    'rdy': ['Gnat off the roost!'],
-}, 1010)
-
-barks('wp_rig', {
-    'sel': ['Rigger.', 'Wrench is ready.'],
-    'mov': ['Hauling.', 'Moving the rig.'],
-    'rdy': ['Rigger is up.'],
-}, 700)
 
 # EVA — the command-net announcer: one composed voice, cleaner processing than
 # the unit radios (she is speaking from HQ, not a moving vehicle)
 EVA = dict(voice='en-us+f3', pitch=46, speed=148, grit=0.7)
 
 def eva(name, text, seed):
+    if ONLY_PREFIX and not ('wp_eva_' + name).startswith(ONLY_PREFIX):
+        return
     out('wp_eva_' + name,
         radio(text, EVA['voice'], EVA['pitch'], EVA['speed'], seed, EVA['grit']))
 
-eva('lowpower_01', 'Warning: power levels critical.', 810)
-eva('funds_01', 'Insufficient funds.', 820)
-eva('attack_01', 'Our base is under attack.', 830)
-eva('attack_02', 'Base is under attack.', 831)
-eva('bldglost_01', 'Structure lost.', 840)
-eva('unitlost_01', 'Unit lost.', 850)
-eva('upgrade_01', 'Upgrade complete.', 860)
 
-print('audio pack complete')
+def generate_pack():
+    out('wp_cannon_01', cannon(11))
+    out('wp_cannon_02', cannon(23))
+    out('wp_boom_01', boom(31))
+    out('wp_boom_02', boom(47))
+    out('wp_ui_click', uiclick(11))
+    out('wp_ui_hover', uiclick(23, freq=1400.0, dur=0.035))
+    out('wp_ui_deny', uiclick(37, freq=520.0, dur=0.09))
+    out('wp_impact_03', impact(151))
+    out('wp_impact_04', impact(163))
+    out('wp_amb_wind', wind(1201))
+    out('wp_amb_powerhum', powerhum())
+    out('wp_amb_factory', factoryloop(1401))
+    out('wp_arty_01', artyfire(611))
+    out('wp_arty_02', artyfire(641))
+    out('wp_chain_01', chaingun(411))
+    out('wp_chain_02', chaingun(437))
+    out('wp_flak_01', flak(521))
+    out('wp_flak_02', flak(547))
+    out('wp_rocket_01', rocket(311))
+    out('wp_rocket_02', rocket(347))
+    out('wp_rifle_01', rifle(71))
+    out('wp_rifle_02', rifle(83))
+    out('wp_bodyfall_01', bodyfall(91))
+    out('wp_impact_01', impact(53))
+    out('wp_impact_02', impact(61))
+    barks('wp_vec', {
+        'sel': ['Vector online.', 'Standing by.', 'Crew reports green.'],
+        'mov': ['Moving out.', 'Course set.', 'Treads turning.'],
+        'atk': ['Engaging.', 'Target locked.', 'Main gun hot.'],
+        'rdy': ['Vector ready.'],
+    }, 100)
+    barks('wp_out', {
+        'sel': ['Outrider, eyes open.', 'Scout on the line.'],
+        'mov': ['On it.', 'Fast run.'],
+        'atk': ['Tagging them!', 'Peppering!'],
+        'rdy': ['Outrider ready.'],
+    }, 300)
+    barks('wp_zen', {
+        'sel': ['Zenith standing by.', 'Big gun listening.'],
+        'mov': ['Repositioning.', 'Hauling the piece.'],
+        'atk': ['Firing solution set.', 'Rain incoming.'],
+        'rdy': ['Zenith deployed.'],
+    }, 400)
+    barks('wp_fab', {
+        'sel': ['Fabricator.', 'Site crew here.'],
+        'mov': ['Rolling out.', 'On the clock.'],
+        'rdy': ['Fabricator ready.'],
+    }, 500)
+    barks('wp_mon', {
+        'sel': ['Mongrel here.', 'Talk to me.', 'Still running, barely.'],
+        'mov': ['Rolling.', 'Yeah yeah, going.', 'Kicking gravel.'],
+        'atk': ['Light them up!', 'Chew them down!', 'Bite time!'],
+        'rdy': ['Mongrel loose.'],
+    }, 200)
+    barks('wp_vul', {
+        'sel': ['Vulture!', 'Yeah, what?'],
+        'mov': ['Gone!', 'Zip zip.'],
+        'atk': ['Strip them down!', 'Get the shiny bits!'],
+        'rdy': ['Vulture out of the cage.'],
+    }, 600)
+    barks('wp_war', {
+        'sel': ['Warden reporting.', 'Rifle ready.', 'Standing to.'],
+        'mov': ['Boots moving.', 'On the double.', 'Covering ground.'],
+        'atk': ['Open fire!', 'Suppressing!', 'Targets marked!'],
+        'rdy': ['Warden ready.'],
+    }, 750)
+    barks('wp_scr', {
+        'sel': ['Scrapper!', 'Yeah boss?', 'What now?'],
+        'mov': ['Leggin it.', 'Going going.', 'Dust up!'],
+        'atk': ['Perforate them!', 'Eat pellets!', 'Scrap fight!'],
+        'rdy': ['Scrapper on the yard.'],
+    }, 780)
+    barks('wp_lan', {
+        'sel': ['Lancer set.', 'Launcher shouldered.'],
+        'mov': ['Repositioning.', 'Finding an angle.'],
+        'atk': ['Rocket out!', 'Backblast clear!'],
+        'rdy': ['Lancer ready to hunt.'],
+    }, 810)
+    barks('wp_stg', {
+        'sel': ['Sting here!', 'Rack is hot!'],
+        'mov': ['Dragging the rack.', 'Yeah, moving!'],
+        'atk': ['Send it screaming!', 'Big one away!'],
+        'rdy': ['Sting is loaded!'],
+    }, 840)
+    barks('wp_kes', {
+        'sel': ['Kestrel airborne.', 'Skies are mine.'],
+        'mov': ['Vectoring.', 'On the wind.'],
+        'atk': ['Talons out!', 'Diving in!'],
+        'rdy': ['Kestrel off the pad.'],
+    }, 870)
+    barks('wp_buz', {
+        'sel': ['Buzzard up!', 'Still flying, somehow!'],
+        'mov': ['Rattling over.', 'Hold together, girl!'],
+        'atk': ['Dump the rack!', 'Rain scrap on them!'],
+        'rdy': ['Buzzard off the roost!'],
+    }, 890)
+    barks('wp_vig', {
+        'sel': ['Vigil here.', 'Eyes open.', 'Watching everything.'],
+        'mov': ['Ghosting ahead.', 'Scouting.', 'No one sees me.'],
+        'atk': ['Spotting fire!', 'Marking them!', 'Contact, engaging light!'],
+        'rdy': ['Vigil on watch.'],
+    }, 910)
+    barks('wp_prw', {
+        'sel': ['Prowler.', 'What you need?', 'Keep it quick.'],
+        'mov': ['Sliding out.', 'Quick look.', 'Back alleys, got it.'],
+        'atk': ['Pop pop!', 'Tagging them!', 'Say goodnight!'],
+        'rdy': ['Prowler loose.'],
+    }, 930)
+    barks('wp_bas', {
+        'sel': ['Bastion.', 'Wall is here.', 'Nothing gets past.'],
+        'mov': ['Advancing.', 'One pace at a time.', 'Ground taken is kept.'],
+        'atk': ['Cutting them down.', 'Sweep and clear.', 'Suppressing!'],
+        'rdy': ['Bastion deployed.'],
+    }, 950)
+    barks('wp_bru', {
+        'sel': ['Bruiser here.', 'Point me at it.', 'Who needs flattening?'],
+        'mov': ['Stomping over.', 'Yeah, yeah, walking.', 'Heavy coming through.'],
+        'atk': ['Grind them up!', 'Chew! Chew!', 'Big gun says hello!'],
+        'rdy': ['Bruiser is up.'],
+    }, 970)
+    barks('wp_shr', {
+        'sel': ['Shrike on station.', 'Guns are warm.', 'Skies are mine.'],
+        'mov': ['Repositioning.', 'On the deck.', 'Vectoring in.'],
+        'atk': ['Strafing run!', 'Walking the line!', 'Guns guns guns!'],
+        'rdy': ['Shrike airborne.'],
+    }, 990)
+    barks('wp_gnt', {
+        'sel': ['Gnat! Bzzt!', 'Still buzzing!', 'Swat me if you can!'],
+        'mov': ['Zip zip zip!', 'Going going!', 'Wheee-hee-hee!'],
+        'atk': ['Sting them up!', 'Annoy and destroy!', 'Bite bite bite!'],
+        'rdy': ['Gnat off the roost!'],
+    }, 1010)
+    barks('wp_rig', {
+        'sel': ['Rigger.', 'Wrench is ready.'],
+        'mov': ['Hauling.', 'Moving the rig.'],
+        'rdy': ['Rigger is up.'],
+    }, 700)
+    barks('wp_por', {
+        'sel': ['Porter reporting.', 'Cargo systems ready.', 'Manifest checked.'],
+        'mov': ['Supply route confirmed.', 'Cargo outbound.', 'Delivery in progress.'],
+        'rdy': ['Porter ready for dispatch.'],
+    }, 1110)
+    barks('wp_scv', {
+        'sel': ['Anything worth taking?', 'Truck is running.', 'Room for one more crate.'],
+        'mov': ['Load it up.', 'Taking the back road.', 'Keep the route clear.'],
+        'rdy': ['Scavenger is on the road.'],
+    }, 1210)
+    eva('lowpower_01', 'Warning: power levels critical.', 810)
+    eva('funds_01', 'Insufficient funds.', 820)
+    eva('attack_01', 'Our base is under attack.', 830)
+    eva('attack_02', 'Base is under attack.', 831)
+    eva('bldglost_01', 'Structure lost.', 840)
+    eva('unitlost_01', 'Unit lost.', 850)
+    eva('upgrade_01', 'Upgrade complete.', 860)
+    print('audio pack complete')
+
+def main(argv=None):
+    global REPO, RUNTIME, ONLY_PREFIX
+    _parser = argparse.ArgumentParser(description=__doc__)
+    _parser.add_argument('--data', default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data'))
+    _parser.add_argument('--runtime', help='Optional explicit second output directory')
+    _parser.add_argument('--only-prefix', default='', help='Comma-separated filename prefixes for incremental generation')
+    _args = _parser.parse_args(argv)
+    REPO = os.path.join(_args.data, 'Data', 'Audio', 'Sounds')
+    RUNTIME = _args.runtime
+    ONLY_PREFIX = tuple(p for p in _args.only_prefix.split(',') if p)
+    generate_pack()
+
+if __name__ == "__main__":
+    main()

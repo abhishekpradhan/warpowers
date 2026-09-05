@@ -348,19 +348,26 @@ def write_icons(path):
         f.write(bytes(hdr) + bytes(body))
     print(f"wrote {path}")
 
-targets = sys.argv[1:] or [
-    os.path.expanduser("~/GeneralsX/GeneralsZH/Art/Terrain/wp_ground.tga"),
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                 "data", "Art", "Terrain", "wp_ground.tga"),
-]
-for t in targets:
-    write_tga(t)
-    write_tga_ash(os.path.join(os.path.dirname(t), "wp_ground_ash.tga"))
-    texdir = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures")
-    write_shadow(os.path.join(texdir, "shadow.tga"))
-    write_glow(os.path.join(texdir, "wp_glow.tga"))
-    write_soft(os.path.join(texdir, "wp_soft.tga"))
-    write_scorch(os.path.join(texdir, "EXScorch01.tga"))
-    write_rallyline(os.path.join(texdir, "wp_rallyline.tga"))
-    write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))
-    write_icons(os.path.join(texdir, "wp_icons.tga"))
+def main():
+    import argparse
+    from pathlib import Path
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('targets',nargs='*',type=Path)
+    parser.add_argument('--data',type=Path,default=Path(__file__).resolve().parents[1]/'data')
+    args=parser.parse_args()
+    targets=args.targets or [args.data/'Art/Terrain/wp_ground.tga']
+    for t in targets:
+        Path(t).parent.mkdir(parents=True,exist_ok=True)
+        write_tga(t)
+        write_tga_ash(os.path.join(os.path.dirname(t), "wp_ground_ash.tga"))
+        texdir = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures")
+        Path(texdir).mkdir(parents=True,exist_ok=True)
+        write_shadow(os.path.join(texdir, "shadow.tga"))
+        write_glow(os.path.join(texdir, "wp_glow.tga"))
+        write_soft(os.path.join(texdir, "wp_soft.tga"))
+        write_scorch(os.path.join(texdir, "EXScorch01.tga"))
+        write_rallyline(os.path.join(texdir, "wp_rallyline.tga"))
+        write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))
+        write_icons(os.path.join(texdir, "wp_icons.tga"))
+
+if __name__=='__main__':main()

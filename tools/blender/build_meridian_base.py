@@ -3,7 +3,7 @@
 
 Three models through the shared pipeline in one headless run.
 Run: blender --background --python build_meridian_base.py
-Outputs: /tmp/hero/{mersuv01,merpp01,merwf01}.w3d + wp_{surveyor,merpp,merwf}.tga
+Outputs: data/Art/W3D and data/Art/Textures; --data or --scratch selects an explicit destination.
 """
 import os
 import sys
@@ -12,7 +12,6 @@ import bpy
 
 PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
-OUT_DIR = '/tmp/hero'
 
 sys.path.insert(0, PLUGIN_REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +19,7 @@ import io_mesh_w3d  # noqa: E402
 io_mesh_w3d.register()
 import wp_pipeline  # noqa: E402
 
-os.makedirs(OUT_DIR, exist_ok=True)
+MODEL_DIR, TEXTURE_DIR = wp_pipeline.output_dirs()
 
 PAL = {
     'STEEL': (0.722, 0.761, 0.800, 1.0),
@@ -43,9 +42,9 @@ def build(name, atlas, tga_name, w3d_name, fn, **comp):
         return
     wp_pipeline.smart_uv(obj, 0.006)
     diff, ao, mask = wp_pipeline.bake_images(obj, atlas)
-    tga = os.path.join(OUT_DIR, tga_name + '.tga')
+    tga = os.path.join(TEXTURE_DIR, tga_name + '.tga')
     wp_pipeline.composite(diff, ao, mask, atlas, tga, **comp)
-    wp_pipeline.export_w3d(obj, tga, os.path.join(OUT_DIR, w3d_name + '.w3d'), tga_name)
+    wp_pipeline.export_w3d(obj, tga, os.path.join(MODEL_DIR, w3d_name + '.w3d'), tga_name)
     print(name + '_EXPORT_OK')
 
 
@@ -112,8 +111,8 @@ def factory(k):
 
 build('MERSUV01', 256, 'wp_surveyor', 'mersuv01', surveyor,
       seed=21, grain=0.02, edge_strength=0.5, edge_radius=1)
-build('MERPP01', 512, 'wp_merpp', 'merpp01', power,
+build('MERPP01', 256, 'wp_merpp', 'merpp01', power,
       seed=22, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
-build('MERWF01', 512, 'wp_merwf', 'merwf01', factory,
+build('MERWF01', 256, 'wp_merwf', 'merwf01', factory,
       seed=23, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
 print('MERIDIAN_BASE_SET_OK')

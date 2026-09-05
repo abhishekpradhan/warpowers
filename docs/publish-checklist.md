@@ -172,21 +172,49 @@ separate release requirements.
 - [x] Hashed engine/data/UI URLs permit immutable caching; HTML/build metadata
       revalidate. Final local HTTP checks return 200 with correct WASM/JavaScript
       types, immutable one-year asset caching and no-cache HTML/build metadata.
-- [x] All 471 final manifest entries, engine files and font match declared hashes
-      and lengths.
-- [x] Ledger/registry agrees with shipped files, generator versions and remaining
-      imported music/font notices.
+- [x] The earlier local candidate's 471 manifest entries, engine files and font
+      matched declared hashes and lengths. This predates removal of the unused
+      imported Extras menu and is not validation of the next release candidate.
+- [ ] Verify the final candidate's manifest, engine and font hashes and lengths;
+      confirm the removed root ExtrasMenu.wnd is absent from staged assets.
+- [ ] Confirm the corrected ledger/registry matches the final shipped content
+      and that music, font and [browser dependency notices](../licenses/third-party.json)
+      are present and accessible through credits.
 - [x] Final bounded root/engine hygiene review covers 16 changed text files
       (638,130 bytes): no high-confidence credential patterns, absolute developer
       paths, build/save/env artifacts, missing local links or removed attribution;
       root engine gitlink matches the pushed engine commit. This supplements the
       prior tracked-text scan and does not certify all repository history.
-- [ ] Preserve the exact corresponding engine/renderer source and build
-      instructions for the distributed binary, plus required license notices.
+- [ ] Record the exact root/engine commits or release tag, vendored renderer
+      revision, dependency versions/revisions, toolchain versions and build
+      commands used for the candidate; preserve its JavaScript and WASM hashes.
+- [ ] Prepare the complete corresponding source: engine, vendored renderer,
+      required dependency source, build scripts/instructions and license notices.
+      Inspect the package rather than copying `_deps` wholesale; local dependency
+      trees may include optional proprietary SDK files or unrelated artifacts.
+- [ ] Validate a clean rebuild from the source package with the recorded
+      toolchain and document the result against the candidate artifacts. Staging
+      a source URL and binary hashes does not establish that they correspond.
+- [ ] Make an immutable source archive or exact public source release reachable
+      through credits before the first public playable deployment. Download it
+      without signing in and confirm it includes everything required to rebuild.
+- [ ] Stage the candidate with `python3 tools/genwebstage.py --release --source-url`
+      followed by the actual HTTPS source archive or release page URL.
+      Verify the generated `source.json` URL and JavaScript/WASM hashes, the
+      credits source link, and `licenses/third-party.json` with its notice files.
+- [ ] Preserve the source package and required notices for every distributed
+      build, including builds superseded by a later deployment.
 - [ ] Verify final public names/branding and the chosen domain before release.
 
-All maintained repositories currently remain private under the owner's
-account: `warpowers`, `warpowers-engine`, `warpowers-dxvk`. The former
+The project is unreleased. The owner plans a manual Vercel deployment and then
+Git repository publication. Corresponding source must be accessible from the
+first public playable deployment: publish a complete immutable source archive
+first if the repositories are still private, or make the repositories public
+before deploying the playable game. Later repository publication cannot serve
+as the source access for an earlier public binary.
+
+The maintained repositories are `warpowers`, `warpowers-engine` and
+`warpowers-dxvk`, currently private under the owner's account. The former
 `warpowers-dvijoke` is archived; its history and source are vendored into the
 root. Follow the owner's eventual publication choice rather than creating
 an organization or transferring repositories automatically. Update source
@@ -195,7 +223,7 @@ links/submodule URLs only when the destination is known and accessible.
 Upstream push URLs stay disabled. Inherited GitHub Actions stay disabled;
 ordinary pushes do not deploy anything. See [WORKSPACE.md](WORKSPACE.md).
 
-## Hosting after explicit authorization
+## Owner's manual hosting and publication
 
 - [ ] Protected preview of the generated `webstage/` only.
 - [ ] Verify JS/WASM content types, compression, cache hit/revalidation
@@ -203,6 +231,10 @@ ordinary pushes do not deploy anything. See [WORKSPACE.md](WORKSPACE.md).
 - [ ] Measure first and repeat visits on a real network against the ≤20s
       boot target; repeat the browser matrix against that candidate.
 - [ ] Confirm publication settings, public source availability and final Play URL.
+- [ ] Before making Git history public, retain the historical GPL menu provenance
+      correction and required licenses for old copies; do not describe all past
+      root content as original CC BY work. Git history is not rewritten by removal
+      of the unused file from the current dataset.
 
 No account or hosted telemetry is required for the game. Debug boot reports
 are opt-in (`?debug=1`) and local diagnostics can be copied from Settings.

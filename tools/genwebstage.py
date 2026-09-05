@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIRS = ('Data', 'Maps', 'Art', 'Window')
@@ -33,11 +34,70 @@ def write_json(path: Path, value: object) -> bytes:
     return payload
 
 
-def stage_release(destination: Path, build_dir: Path, run_checks: bool = True) -> dict:
+def read_notices(root: Path) -> dict[str, bytes]:
+    """Read only declared notices; missing license material aborts staging."""
+    files = {
+        'CREDITS.md': root / 'CREDITS.md', 'ASSETS.md': root / 'ASSETS.md',
+        'LICENSING.md': root / 'LICENSING.md', 'LICENSE.txt': root / 'LICENSE',
+        'ENGINE-LICENSE.md': root / 'engine/LICENSE.md',
+        'DVIJOKE-LICENSE.txt': root / 'dvijoke/LICENSE',
+        'FONT-LICENSE.txt': root / 'data/Fonts/LICENSE-LiberationFonts',
+        'third-party.json': root / 'licenses/third-party.json',
+    }
+    manifest = json.loads(files['third-party.json'].read_text())
+    components = manifest.get('components')
+    if manifest.get('schemaVersion') != 1 or not isinstance(components, list) or not components:
+        raise ValueError('The third-party license inventory must contain components (schemaVersion 1).')
+    ids = set()
+    license_root = (root / 'licenses').resolve()
+    for component in components:
+        if not isinstance(component, dict) or any(
+                not isinstance(component.get(key), str) or not component[key].strip()
+                for key in ('id', 'name', 'version', 'license', 'source', 'notice')):
+            raise ValueError('Each license component needs an id, name, version, license, source and notice.')
+        if component['id'] in ids:
+            raise ValueError(f"Duplicate license component: {component['id']}")
+        ids.add(component['id'])
+        relative = Path(component['notice'])
+        source = license_root / relative
+        if (relative.is_absolute() or '..' in relative.parts or len(relative.parts) < 2
+                or relative.parts[0] != 'third-party'
+                or license_root not in source.resolve().parents):
+            raise ValueError(f"License notice must stay inside licenses/third-party/: {relative}")
+        files[relative.as_posix()] = source
+    notices = {name: path.read_bytes() for name, path in files.items()}
+    for name, content in notices.items():
+        if not content.strip():
+            raise ValueError(f'Empty required license notice: {name}')
+    return notices
+
+
+def validate_source_url(source_url: str | None, release: bool) -> None:
+    if not source_url:
+        if release:
+            raise ValueError('Public release staging requires --source-url pointing to complete corresponding source.')
+        return
+    error = 'The source URL must be an HTTPS URL without credentials or whitespace and with a valid port.'
+    try:
+        url = urlsplit(source_url)
+        # urlsplit defers malformed and out-of-range port errors until access.
+        _ = url.port
+    except ValueError as cause:
+        raise ValueError(error) from cause
+    if (url.scheme != 'https' or not url.hostname or url.username is not None or url.password is not None
+            or any(character.isspace() or ord(character) < 32 for character in source_url)):
+        raise ValueError(error)
+
+
+def stage_release(destination: Path, build_dir: Path, run_checks: bool = True,
+                  *, source_url: str | None = None, release: bool = False) -> dict:
+    validate_source_url(source_url, release)
+    if release and not run_checks:
+        raise ValueError('Public release staging cannot skip content checks.')
     destination = destination.resolve()
     build_dir = build_dir.resolve()
     root = ROOT.resolve()
-    protected = tuple(root / name for name in ('data', 'engine', 'web', 'dvijoke', 'tools', 'tests', 'docs', 'refs'))
+    protected = tuple(root / name for name in ('data', 'engine', 'web', 'dvijoke', 'tools', 'tests', 'docs', 'refs', 'licenses'))
     # Legacy stages and compiler outputs can both contain GeneralsXZH.wasm.
     # Check path ownership before trusting that marker and replacing a tree.
     if (destination == root or destination in root.parents or '.git' in destination.parts
@@ -51,6 +111,7 @@ def stage_release(destination: Path, build_dir: Path, run_checks: bool = True) -
     for name in ('GeneralsXZH.js', 'GeneralsXZH.wasm'):
         if not (build_dir / name).is_file():
             raise FileNotFoundError(f'Missing {build_dir / name}. Build the wasm target first.')
+    notices = read_notices(root)
     if run_checks:
         for gate in ('lint_voices.py', 'validate_gameplay.py', 'check_content.py'):
             subprocess.run([sys.executable, str(ROOT / 'tools' / gate)], check=True)
@@ -98,27 +159,43 @@ def stage_release(destination: Path, build_dir: Path, run_checks: bool = True) -
         (temporary / style_name).write_bytes(styles)
         page = (ROOT / 'web/index.html').read_text().replace('href="styles.css"', f'href="{style_name}"').replace('src="app.js"', f'src="{app_name}"')
         (temporary / 'index.html').write_text(page)
+        source_message = (f'<a href="{html.escape(source_url, quote=True)}">Corresponding source for this build</a>.'
+                          if source_url else 'Unreleased development build. Corresponding source will be available with the public release.')
+        credits = (ROOT / 'web/credits.html').read_text().replace('href="styles.css"', f'href="{style_name}"')
+        credits = credits.replace('{{SOURCE}}', source_message)
+        components = json.loads(notices['third-party.json'])['components']
+        dependency_links = ''.join(
+            f'<li><a href="licenses/{html.escape(component["notice"], quote=True)}">'
+            f'{html.escape(component["name"])} {html.escape(component["version"])}</a>'
+            f' · {html.escape(component["license"])}</li>' for component in components)
+        credits = credits.replace('{{DEPENDENCY_NOTICES}}', dependency_links)
+        notice_hash = hashlib.sha256()
+        for name, content in sorted(notices.items()):
+            notice_hash.update(name.encode() + b'\0' + digest(content).encode())
         compatibility = fingerprint.hexdigest()[:20]
         release_id = digest(fingerprint.digest() + app + styles + page.encode()
-                            + engine['js']['sha256'].encode() + operation_asset['sha256'].encode())[:12]
+                            + engine['js']['sha256'].encode() + operation_asset['sha256'].encode()
+                            + notice_hash.digest() + credits.encode() + (source_url or '').encode())[:12]
         config = {
             'schemaVersion': 1, 'id': release_id, 'compatibility': compatibility,
             'engine': engine, 'font': font, 'manifest': manifest_name,
             'operations': operation_asset['url'], 'dataFiles': len(manifest),
             'dataBytes': sum(entry['s'] for entry in manifest),
+            'source': 'source.json',
         }
         write_json(temporary / 'build.json', config)
-        notices = {
-            'CREDITS.md': ROOT / 'CREDITS.md', 'ASSETS.md': ROOT / 'ASSETS.md',
-            'LICENSING.md': ROOT / 'LICENSING.md', 'LICENSE.txt': ROOT / 'LICENSE',
-            'ENGINE-LICENSE.md': ROOT / 'engine/LICENSE.md',
-            'DVIJOKE-LICENSE.txt': ROOT / 'dvijoke/LICENSE',
-            'FONT-LICENSE.txt': ROOT / 'data/Fonts/LICENSE-LiberationFonts',
-        }
-        (temporary / 'licenses').mkdir()
-        for name, source in notices.items():
-            shutil.copyfile(source, temporary / 'licenses' / name)
-        credits = (ROOT / 'web/credits.html').read_text().replace('href="styles.css"', f'href="{style_name}"')
+        # The URL is supplied by the releaser, not proof that source reproduces
+        # these bytes. Signed-out access and rebuilding remain release checks.
+        write_json(temporary / 'source.json', {
+            'schemaVersion': 1, 'build': release_id,
+            'status': 'provided' if source_url else 'development', 'url': source_url,
+            'engine': {kind: {'sha256': item['sha256'], 'size': item['size']} for kind, item in engine.items()},
+            'dependencies': 'licenses/third-party.json',
+        })
+        for name, content in notices.items():
+            target = temporary / 'licenses' / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
         credits = credits.replace('{{BUILD}}', html.escape(release_id))
         (temporary / 'credits.html').write_text(credits)
         staged_bytes = sum(p.stat().st_size for p in temporary.rglob('*') if p.is_file())
@@ -141,8 +218,11 @@ def main() -> None:
     parser.add_argument('destination', nargs='?', type=Path, default=ROOT / 'webstage')
     parser.add_argument('--build-dir', type=Path, default=ROOT / 'engine/build/wasm/GeneralsMD')
     parser.add_argument('--skip-checks', action='store_true', help='Only for isolated packaging tests; never use for a release.')
+    parser.add_argument('--source-url', help='HTTPS link to complete corresponding source for this build (archive or release source page).')
+    parser.add_argument('--release', action='store_true', help='Require a source link and content checks for a public release candidate; never deploys.')
     args = parser.parse_args()
-    result = stage_release(args.destination, args.build_dir, not args.skip_checks)
+    result = stage_release(args.destination, args.build_dir, not args.skip_checks,
+                           source_url=args.source_url, release=args.release)
     print(f"Staged {result['dataFiles']} data files, {result['stagedBytes'] / 1048576:.1f} MiB; build {result['id']} -> {args.destination}")
 
 

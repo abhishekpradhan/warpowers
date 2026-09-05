@@ -31,7 +31,7 @@
       ]
     },
     {
-      "source": "/(index.html|build.json|credits.html)?",
+      "source": "/(index.html|build.json|source.json|credits.html)?",
       "headers": [
         {
           "key": "Cache-Control",

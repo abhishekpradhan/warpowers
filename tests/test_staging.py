@@ -25,8 +25,14 @@ class StageTests(unittest.TestCase):
             'engine/LICENSE.md': b'engine notice', 'dvijoke/LICENSE': b'renderer notice',
             'web/core.js': b'export const a = 1;', 'web/app.js': b"import './core.js';",
             'web/styles.css': b"url('fonts/default.ttf')", 'web/index.html': b'<link href="styles.css"><script src="app.js"></script>',
-            'web/credits.html': b'{{BUILD}}', 'CREDITS.md': b'credits', 'ASSETS.md': b'provenance',
+            'web/credits.html': b'{{BUILD}} {{SOURCE}} <ul>{{DEPENDENCY_NOTICES}}</ul>',
+            'CREDITS.md': b'credits', 'ASSETS.md': b'provenance',
             'LICENSING.md': b'license map', 'LICENSE': b'code notice',
+            'licenses/third-party.json': json.dumps({'schemaVersion': 1, 'components': [{
+                'id': 'fixture', 'name': 'Fixture Library', 'version': '1.0', 'license': 'MIT',
+                'source': 'https://example.com/library/1.0', 'notice': 'third-party/fixture.txt',
+            }]}).encode(),
+            'licenses/third-party/fixture.txt': b'Fixture Library copyright and permission',
         }.items():
             target = self.root / name
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -38,8 +44,8 @@ class StageTests(unittest.TestCase):
         staging.ROOT = self.original_root
         self.temp.cleanup()
 
-    def stage(self):
-        return staging.stage_release(self.out, self.build_dir, False)
+    def stage(self, **kwargs):
+        return staging.stage_release(self.out, self.build_dir, False, **kwargs)
 
     def test_identical_input_has_identical_release_and_save_compatibility(self):
         first = self.stage()
@@ -57,7 +63,82 @@ class StageTests(unittest.TestCase):
             self.assertEqual(staging.digest(data), entry['h'])
         self.assertTrue((self.out / 'licenses/ENGINE-LICENSE.md').exists())
         self.assertTrue((self.out / 'licenses/FONT-LICENSE.txt').exists())
+        self.assertEqual((self.out / 'licenses/third-party/fixture.txt').read_bytes(),
+                         (self.root / 'licenses/third-party/fixture.txt').read_bytes())
+        self.assertIn('href="licenses/third-party/fixture.txt"', (self.out / 'credits.html').read_text())
         self.assertFalse((self.out / '.git').exists())
+
+    def test_missing_or_empty_notice_preserves_previous_stage(self):
+        first = self.stage()
+        notice = self.root / 'licenses/third-party/fixture.txt'
+        notice.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.stage()
+        self.assertEqual(json.loads((self.out / 'build.json').read_text())['id'], first['id'])
+        notice.write_text('  \n')
+        with self.assertRaisesRegex(ValueError, 'Empty required license notice'):
+            self.stage()
+        self.assertEqual(json.loads((self.out / 'build.json').read_text())['id'], first['id'])
+
+    def test_notice_paths_cannot_escape_license_directory(self):
+        path = self.root / 'licenses/third-party.json'
+        manifest = json.loads(path.read_text())
+        outside = self.root / 'private.txt'
+        outside.write_text('not a license')
+        (self.root / 'licenses/third-party/escape.txt').symlink_to(outside)
+        for name in ('../private.txt', str(outside), 'third-party/escape.txt'):
+            with self.subTest(notice=name):
+                manifest['components'][0]['notice'] = name
+                path.write_text(json.dumps(manifest))
+                with self.assertRaisesRegex(ValueError, 'must stay inside'):
+                    self.stage()
+
+    def test_notice_and_credits_changes_identify_release_without_invalidating_saves(self):
+        first = self.stage()
+        (self.root / 'licenses/third-party/fixture.txt').write_text('Corrected copyright and permission')
+        updated = self.stage()
+        self.assertNotEqual(first['id'], updated['id'])
+        self.assertEqual(first['compatibility'], updated['compatibility'])
+        with (self.root / 'web/credits.html').open('a') as page:
+            page.write(' Additional acknowledgment.')
+        credits = self.stage()
+        self.assertNotEqual(updated['id'], credits['id'])
+        self.assertEqual(updated['compatibility'], credits['compatibility'])
+
+    def test_development_and_supplied_source_records_match_distributed_engine(self):
+        development = self.stage()
+        self.assertEqual(json.loads((self.out / 'source.json').read_text())['status'], 'development')
+        url = 'https://example.com/releases/1.0/source?format=tar&download=1'
+        provided = self.stage(source_url=url)
+        source = json.loads((self.out / provided['source']).read_text())
+        self.assertEqual(source['status'], 'provided')
+        self.assertEqual(source['url'], url)
+        self.assertEqual(source['build'], provided['id'])
+        self.assertEqual(source['engine']['wasm']['sha256'], provided['engine']['wasm']['sha256'])
+        self.assertEqual(source['dependencies'], 'licenses/third-party.json')
+        self.assertIn('format=tar&amp;download=1', (self.out / 'credits.html').read_text())
+        self.assertNotEqual(development['id'], provided['id'])
+        self.assertEqual(development['compatibility'], provided['compatibility'])
+
+    def test_public_release_requires_source_and_content_checks(self):
+        with self.assertRaisesRegex(ValueError, 'requires --source-url'):
+            staging.stage_release(self.out, self.build_dir, release=True)
+        with self.assertRaisesRegex(ValueError, 'cannot skip'):
+            self.stage(source_url='https://example.com/source', release=True)
+        with patch.object(staging.subprocess, 'run') as run:
+            config = staging.stage_release(self.out, self.build_dir, release=True,
+                                           source_url='https://example.com/releases/1.0/source')
+        self.assertEqual(run.call_count, 3)
+        self.assertEqual(json.loads((self.out / 'source.json').read_text())['build'], config['id'])
+
+    def test_source_urls_reject_credentials_and_unsafe_schemes(self):
+        for url in ('javascript:alert(1)', 'http://example.com/source', 'https:///source',
+                    'https://user:secret@example.com/source', 'https://example.com/\nsource',
+                    'https://example.com:bad/source.tar.gz', 'https://example.com:99999/source.tar.gz',
+                    'https://[invalid]/source'):
+            with self.subTest(url=url):
+                with self.assertRaisesRegex(ValueError, 'HTTPS URL'):
+                    self.stage(source_url=url)
 
     def test_content_changes_invalidate_saves_but_ui_changes_do_not(self):
         first = self.stage()
@@ -96,7 +177,8 @@ class StageTests(unittest.TestCase):
 
     def test_source_subdirectories_and_repository_roots_survive_stage_markers(self):
         for destination in (self.root / 'data' / 'Art', self.root / 'web',
-                            self.root / 'tools' / 'generated', self.root / 'another-repo'):
+                            self.root / 'tools' / 'generated', self.root / 'licenses',
+                            self.root / 'another-repo'):
             with self.subTest(destination=destination):
                 destination.mkdir(parents=True, exist_ok=True)
                 (destination / 'build.json').write_text('{}')

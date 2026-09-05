@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "id": "gamespy",
+      "name": "GameSpy SDK",
+      "version": "07e3d15c500415abc281efb74322ab6d9c857eb8",
+      "license": "BSD-3-Clause",
+      "source": "https://github.com/TheSuperHackers/GamespySDK/tree/07e3d15c500415abc281efb74322ab6d9c857eb8",
+      "notice": "third-party/gamespy.txt",
+      "notes": "The BSD notice covers GameSpy code; the RSA MD5 implementation has a separate entry. Optional console SDK/sample sources are not part of the browser build."
+    },
+    {
+      "id": "gamespy-rsa-md5",
+      "name": "RSA Data Security, Inc. MD5 Message-Digest Algorithm",
+      "version": "1991 (GameSpy 07e3d15c500415abc281efb74322ab6d9c857eb8)",
+      "license": "RSA-MD",
+      "source": "https://github.com/TheSuperHackers/GamespySDK/blob/07e3d15c500415abc281efb74322ab6d9c857eb8/src/common/md5c.c",
+      "notice": "third-party/gamespy-rsa-md5.txt",
+      "notes": "The GameSpy MD5 implementation is derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm."
+    },
+    {
+      "id": "glm",
+      "name": "OpenGL Mathematics (GLM)",
+      "version": "1.0.1",
+      "license": "MIT",
+      "source": "https://github.com/g-truc/glm/tree/1.0.1",
+      "notice": "third-party/glm.txt",
+      "notes": "MIT alternative selected from upstream copying.txt."
+    },
+    {
+      "id": "gli",
+      "name": "OpenGL Image (GLI)",
+      "version": "0.8.2.0",
+      "license": "MIT",
+      "source": "https://github.com/g-truc/gli/tree/0.8.2.0",
+      "notice": "third-party/gli.txt",
+      "notes": "MIT alternative selected from the Licenses section of upstream manual.md."
+    },
+    {
+      "id": "emscripten",
+      "name": "Emscripten JavaScript runtime and Node-derived path code",
+      "version": "6.0.8",
+      "license": "MIT",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8",
+      "notice": "third-party/emscripten.txt",
+      "notes": "MIT alternative selected for Emscripten; the complete upstream license also preserves the separately credited Node.js path implementation. Local SDK revision e5bd3d0874e302a18f13c5b41f5bacf9a40c8e59."
+    },
+    {
+      "id": "musl",
+      "name": "musl C library, including portable math and utility code",
+      "version": "bundled with Emscripten 6.0.8",
+      "license": "MIT AND BSD-2-Clause AND BSD-3-Clause; additional permissive source notices",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8/system/lib/libc/musl",
+      "notice": "third-party/musl.txt",
+      "notes": "Includes the complete musl COPYRIGHT and source notices for portable math, complex, regex, crypt and standard-library routines. Architecture-specific native assembly is not part of this wasm inventory."
+    },
+    {
+      "id": "freetype",
+      "name": "FreeType font engine",
+      "version": "2.14.3",
+      "license": "FTL; bundled MIT-style source notices",
+      "source": "https://github.com/freetype/freetype/tree/VER-2-14-3",
+      "notice": "third-party/freetype.txt",
+      "notes": "Portions of this software are copyright © 1996–2026 The FreeType Project (https://freetype.org). All rights reserved. This software is based in part on the work of the FreeType Team. FTL selected; the notice also preserves BDF/PCF, hash-table and embedded HarfBuzz-derived source notices. Emscripten uses system zlib, listed separately."
+    },
+    {
+      "id": "compiler-rt",
+      "name": "LLVM compiler-rt",
+      "version": "bundled with Emscripten 6.0.8",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8/system/lib/compiler-rt",
+      "notice": "third-party/compiler-rt.txt",
+      "notes": "Toolchain runtime support used by the C++/WebAssembly exception build. The complete upstream license preserves legacy notices and LLVM exceptions; unused routines may be removed by the linker."
+    },
+    {
+      "id": "libcxx",
+      "name": "LLVM libc++",
+      "version": "bundled with Emscripten 6.0.8",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8/system/lib/libcxx",
+      "notice": "third-party/libcxx.txt",
+      "notes": "Toolchain runtime support used by the C++/WebAssembly exception build. The complete upstream license preserves legacy notices and LLVM exceptions; unused routines may be removed by the linker."
+    },
+    {
+      "id": "libcxxabi",
+      "name": "LLVM libc++abi",
+      "version": "bundled with Emscripten 6.0.8",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8/system/lib/libcxxabi",
+      "notice": "third-party/libcxxabi.txt",
+      "notes": "Toolchain runtime support used by the C++/WebAssembly exception build. The complete upstream license preserves legacy notices and LLVM exceptions; unused routines may be removed by the linker."
+    },
+    {
+      "id": "libunwind",
+      "name": "LLVM libunwind",
+      "version": "bundled with Emscripten 6.0.8",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/emscripten-core/emscripten/tree/6.0.8/system/lib/libunwind",
+      "notice": "third-party/libunwind.txt",
+      "notes": "Toolchain runtime support used by the C++/WebAssembly exception build. The complete upstream license preserves legacy notices and LLVM exceptions; unused routines may be removed by the linker."
+    },
+    {
+      "id": "sdl3",
+      "name": "Simple DirectMedia Layer (SDL3)",
+      "version": "3.4.2",
+      "license": "Zlib AND BSD-3-Clause; additional permissive source notices",
+      "source": "https://github.com/libsdl-org/SDL/releases/tag/release-3.4.2",
+      "notice": "third-party/sdl3.txt",
+      "notes": "Includes SDL3 and bundled yuv2rgb, HIDAPI, libm and standard-library notices. HIDAPI BSD alternative selected. The main SDL3 notice applies to source distributions; retained here as part of the browser dependency inventory."
+    },
+    {
+      "id": "zlib",
+      "name": "zlib",
+      "version": "1.3.2",
+      "license": "Zlib",
+      "source": "https://github.com/madler/zlib/releases/tag/v1.3.2",
+      "notice": "third-party/zlib.txt",
+      "notes": "Emscripten port, statically linked for compression and FreeType."
+    },
+    {
+      "id": "lzhl",
+      "name": "LZH-Light",
+      "version": "1.0 (dfd96e2ca64adaddb35dd4ebadd6add7d5586783)",
+      "license": "LicenseRef-LZH-Light",
+      "source": "https://github.com/TheSuperHackers/lzhl-1.0/tree/dfd96e2ca64adaddb35dd4ebadd6add7d5586783",
+      "notice": "third-party/lzhl.txt",
+      "notes": "Exact permissive license from lzhl.h; this library has no standalone LICENSE file."
+    },
+    {
+      "id": "miniaudio",
+      "name": "miniaudio",
+      "version": "0.11.25",
+      "license": "MIT-0",
+      "source": "https://github.com/mackron/miniaudio/tree/0.11.25",
+      "notice": "third-party/miniaudio.txt",
+      "notes": "MIT No Attribution alternative selected from the actual miniaudio.h, copyright 2026 David Reid. The build currently fetches master; verify this version and refresh the inventory whenever dependencies change. Audited header SHA-256: ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89."
+    },
+    {
+      "id": "stb",
+      "name": "stb_image_write",
+      "version": "1.16 (5c205738c191bcb0abc65c4febfa9bd25ff35234)",
+      "license": "MIT",
+      "source": "https://github.com/TheSuperHackers/stb/tree/5c205738c191bcb0abc65c4febfa9bd25ff35234",
+      "notice": "third-party/stb.txt",
+      "notes": "MIT alternative selected from upstream LICENSE; used for screenshot encoding."
+    },
+    {
+      "id": "dxvk-headers",
+      "name": "DXVK native / Wine / MinGW compatibility headers",
+      "version": "2.6",
+      "license": "Zlib AND LGPL-2.1-or-later",
+      "source": "https://github.com/doitsujin/dxvk/releases/tag/v2.6",
+      "notice": "third-party/dxvk-headers.txt",
+      "notes": "Only compatibility headers are used on wasm. The upstream README explains the LGPL 2.1 section 5 allowance for data structures, short macros and short inline functions. Original header notices and full LGPL text are preserved. No native DXVK library or optional platform SDK is included."
+    }
+  ]
+}

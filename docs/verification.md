@@ -1,5 +1,35 @@
 # Current polish verification
 
+## September 5 — licensing and release packaging
+
+Local candidate `124780cd759e` contains 470 data files and is 66,918,344 bytes.
+It reuses the previously built engine; no engine source changed. The unused
+root `ExtrasMenu.wnd` was removed, its historical GPL provenance corrected,
+and 17 browser dependency notice files added with a versioned inventory.
+
+All 28 web tests, 15 packaging tests and the voice/gameplay/content staging
+checks pass. Packaging tests cover missing notices preserving the previous
+stage, notice-path containment, public-release source requirements, malformed
+source URL rejection (including invalid ports), and notice or source-link
+changes updating build identity without invalidating saves.
+The native keyboard, sentence, mip-filter, surface-copy and browser renderer
+resource harnesses also pass all 186 checks.
+All 470 staged asset hashes and the final notice contents match their inputs;
+the removed menu is absent. The source record identifies development status.
+
+The Codex in-app browser on `http://localhost:8322` passed boot, settings,
+Field Orientation deployment, pause/resume and abandonment back to the main
+menu on candidate `a26894316496`. The final candidate changes only notice
+inventory metadata from that smoke-tested package; its credits were reloaded
+and the final build identifier verified. No browser console errors were
+recorded. All 27 local credits links returned HTTP 200 and exact staged bytes
+on the smoke-tested candidate. This is a bounded menu/credits smoke check,
+not a full match or cross-browser release certification.
+
+The project remains unreleased. Corresponding-source preparation, clean
+rebuild verification, signed-out public access, and the owner's manual Vercel
+deployment remain future gates in [publish-checklist.md](publish-checklist.md).
+
 ## September 5 — completed text and texture repairs
 
 The unfinished crash investigation contained reproducible defects in shared text

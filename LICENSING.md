@@ -1,82 +1,99 @@
 # War Powers — Licensing
 
-**The whole story in one sentence: everything in this repository is free to
-reuse with attribution — MIT code, CC BY 4.0 content, CC0/OFL imports — and
-the only copyleft in the project is the engine, which lives in its own GPL
-repository and is what the compiled game ships under.**
+Root code is MIT, project-authored game content is CC BY 4.0, and imported
+files retain their own licenses. The compiled browser engine is distributed
+under GPL-3.0 with EA's additional terms and the applicable dependency notices.
 
-Authority chain: **[ASSETS.md](ASSETS.md)** is the authoritative per-file
-license ledger, **[CREDITS.md](CREDITS.md)** carries the attributions, and
-this file is the map. Policy: D019 (per-file licensing; legality is the only
-exclusion bar) as narrowed by D022 (permissive-only workspace) — see
-[docs/decisions.md](docs/decisions.md).
+[ASSETS.md](ASSETS.md) records content provenance and per-file licenses;
+[CREDITS.md](CREDITS.md) carries acknowledgements. The browser code dependency
+inventory and notice files are linked from [licenses/third-party.json](licenses/third-party.json).
+Policy decisions D019 and D022 are recorded in [docs/decisions.md](docs/decisions.md).
 
-## 1. Our code — MIT
+## Our code — MIT
 
-Everything authored in this repository that is code, tooling, or
-documentation — `tools/`, `web/`, build/generator scripts, `docs/` — is MIT
-licensed (see [LICENSE](LICENSE)).
+Code, tooling and documentation authored in the root repository — including
+`tools/`, `web/`, build/generator scripts and `docs/` — are MIT licensed
+(see [LICENSE](LICENSE)). Imported code keeps its upstream license.
 
-## 2. Our content — CC BY 4.0
+## Our content — CC BY 4.0
 
-All original War Powers game content — models, textures, audio, maps, UI
-layouts, strings, and the INI data set under `data/` — is licensed under
-**Creative Commons Attribution 4.0 International (CC BY 4.0)** unless a row
-in ASSETS.md says otherwise.
+Original War Powers models, textures, audio, maps, UI layouts, strings and
+INI data are licensed under **Creative Commons Attribution 4.0 International**,
+subject to the per-file exceptions and historical records in ASSETS.md.
 
-- Full text: https://creativecommons.org/licenses/by/4.0/legalcode
-- Attribution: "War Powers project", linking to the project repository once
-  public.
+- [Full CC BY 4.0 terms](https://creativecommons.org/licenses/by/4.0/legalcode)
+- Attribute project-authored content to "War Powers project" and link to the
+  project's published source location.
 
-## 3. Imported content — permissive-with-attribution, per file
+## Imported content
 
-Imports ship under whatever license they came with, tracked per-file in
-ASSETS.md and credited in CREDITS.md. Pre-approved inbound licenses (D022):
-**CC0 / public domain, CC BY, SIL OFL** — the same
-permissive-with-attribution family as our own terms, so imports never change
-what a reuser may do with the collection. Adaptations of CC0 sources ship
-under our CC BY 4.0.
+The pre-approved inbound content licenses are CC0/public domain, CC BY and
+SIL OFL. Their conditions differ: CC BY requires attribution and modification
+notices; OFL fonts must retain OFL and the copyright notice, cannot be sold
+alone, and must respect reserved font names when modified. CC0 source material
+retains its dedication; our original additions to CC0 adaptations use CC BY 4.0.
 
-Anything outside that family — ShareAlike, GPL-licensed art, NC — requires a
-fresh decision-log entry *before* import (none has ever been needed). Never
-acceptable regardless: EA-derived content in any form (unlicensed derivative
-works — the rule that makes "no game files needed" legal), unlicensed
-assets, and ND-encumbered assets (the style pipeline modifies everything;
-ND bars derivatives).
-
-Current imports (complete as of 2026-08-31; the ledger is the authority):
+ShareAlike, GPL-licensed art and NC imports require a fresh decision-log entry
+before import. Retail EA assets or extracted game data, unlicensed assets, and
+ND imports that cannot be adapted and shared through our pipeline are excluded.
 
 | Import | License | Notes |
 |---|---|---|
-| Music — six tracks by Kevin MacLeod (incompetech.com) | **CC BY 4.0** | Re-encoded/trimmed for the web build; attribution in CREDITS.md |
-| Quaternius model packs (`refs/quaternius-tanks/`) | **CC0 1.0** | Conversion sources only; our adaptations ship under CC BY 4.0 |
-| Liberation Sans (`data/Fonts/`) | **SIL OFL 1.1** | License at `data/Fonts/LICENSE-LiberationFonts` |
+| Six music tracks by Kevin MacLeod (incompetech.com) | CC BY 4.0 | Re-encoded/trimmed for the browser; track credits and changes in ASSETS.md and CREDITS.md |
+| Quaternius models in `refs/quaternius-tanks/` | CC0 1.0 | Historical prototype references; current production models are project-authored replacements and these references are not staged |
+| Liberation Sans in `data/Fonts/` | SIL OFL 1.1 | Copyright and license at `data/Fonts/LICENSE-LiberationFonts` |
 
-## 4. Code we ship from others
+The former `data/Window/Menus/ExtrasMenu.wnd` was copied verbatim from the GPL
+engine repository, not merely authored using the same format. It was incorrectly
+included in the original-content declaration. The unused root copy was removed
+from the unreleased dataset on 2026-09-05; ASSETS.md preserves its provenance.
+Historical copies remain GPL licensed. The engine repository retains its own copy.
 
-- `engine/` (submodule; our GeneralsX fork): **GPL-3.0 with EA's additional
-  terms** — from Electronic Arts' 2025 source release of the Generals engine
-  (full terms in `engine/LICENSE.md`). Our engine modifications are GPL-3.0.
-- `dvijoke/` (vendored inline, upstream meerzulee/dvijoke): **MIT** — the
-  D3D8→WebGL2 layer the web build compiles in. Carries its own copyright
-  notice and license text at `dvijoke/LICENSE` (decision D020).
-- DXVK fork (engine submodule, `engine/references/fbraz3-dxvk`): **zlib** —
-  used only by the native macOS development build; never part of the web
-  bundle.
+## Code from other projects
 
-## What the shipped web bundle is, license-wise
+- `engine/`, our GeneralsX fork: GPL-3.0 with EA's additional terms from the
+  Generals source release. The full terms are in `engine/LICENSE.md`.
+- `dvijoke/`, vendored from meerzulee/dvijoke: MIT. Its D3D8-to-WebGL2 renderer
+  is compiled into the browser engine; `dvijoke/LICENSE` preserves the notice.
+- FreeType 2.14.3: the browser build selects the FreeType License (FTL).
+  Portions of this software are copyright © 1996–2026 The FreeType Project
+  (https://freetype.org). All rights reserved. This software is based in part
+  on the work of the FreeType Team.
+- The native DXVK renderer uses zlib terms and is not used by the browser.
+  Wine-derived DirectX headers fetched with DXVK are used by the browser build
+  under LGPL-2.1-or-later; their notices are included in the dependency inventory.
+- Emscripten and the remaining browser dependencies retain the licenses and
+  notices recorded in [licenses/third-party.json](licenses/third-party.json).
 
-`GeneralsXZH.wasm/.js` compiles together the GPL engine, the MIT d8web
-layer, and emscripten's MIT runtime — MIT is GPL-compatible, so the
-**combined binary is distributed under GPL-3.0** while the MIT files
-themselves stay MIT. When the game is deployed publicly, the corresponding
-source for that binary is the public engine repo plus the vendored
-`dvijoke/` in the public workspace (publish-checklist §6 makes both public
-at go-time).
+The combined `GeneralsXZH.wasm/.js` engine is GPL-3.0 with EA's additional
+terms. Compatible dependency licenses and notices still apply to their
+respective code. Separately authored game data retains its per-file license;
+copying or adapting upstream content must be reviewed on its own provenance.
+Repository or file-format boundaries alone do not establish a license exception.
 
-The game data files ride *alongside* the binary under their own per-file
-licenses: the GPL engine executes game data the way a compiler runs a
-program — data is not linked into, compiled into, or derived from GPL code,
-so the content tiers are untouched by the engine's GPL. One nuance is
-recorded in the ledger: our WND files follow a file *format* learned from a
-GPL example file; formats are not copyrightable and the content is original.
+## Source for a public browser release
+
+The project is unreleased. The owner plans to deploy manually to Vercel and
+publish the Git repositories afterward. The corresponding source must be
+accessible to recipients **from the first public playable deployment**. If the
+repositories are still private, publish a complete immutable source archive
+first and link it from the game's credits. Making the repositories public
+before the playable deployment is another option.
+
+The source package must cover the distributed engine, vendored renderer,
+required dependency source and build scripts/instructions. Record the exact
+commits or release tag, dependency revisions, toolchain versions and the
+resulting JavaScript/WASM hashes. Include the required notices and review
+archive contents; do not copy a local `_deps` tree wholesale, which may contain
+optional proprietary SDK material or unrelated build artifacts.
+
+Stage a public release with `python3 tools/genwebstage.py --release --source-url`
+followed by the actual HTTPS source archive or release page URL. The stager
+records that URL, engine artifact hashes and the dependency-notice link in
+`source.json`. This records the supplied location; it does not prove that the
+archive matches the binary or is complete.
+
+Before release, validate a clean rebuild from the source package and download
+the source and notices without signing in. Preserve the source for every
+distributed build. The remaining checks are in
+[docs/publish-checklist.md](docs/publish-checklist.md).

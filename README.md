@@ -1,5 +1,7 @@
 # War Powers
 
+[Licensing](LICENSING.md) · [Dependency notices](licenses/README.md) · [Contributing](CONTRIBUTING.md)
+
 ![Original War Powers models in the menu panorama](docs/media/warpowers-panorama.jpg)
 
 A free real-time strategy game built for the browser: establish a base,

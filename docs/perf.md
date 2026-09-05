@@ -23,7 +23,7 @@ tracks. The stager enforces the size limit before replacing a working stage.
 
 ## Current candidate and build evidence
 
-- Candidate `2a5fb93551f9`: **66,734,400 bytes (63.643 MiB)** staged,
+- Candidate `1df03a19fdd9`: **66,730,332 bytes (63.639 MiB)** staged,
   including engine, data, UI and notices. This directory measurement was read
   from the current local stage; it is not compressed network transfer size.
 - An earlier repaired bridge reached the main loop in **542 ms** on one local
@@ -34,11 +34,11 @@ tracks. The stager enforces the size limit before replacing a working stage.
   build and staged `8b0a011a5989`, **66,729,527 bytes (63.638 MiB)**.
   That demonstrates build/size reproducibility, not browser performance or
   byte-identical compilation.
-- The independent checkout then fetched final root `0ab5819`, engine
+- The independent checkout then fetched the initial completed polish root `0ab5819`, engine
   `05c81c9908d95f6428b14a96935694539b6c1b9d` and DXVK `538cb703`. Tests,
   gates, incremental WASM build and staging pass with a clean tree and resolved
-  recursive pins. Its final candidate `a50ecbb361a0` is **66,734,559 bytes**,
-  159 bytes above the primary stage and still below 64 MiB. This is an
+  recursive pins. Its candidate `a50ecbb361a0` is **66,734,559 bytes**,
+  159 bytes above the earlier `2a5fb93551f9` stage and still below 64 MiB. This is an
   incremental rebuild of the earlier clean checkout, not another full clean build.
 
 ## Isolated crowded-battle measurement

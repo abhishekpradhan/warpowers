@@ -38,6 +38,9 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
         fontsize = max(12, round(fontsize * 1.2))
     if textcolor is None:
         textcolor = "255 255 255 255"
+    disabled_text = "156 163 170 255" if wtype == "PUSHBUTTON" else "128 128 128 255"
+    disabled_fill = "13 18 24 255" if wtype == "PUSHBUTTON" else "26 28 32 255"
+    disabled_border = "63 70 78 255" if wtype == "PUSHBUTTON" else border
     body = f"""WINDOW
   WINDOWTYPE = {wtype};
   SCREENRECT = UPPERLEFT: {x0} {y0}, BOTTOMRIGHT: {x1} {y1}, CREATIONRESOLUTION: 1280 720;
@@ -52,10 +55,10 @@ def window(name, rect, wtype="USER", status="ENABLED+IMAGE+NOFOCUS",
   HEADERTEMPLATE = "[NONE]";
   TOOLTIPDELAY = -1;
 {extra}  TEXTCOLOR = ENABLED: {textcolor}, ENABLEDBORDER: {textcolor},
-              DISABLED: 128 128 128 255, DISABLEDBORDER: 128 128 128 255,
+              DISABLED: {disabled_text}, DISABLEDBORDER: {disabled_text},
               HILITE: 255 255 128 255, HILITEBORDER: 255 255 255 255;
   ENABLEDDRAWDATA = {drawdata(bg, border, image)};
-  DISABLEDDRAWDATA = {drawdata('26 28 32 255', border, image)};
+  DISABLEDDRAWDATA = {drawdata(disabled_fill, disabled_border, image)};
   HILITEDRAWDATA = {drawdata(hilitebg or '58 64 74 255', border, image)};
 """
     if children:
@@ -361,12 +364,9 @@ message_box("QuitMessageBox", "QuitMessageBoxSystem")
 
 main_children = [
     menu_art(),
-    backdrop(alpha=95),
-    # The artwork leaves open terrain on the left; this translucent field
-    # keeps the live wordmark and controls readable at any output resolution.
-    window("MenuTextField", (55, 127, 625, 453), status="ENABLED+NOFOCUS",
-           bg="10 12 16 165", border="10 12 16 165"),
-    frame_border(),
+    # One continuous wash keeps the wordmark readable without boxing off
+    # the terrain illustration or drawing a second frame inside the screen.
+    backdrop(alpha=145),
     # Two-tone wordmark (WAR warm-white, POWERS gold): two
     # left-justified labels on one baseline; box origins hand-tuned to the
     # rendered glyph widths (checked via native frame dump).
@@ -376,7 +376,7 @@ main_children = [
           color=GOLD, bold=1, centered=0),
     rule("TitleRule", (90, 218, 186, 221)),
     label("TitleTag", (90, 239, 593, 279), "WP:Tagline", size=11,
-          color="172 183 199 255", centered=0),
+          color=TEXT, centered=0),
     btn("ButtonEngage",  (90, 312, 310, 352), "WP:Engage", "primary", size=13),
     btn("ButtonQuit",    (90, 366, 310, 400), "WP:QuitGame", "ghost"),
     label("LabelVersion", (540, 576, 792, 594), "", size=9, color=DIM,

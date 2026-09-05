@@ -1,9 +1,51 @@
 # Current polish verification
 
 Local evidence recorded 2026-09-05 in the Chromium in-app browser on the
-development Mac. The final local playtest candidate is `2a5fb93551f9`. Earlier
+development Mac. The current local playtest candidate is `1df03a19fdd9`. Earlier
 candidate results are identified below; they are retained evidence, not a
 claim that every diagnostic was rerun after each subsequent change.
+
+## Menu and disabled-state follow-up
+
+Player screenshots exposed a redundant main-menu frame and content panel,
+plus command availability that relied too heavily on grayscale portraits.
+The follow-up removes both menu boxes, retains a full-screen contrast wash,
+and adds an outlined padlock to unavailable commands and faction deployment
+buttons. Web buttons use the same shape cue, readable neutral text and dashed
+borders; disabled buttons no longer receive active hover colors.
+
+Candidate `15907462d540` was observed in an ordinary Field Orientation game:
+
+- Vector and Bastion portraits have locks for missing prerequisites. Clicking
+  the locked Vector does not queue it or spend money; its Vehicle Plant
+  prerequisite tooltip remains readable.
+- Available Fabricators queue without locks. Cancelling an active entry
+  refunds $450; another queued Fabricator completes. Empty queue slots stay blank.
+- Spending down to $150 locks unaffordable units while the affordable Vigil
+  remains unmarked. A cancellation returns funds to $600 and clears the
+  corresponding locks; prerequisite locks remain. The builder's construction
+  grid also distinguishes affordable orders from locked ones.
+- Disabled Save/Resume checkpoint buttons display the padlock and dashed
+  border at full text opacity, retain native HTML disabled semantics, and do
+  not show an enabled gold fill.
+
+Candidate `1df03a19fdd9` adds the faction deployment badge. The final menu has
+neither extra box; Field Training remains selected without a lock, the
+unavailable Jackal deployment has a lock and ignores clicks, and Meridian
+deploys normally. Its headquarters command locks were also checked visually.
+In ordinary training, a player-built Directorate displayed its lock and
+RECHARGING 2:04, then a readable sweep at 0:34 and 0:05. After natural recharge
+the heading changed to POWER READY and the lock disappeared. Choosing the
+power and targeting revealed ground started RECHARGING 2:30 and restored the
+lock. No browser error-level logs were reported during this final run.
+Settings confirms build `1df03a19fdd9` and clearly distinguishes the enabled
+Save checkpoint from locked Resume checkpoint in the same row. The follow-up
+engine revision is `4d68b9ef6ae95322229520c79469f5fe12c622f8`, pinned by the
+parent `codex/product-polish` branch.
+The final WASM build, six web-state tests, six packaging tests and all voice,
+content and map gates pass. Stage size is 66,730,332 bytes, below 64 MiB.
+The unchanged keyboard implementation retains the earlier 16-case evidence
+below; those cases were not repeated for this presentation-only follow-up.
 
 ## Automated local gates
 
@@ -192,14 +234,15 @@ from other active game tabs when measuring performance.
 
 ## Build reproduction and remaining release checks
 
-The final pushed source snapshot is root `0ab5819`, engine
+The initial completed polish source snapshot is root `0ab5819`, engine
 `05c81c9908d95f6428b14a96935694539b6c1b9d` and DXVK `538cb703`.
 An independent checkout fetched these pins, passed all six web tests, six
 packaging tests, 16 native keyboard cases and content/gameplay/voice gates,
 then completed an incremental WASM build and staging. The tree was clean and
 all recursive pins resolved. Its candidate `a50ecbb361a0` is 66,734,559 bytes,
 159 bytes larger than primary candidate `2a5fb93551f9` and below 64 MiB.
-The primary candidate remains the local playtest build.
+That independent artifact was not browser-tested. The current playtest build
+and the later visual follow-up are identified at the top of this document.
 
 A fresh recursive GitHub clone at root `5ad409c`, engine `d04deed8` and
 DXVK `538cb703` passed all 12 tests and content/gameplay/voice gates. The

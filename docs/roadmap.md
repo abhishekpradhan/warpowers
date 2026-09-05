@@ -7,11 +7,17 @@ engine and swappable dataset architecture remain the foundation (D018).
 
 ## Ready for local playtest
 
-Candidate `2a5fb93551f9` passes the full WASM build, six web-state tests,
-six packaging tests, 16 native keyboard cases and all content/gameplay/voice gates.
+Candidate `1df03a19fdd9` passes the full WASM build, six web-state tests,
+six packaging tests and all content/gameplay/voice gates. The unchanged keyboard
+implementation retains the preceding 16-case regression evidence.
 The product polish pass is ready for local playtesting. Native evidence spans
 this candidate and preceding controls, faction-power, mission and hauling runs;
 [verification.md](verification.md) records which build exercised each flow.
+
+The first player-feedback follow-up removes the redundant main-menu boxes and
+adds explicit padlock cues for disabled commands, deployment and web actions.
+Normal training checks cover prerequisite/funds locks, restored affordability
+and queue cancellation with a refund.
 
 | Area | Implemented | Verified locally / remaining work |
 |---|---|---|
@@ -21,8 +27,8 @@ this candidate and preceding controls, faction-power, mission and hauling runs;
 | Opponent and maps | Paid economy/production, composition responses, supply raids, scenery and route identities | All 17 map binaries pass cliff-clearance route checks and an AI HQ assault was observed; full difficulty/faction balance matrix remains |
 | Original art | All 41 roster models original; lifecycle/ownership/aiming contracts, environment kit, panorama and 44 portraits | Export/import, hierarchy, texture and portrait checks pass; Meridian 23 / Jackal 22 fixture scenes have zero missing models and distinct silhouettes; steering, flight and several combat/wreck states observed; exhaustive lifecycle coverage remains |
 | Product durability | Settings, remapping, channel audio, pause ownership, IDBFS checkpoint, compatibility checks and recovery UI | Full reload/resume restores training identity, stage, time, economy, construction and HUD, including resumed Exchange completion and a later completed Power Array; fullscreen/Settings recovery, explicit pause ownership and I→J remapping with native selection after restart pass; broader storage/error and input matrix remains |
-| Performance and distribution | Hashed paths, stable build IDs, bundled notices, registry and enforced 64 MiB staging limit | Final stage 63.643 MiB; isolated 120-unit attack-move fixture holds approximately 60 render / 30 logic for one minute on M1 Max/64 GB at Balanced; long soak, lower-end hardware and network/browser matrix remain |
-| Open-source preparation | Root/engine/native-renderer contribution/build docs, fork routing and protected upstream remotes | Final root 0ab5819 / engine 05c81c9908d95f6428b14a96935694539b6c1b9d / DXVK 538cb703 are pushed; independent checkout passes tests, gates, incremental build and staging after its earlier 1,279-step clean build; recursive pins, manifest hashes and bounded hygiene review pass |
+| Performance and distribution | Hashed paths, stable build IDs, bundled notices, registry and enforced 64 MiB staging limit | Current stage 63.639 MiB; isolated 120-unit attack-move fixture holds approximately 60 render / 30 logic for one minute on M1 Max/64 GB at Balanced; long soak, lower-end hardware and network/browser matrix remain |
+| Open-source preparation | Root/engine/native-renderer contribution/build docs, fork routing and protected upstream remotes | Initial completed polish root 0ab5819 / engine 05c81c9908d95f6428b14a96935694539b6c1b9d / DXVK 538cb703 are pushed; independent checkout passes tests, gates, incremental build and staging after its earlier 1,279-step clean build; recursive pins, manifest hashes and bounded hygiene review pass |
 
 The [polish plan](product-polish.md) defines intended player outcomes; the
 [publish checklist](publish-checklist.md) retains independent release gates.

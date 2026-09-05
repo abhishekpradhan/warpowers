@@ -260,7 +260,7 @@ function showHelp() {
   section('Faction powers');
   appendHTML('<p class="muted">A Directorate unlocks Meridian’s Precision Strike: a visible targeting beacon followed by a concentrated blast. A Jackal Den unlocks Tunnel Ambush: a mixed infantry squad at a scouted target. Select the completed structure, choose its power and target revealed ground. Each power must recharge before it can be used again.</p>');
   section('Production & survival');
-  appendHTML('<p class="muted">Select a production building to view its available units. Hover a portrait for cost, role and prerequisites. Queue units by clicking their portraits; click a queued item to cancel it. Select a builder to place structures on revealed ground. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>');
+  appendHTML('<p class="muted">Select a production building to view its units. A padlock marks unavailable orders; hover a portrait for cost, role and prerequisites. Queue units by clicking their available portraits; click a queued item to cancel it. Select a builder to place structures on revealed ground. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>');
 }
 function missionUnlocked(mission) {
   if (!mission?.unlock) return true;

@@ -5,14 +5,21 @@ repository visibility. The owner authorized implementing the polish plan,
 preparing private repositories and committing/pushing work. A public release
 remains a separate decision (D013).
 
-Final local playtest candidate: `2a5fb93551f9`, 66,734,400 bytes. Automated gates
-below pass on this candidate. Bounded observations from earlier candidates
+Current local playtest candidate: `1df03a19fdd9`, 66,730,332 bytes. Build, web,
+packaging and content gates pass. Bounded observations from earlier candidates
 are explicitly identified in [verification.md](verification.md). A checked
 fixture is evidence for that fixture; broader release categories stay open
 where only some requirements have been exercised.
 
 ## Completed local checks
 
+- [x] `1df03a19fdd9`: menu frame/panel removed, explicit disabled-command and
+      faction-deployment padlocks, web disabled styles; final WASM build and
+      web/packaging/content gates pass. `15907462d540` normal training verifies
+      prerequisite/funds locks, affordability recovery and queue cancellation.
+- [x] `1df03a19fdd9`: a normally built Directorate keeps its recharge sweep and
+      countdown visible, loses the lock at POWER READY after natural recharge,
+      accepts ground targeting and restores the lock on the next cooldown.
 - [x] `2a5fb93551f9` passes the full WASM build, six web-state tests, six packaging
       tests and 16 native keyboard cases.
 - [x] Voice lint, model/texture/icon/window references and operation metadata pass.
@@ -69,12 +76,13 @@ where only some requirements have been exercised.
       resolution, render/logic cadence and WASM heap-capacity measurements in perf.md.
 - [x] An earlier pushed snapshot reproduces from a fresh recursive GitHub clone:
       tests/gates, documented configuration, 1,279-step clean engine build and staging.
-- [x] Final source snapshot pushed: root `0ab5819`, engine
+- [x] Initial completed polish snapshot pushed: root `0ab5819`, engine
       `05c81c9908d95f6428b14a96935694539b6c1b9d`, DXVK `538cb703`.
-- [x] Independent checkout at those final pins passes all tests/gates, incremental
+- [x] Independent checkout at those pins passes all tests/gates, incremental
       WASM build and staging after its earlier clean build. Tree clean; recursive
-      pins resolve. Candidate `a50ecbb361a0` is 66,734,559 bytes; its normal main
-      menu opens without diagnostics and with fresh 0/4 progress.
+      pins resolve. Candidate `a50ecbb361a0` is 66,734,559 bytes. This independent
+      artifact was not browser-tested; browser evidence belongs to the primary
+      candidates recorded in verification.md.
 
 ## Remaining local candidate coverage
 

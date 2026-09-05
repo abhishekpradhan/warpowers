@@ -1003,6 +1003,22 @@ WP:OrdersLabel
 "ORDERS"
 END
 
+WP:PowerReady
+"POWER READY"
+END
+
+WP:PowerRecharging
+"RECHARGING %d:%02d"
+END
+
+WP:PowerRequired
+"POWER REQUIRED"
+END
+
+WP:PowerUnavailable
+"POWER UNAVAILABLE"
+END
+
 WP:MissionRelay
 "Communications Relay"
 END
@@ -1028,7 +1044,7 @@ WP:MapTraining
 END
 
 WP:MapTrainingDesc
-"Welcome to the Strip, commander. Establish a small Combine outpost, learn to keep production supplied, then clear the hostile command post. Your operations officer will guide the opening; you control the pace."
+"Learn the Combine opening: build an economy, train a mixed force, scout the approach, then destroy the hostile headquarters. Protect your own command center. Guidance follows your progress."
 END
 
 WP:Objective_training_0
@@ -1056,7 +1072,7 @@ WP:MapOp01
 END
 
 WP:MapOp01Desc
-"The Combine calls this a restoration of service. The Jackal Front calls it an occupation. Their forward relay coordinates raids through the eastern ridge. Establish a productive foothold, then silence the relay before the next convoy enters the corridor."
+"Establish an Exchange and Vehicle Plant, then destroy the Jackal relay beyond the ridge passes. Protect your headquarters; destroying the enemy base is optional."
 END
 
 WP:Objective_op01_0
@@ -1072,7 +1088,7 @@ WP:MapOp02
 END
 
 WP:MapOp02Desc
-"The Front cannot afford a straight fight with the new garrison. Its supply offices and grid substation are another matter. Strike three separated sites around the basin. Fast Vultures can exploit gaps; cheap Rackets fund replacements without a power grid."
+"Raid both supply offices and the grid substation around the basin. Destroy all three targets while protecting your command post. Vultures can exploit gaps in the garrison."
 END
 
 WP:Objective_op02_0
@@ -1084,7 +1100,7 @@ WP:MapOp03
 END
 
 WP:MapOp03Desc
-"One relay now carries every order north of the basin. Hold it for eight minutes while the Combine reroutes the network, then counterattack the Jackal command post. Losing the relay or your headquarters ends the operation. The Front is already moving through the trenches."
+"Hold the forward relay for eight minutes, then destroy the Jackal command post. Keep both the relay and your headquarters alive throughout the operation."
 END
 
 WP:Objective_op03_0
@@ -1100,7 +1116,7 @@ WP:MapOp04
 END
 
 WP:MapOp04Desc
-"The Combine's occupation headquarters is dug into the scrapyard. Two air-defense sites cover the approach. Dismantle both, then finish the headquarters before the corridor becomes permanent. The Front's commanders promise this is their last emergency operation. Nobody puts it in writing."
+"Break the two air-defense sites in the scrapyard, then destroy the occupation headquarters. Ground raiders open the way for aircraft. Protect your command post."
 END
 
 WP:Objective_op04_0
@@ -1112,11 +1128,11 @@ WP:Objective_op04_1
 END
 
 WP:MapChallengeM
-"Commander Trial - Glass Rampart"
+"Glass Rampart"
 END
 
 WP:MapChallengeMDesc
-"Jackal commander Rook has turned the trench line into a mortar range. Your supply relay must survive ten minutes. The headquarters alone will not save it. Build a layered defense, raid the mortar positions, and spend every repair interval wisely."
+"Keep the relay and headquarters alive for ten minutes under Rook's siege. Repair between volleys and raid the two forward mortar pits to reduce pressure."
 END
 
 WP:Objective_challenge-meridian_0
@@ -1124,11 +1140,11 @@ WP:Objective_challenge-meridian_0
 END
 
 WP:MapChallengeJ
-"Commander Trial - Hostile Takeover"
+"Hostile Takeover"
 END
 
 WP:MapChallengeJDesc
-"Director Vale's requisition column arrives in nine minutes. Destroy the forward headquarters before the deadline and the contract collapses. The Combine is entrenched; the Front starts with a mobile raiding group and enough credit to choose between more armor and an air strike."
+"Destroy Vale's forward headquarters within nine minutes. Start with a mobile raiding force, choose a pass and strike before reinforcements arrive. Protect your command post."
 END
 
 WP:Objective_challenge-jackal_0

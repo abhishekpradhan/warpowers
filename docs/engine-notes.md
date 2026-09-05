@@ -189,6 +189,30 @@ produced trucks by producer ID; ordinary skirmish maps also have starting
 haulers. Map-placed War Powers haulers are explicitly put into their normal
 harvesting state on fresh game start, while restored saves retain their orders.
 
+`Appearance = FOUR_WHEELS` changes native movement as well as wheel posing.
+It requires an explicit, attainable `MinTurnSpeed`: `LocomotorTemplate` defaults
+that field to `BIGNUM`, and `moveTowardsPositionWheels` scales steering by
+`actualSpeed / MinTurnSpeed`. Omitting it makes vehicles drive almost straight
+past their goals even when `TurnRate` is high. The source is
+`GeneralsMD/Code/GameEngine/Source/GameLogic/Object/Locomotor.cpp`; increasing
+turn rate or changing supply docking modules does not address the missing
+denominator. Our wheel locomotors use 15 world units/second for scouts, 6 for
+heavy artillery, 10 for Porters and 12 for Scavengers. `CanMoveBackwards = Yes`
+also lets them reverse during close approaches. Keep `W3DTruckDraw` and the
+wheel bones; reverting the art is unnecessary.
+
+This failure was reproduced in build `6375`: both native economy diagnostics
+showed zero cargo or stock removal, with only passive hub income. The corrected
+`6b10fd8f36e1` passed both 60-second runs with actual delivery and maximum cargo
+of four crates for the Porter and two for the Scavenger. Their player cash
+changes were $2,100 versus $300 passive and $1,240 versus $240 passive,
+respectively. Cash and source-stock totals also include starting haulers, so
+these are delivery regression checks, not isolated truck-throughput or balance
+measurements. `tools/validate_gameplay.py` now rejects missing or unattainable
+wheel turn speeds and checks reverse capability; an in-memory reproduction of
+the missing-field data was rejected without changing shipped files. New wheel
+locomotor changes still require native movement and harvesting checks.
+
 `WP_AUTOTEST=mission` changes explicit prerequisites, target survival or timer
 expiry and observes native script counters/results. It never dispatches a
 victory action itself. The expected-result latch is separate from `inGame`:

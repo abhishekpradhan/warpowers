@@ -147,6 +147,28 @@ def scalar(block, key):
     return float(value[1].strip())
 
 
+def combat_commands(buttons, command_sets):
+    contracts = (("Command_WPAttackMove", "ATTACK_MOVE", True),
+                 ("Command_WPGuard", "GUARD", True),
+                 ("Command_WPStop", "STOP", False))
+    available = set(re.findall(r"(?m)^\s*\d+\s*=\s*(\w+)", command_sets["WP_CombatUnitCommandSet"]))
+    for name, command, needs_position in contracts:
+        assert name in available, f"{name}: missing from the shared combat command set"
+        button = buttons[name]
+        actual_command = re.search(r"(?m)^\s*Command\s*=\s*(\w+)", button)
+        assert actual_command and actual_command[1] == command, f"{name}: wrong native order"
+        options_match = re.search(r"(?m)^\s*Options\s*=\s*([^;\n]+)", button)
+        options = set(options_match[1].split()) if options_match else set()
+        assert "OK_FOR_MULTI_SELECT" in options, f"{name}: must work for a selected army"
+        # NEED_TARGET_POS keeps the destination click in GUICommandTranslator.
+        # Without it, ATTACK_MOVE toggles legacy mode and the normal selection
+        # translator consumes the left-click instead in right-click order mode.
+        if needs_position:
+            assert "NEED_TARGET_POS" in options, f"{name}: needs position targeting to consume the destination click"
+        else:
+            assert not any(option.startswith("NEED_TARGET_") for option in options), f"{name}: Stop must execute immediately without targeting"
+
+
 def validate_links(game_map, objects, strings, templates):
     named = {o["props"]["objectName"] for o in game_map["objects"] if "objectName" in o["props"]}
     for o in game_map["objects"]:
@@ -345,7 +367,17 @@ def main():
     ini = ROOT / "data/Data/INI"
     objects = blocks(ini / "Default/Object.ini", "Object")
     weapons = blocks(ini / "Weapon.ini", "Weapon")
+    combat_commands(blocks(ini / "Default/CommandButton.ini", "CommandButton"),
+                    blocks(ini / "CommandSet.ini", "CommandSet"))
     locomotors = blocks(ini / "Locomotor.ini", "Locomotor")
+    for name, locomotor in locomotors.items():
+        if re.search(r"(?m)^\s*Appearance\s*=\s*FOUR_WHEELS\b", locomotor):
+            # Native steering divides forward speed by MinTurnSpeed. The
+            # omitted default is BIGNUM, which made all new wheel vehicles
+            # drive almost straight and prevented either hauler from docking.
+            assert re.search(r"(?m)^\s*MinTurnSpeed\s*=", locomotor), f"{name}: FOUR_WHEELS requires explicit MinTurnSpeed to steer"
+            assert 0 < scalar(locomotor, "MinTurnSpeed") <= scalar(locomotor, "Speed"), f"{name}: turn speed must be attainable"
+            assert re.search(r"(?m)^\s*CanMoveBackwards\s*=\s*Yes\b", locomotor), f"{name}: wheel vehicles must be able to reverse out of close approaches"
     creation_lists = blocks(ini / "ObjectCreationList.ini", "ObjectCreationList")
     for name, ocl in creation_lists.items():
         for reference in re.findall(r"(?m)^\s*ObjectNames\s*=\s*(\w+)", ocl):
@@ -380,6 +412,11 @@ def main():
     for name, obj in objects.items():
         if "Draw =" in obj:
             assert "Body =" in obj, f"{name}: native drawable startup requires a body module"
+        if re.search(r"(?m)^\s*Behavior\s*=\s*OCLSpecialPower\b", obj) and re.search(r"(?m)^\s*KindOf\s*=.*\bSTRUCTURE\b", obj):
+            # A newly built power structure must start its recharge when
+            # construction completes; the special-power constructor only
+            # starts a countdown for objects that are already built.
+            assert re.search(r"(?m)^\s*Behavior\s*=\s*SpecialPowerCreate\b", obj), f"{name}: special-power construction must initialize recharge via SpecialPowerCreate"
         if "Draw = W3DTruckDraw" in obj:
             locomotor = re.search(r"Locomotor\s*=\s*SET_NORMAL\s+(\w+)", obj)
             assert locomotor and "Appearance = FOUR_WHEELS" in locomotors[locomotor[1]], f"{name}: wheel draw needs native wheel physics information"
@@ -415,7 +452,7 @@ def main():
                   (("WP_Fabricator", 1), ("WP_Exchange", 1), ("WP_PowerArray", 1),
                    ("WP_Porter", 1), ("WP_VehiclePlant", 1), ("WP_Tank", 2), ("WP_Vigil", 1)))
     assert opening <= maps["WPTraining"]["sides"][1]["playerStartMoney"], "training opening must be affordable"
-    print(f"PASS: {len(maps)} binary maps; 7 mission success/failure/edge cases; native script signatures; cliff/pass routes, paid AI responses, supply, faction and opening-budget contracts.")
+    print(f"PASS: {len(maps)} binary maps; 7 mission success/failure/edge cases; native script signatures; combat orders, cliff/pass routes, paid AI responses, supply, faction and opening-budget contracts.")
 
 
 if __name__ == "__main__":

@@ -35,6 +35,7 @@ let failed = false;
 let pendingResult = null;
 let lastResultKey = '';
 let toastTimer;
+let activeToasts = [];
 let lastActivity = performance.now();
 let loadedBytes = 0;
 let totalBytes = 1;
@@ -55,10 +56,22 @@ function log(message) {
   }
   if (DEBUG) { $('debugLog').hidden = false; $('debugLog').textContent = logLines.slice(-25).join('\n'); }
 }
-function toast(text) {
+function renderToasts() {
   clearTimeout(toastTimer);
-  $('toast').textContent = text; $('toast').hidden = false;
-  toastTimer = setTimeout(() => { $('toast').hidden = true; }, 5500);
+  const now = performance.now();
+  activeToasts = activeToasts.filter(notice => notice.expires > now);
+  $('toast').textContent = activeToasts.map(notice => notice.text).join('\n');
+  $('toast').hidden = !activeToasts.length;
+  if (activeToasts.length)
+    toastTimer = setTimeout(renderToasts, Math.max(1, Math.min(...activeToasts.map(notice => notice.expires)) - now));
+}
+function toast(text) {
+  // Keep a few concurrent announcements visible without delaying a fresh alert
+  // behind production chatter. Repeated text refreshes its existing notice.
+  activeToasts = activeToasts.filter(notice => notice.text !== text);
+  activeToasts.push({ text, expires: performance.now() + 5500 });
+  activeToasts = activeToasts.slice(-3);
+  renderToasts();
 }
 function writeStorage(key, value) {
   try { storage.setItem(key, JSON.stringify(value)); return true; }

@@ -1,16 +1,21 @@
+> **Historical record.** The 4 September 2026 product assessment that started
+> the polish push, moved from `docs/product-polish.md` on 2026-09-07; it
+> describes the pre-polish build, and the current plan is in
+> [roadmap.md](../roadmap.md).
+
 # War Powers — product polish plan
 
-Assessment baseline: 2026-09-04. The owner authorized implementing this plan, including preparing and pushing the private source repositories, later that day. This document records the problems and intended acceptance bar; [roadmap.md](roadmap.md) tracks current implementation and [publish-checklist.md](publish-checklist.md) tracks verified release readiness. Baseline observations below describe the pre-polish build, not current feature availability.
+Assessment baseline: 2026-09-04. The maintainer approved implementing this plan later that day. This document records the problems and intended acceptance bar; [roadmap.md](../roadmap.md) tracks current implementation and [RELEASING.md](../../RELEASING.md) holds the release process. Baseline observations below describe the pre-polish build, not current feature availability.
 
 ## Product direction
 
 The existing objectives are sufficiently clear: deliver the classic Generals-style RTS experience through a browser link, with no supplied game files, a polished modern interface, readable battles and independently shippable content. Keep the engine foundation and its swappable dataset. Single-player skirmish comes first; Meridian Combine and Jackal Front are the playable faction scope. Desktop input is the target. Self-produced Blender assets are the established production path, with suitable imports available as accelerators.
 
-These priorities follow D002, D003, D008, D013, D015, D017 and D018 in [decisions.md](decisions.md). [vision.md](vision.md) supplies the experience bar: quick entry, readable chaos, useful controls, guided onboarding and 15–30 minute matches. It places a boss ladder later. The present request brings asset quality, scenarios and campaigns into review; it does not require a large campaign to become the next release gate.
+These priorities follow D002, D003, D008, D013, D015, D017 and D018 in [decisions.md](../decisions.md). [vision.md](../vision.md) supplies the experience bar: quick entry, readable chaos, useful controls, guided onboarding and 15–30 minute matches. It places a boss ladder later. The present request brings asset quality, scenarios and campaigns into review; it does not require a large campaign to become the next release gate.
 
 **Recommendation: finish one reference skirmish to the intended product standard, then extend that standard across the pack.** Prove authored missions with one operation before expanding into a commander ladder or campaign.
 
-Gameplay-depth and authored-content milestones below are proposed extensions to the bundled pack beyond D018's port-first baseline. The existing deployment/publication gate in D013 and publish-checklist.md continues to apply.
+Gameplay-depth and authored-content milestones below are proposed extensions to the bundled pack beyond D018's port-first baseline. The existing deployment/publication gate in D013 continued to apply.
 
 ## What is already valuable
 
@@ -32,19 +37,19 @@ The walkthrough showed small units on repetitive terrain, a largely empty black 
 
 ### Battlefield, camera and HUD
 
-The wrapper forces a 4:3 canvas and a 1024×768 internal resolution. Boot options select Low LOD and disable both shadow types ([web/index.html](../web/index.html), lines 54–59, 189, 432–439). Better textures will have limited impact until we establish how much detail the game actually displays.
+The wrapper forces a 4:3 canvas and a 1024×768 internal resolution. Boot options select Low LOD and disable both shadow types (`web/index.html` of that build, lines 54–59, 189, 432–439). Better textures will have limited impact until we establish how much detail the game actually displays.
 
 Define a supported widescreen layout, render resolution and UI scale while preserving reliable world picking and camera behavior. Test shadow support in the browser renderer; choose a tested grounding treatment if full shadows are unsuitable. Use a compact, coherent command bar with a clear selected-unit identity, role, health, commands and production queue. Put economy, power, objectives and threats in predictable locations. Give the minimap a clear frame, legible ownership and alerts. Show hotkeys and explain unavailable commands, prerequisites and costs.
 
 Maintain the RTS controls already working. Make their behavior discoverable, including selection versus orders, attack-move, rally points, groups, camera movement and cancel. Check browser shortcut/focus conflicts and full-screen input. Add visible group/idle-worker feedback and configurable camera sensitivity as part of the control specification.
 
-The current command bar is generated in [tools/genwnd.py](../tools/genwnd.py), lines 90–166. This should become an intentional gameplay layout rather than an accumulation of engine-required windows.
+The current command bar is generated in `tools/genwnd.py` of that build, lines 90–166. This should become an intentional gameplay layout rather than an accumulation of engine-required windows.
 
 ### Guided entry and objectives
 
 The deployment screen gives battlefield and opposition text, then immediately starts a match. It needs a map preview, faction playstyle summary, a clear win condition and a discoverable controls/help surface. “SKIRMISH” currently names the easiest difficulty; use language that distinguishes mode from difficulty.
 
-All current maps win when the enemy HQ is destroyed and lose when the player's HQ is destroyed ([tools/genmap.py](../tools/genmap.py), lines 547–553). State that explicitly. A skippable first-skirmish guide should teach selection, builder use, production, income, scouting, counters, HQ defense and attack. Give instructions at the moment they matter, with generous early pressure. Introduce alerts before the player has to react to them.
+All current maps win when the enemy HQ is destroyed and lose when the player's HQ is destroyed (`tools/genmap.py` of that build, lines 547–553). State that explicitly. A skippable first-skirmish guide should teach selection, builder use, production, income, scouting, counters, HQ defense and attack. Give instructions at the moment they matter, with generous early pressure. Introduce alerts before the player has to react to them.
 
 The result screen should explain the outcome and offer an immediate next action: retry, change difficulty, change battlefield or later continue an operation. Avoid making a novice infer the loss condition from the destruction animation.
 
@@ -52,7 +57,7 @@ The result screen should explain the outcome and offer an immediate next action:
 
 Finish one representative vehicle from idle through destruction before scaling production: a readable silhouette and player-color region, articulated turret, aligned muzzle/projectile origin, recoil, movement detail, impact reaction, damage smoke and a short-lived wreck. Infantry needs readable movement/attack transitions and death feedback; structures need construction, active, damaged and destroyed states.
 
-The active object data does not wire turret or weapon-fire/launch-bone fields, or named damaged/rubble model conditions. Vector's draw block contains its default model ([data/Data/INI/Default/Object.ini](../data/Data/INI/Default/Object.ini), lines 165–179). Shared scaffolds and immediate destruction paths are widespread. The engine has capabilities that the content still needs to exercise.
+The active object data does not wire turret or weapon-fire/launch-bone fields, or named damaged/rubble model conditions. Vector's draw block contains its default model (`data/Data/INI/Default/Object.ini` of that build, lines 165–179). Shared scaffolds and immediate destruction paths are widespread. The engine has capabilities that the content still needs to exercise.
 
 Keep effects readable in groups: projectile direction, hit location, attack type and ownership should survive overlapping smoke and explosions. Align visual impact, weapon sound and damage timing. Use screen shake only when useful, with a toggle.
 
@@ -68,7 +73,7 @@ The current tuning merits a dedicated balance pass:
 | Exchange costs $700 and produces $25 per 8 seconds; Racket costs $650 and produces $30 per 10 seconds. | Nominal payback is 3.73/3.61 minutes before construction time. Test investment value, reinforcement affordability and late-game starvation. |
 | A tank shell deals 100 armor-piercing damage; infantry takes 120%; Lancer has 100 HP. | A direct shell kills the anti-armor infantry unit. Verify the intended counter through range, cost, terrain and mixed-army encounters. |
 
-Sources: [genmap.py](../tools/genmap.py), lines 334/346; [Object.ini](../data/Data/INI/Default/Object.ini), lines 147–148, 1084, 1418–1497; [Weapon.ini](../data/Data/INI/Weapon.ini), lines 2–9; [Armor.ini](../data/Data/INI/Armor.ini), lines 12–16. These numbers do not establish a dominant strategy by themselves.
+Sources (line numbers as of that build): `tools/genmap.py`, lines 334/346; `Object.ini`, lines 147–148, 1084, 1418–1497; `Weapon.ini`, lines 2–9; `Armor.ini`, lines 12–16. These numbers do not establish a dominant strategy by themselves.
 
 Test several viable openings and explicit equal-budget counter situations. Record first contact, first meaningful tech choice, economic recovery and match duration. A visible supply/gatherer loop is part of the documented ambition and would make raiding more tangible; treat it as a scoped gameplay milestone after the current economy is measured.
 
@@ -82,7 +87,7 @@ The already-proposed Precision Strike and Tunnel Ambush are suitable later exper
 
 ### AI and map play
 
-Retain the working economic AI. Its scripted team compositions, expansion recipe and escalation schedules repeat across maps ([genmap.py](../tools/genmap.py), lines 348–352, 401–423, 597–671). Add readable strategic variation: raiding, fortification or armor pressure, alternate routes and responses to player composition. Telegraph escalating threats through scouting opportunities and appropriate warnings.
+Retain the working economic AI. Its scripted team compositions, expansion recipe and escalation schedules repeat across maps (`tools/genmap.py` of that build, lines 348–352, 401–423, 597–671). Add readable strategic variation: raiding, fortification or armor pressure, alternate routes and responses to player composition. Telegraph escalating threats through scouting opportunities and appropriate warnings.
 
 Test rebuilding after losing economy, power, factory or builder. Test whether the permanent retaliation unlock after the first enemy building kill makes successful harassment feel disproportionately punishing. Do not assume this is broken without match evidence.
 
@@ -92,7 +97,7 @@ There are five geometries mirrored by faction, rather than ten distinct scenario
 
 **Visual thesis:** a readable, stylized near-future conflict with painted material detail, weathered industrial ground and sharply different faction silhouettes. This follows D003/D015 and the existing creative bible.
 
-Establish one current asset specification: model scale, camera/readability target, material and texture budgets, UV conventions, player-color masks, named attachments, animation states, export rules and performance limits. The pipeline currently defers team-color masks ([tools/blender/wp_pipeline.py](../tools/blender/wp_pipeline.py), lines 15–16). Replace the contradictory historical art rules in the creative bible when the new standard is adopted.
+Establish one current asset specification: model scale, camera/readability target, material and texture budgets, UV conventions, player-color masks, named attachments, animation states, export rules and performance limits. The pipeline currently defers team-color masks (`tools/blender/wp_pipeline.py` of that build, lines 15–16). Replace the contradictory historical art rules in the creative bible when the new standard is adopted.
 
 | Order | Asset work | Why this comes first |
 |---|---|---|
@@ -102,7 +107,7 @@ Establish one current asset specification: model scale, camera/readability targe
 | 4 | One portrait system for the whole active roster. | Current shaded 3D cameos and flat geometric icons visibly conflict. Use consistent framing, lighting and role readability. |
 | 5 | Replace remaining placeholder assets by visibility and gameplay role. | Quality improves where players spend attention; new roster breadth waits until the workflow is proven. |
 
-Among imported models, prioritize **Vulture and Outrider**: their source forms read as tanks despite gun-truck and recon roles ([convert_pack_units.py](../tools/blender/convert_pack_units.py), lines 44–53). Give them unmistakable role silhouettes. Mongrel and Zenith can remain until their own quality pass. Retain useful imports while they meet the chosen standard.
+Among imported models, prioritize **Vulture and Outrider**: their source forms read as tanks despite gun-truck and recon roles (the since-removed `tools/blender/convert_pack_units.py`, lines 44–53). Give them unmistakable role silhouettes. Mongrel and Zenith can remain until their own quality pass. Retain useful imports while they meet the chosen standard.
 
 Audio should retain the processed-radio direction and faction writing. Audit the actual mix, then improve weapon layers, movement, production/completion, repair and objective cues, voice repetition and alert priority. Provide separate music/effects/voice levels and text for critical announcements. Source coverage is known, but audio quality was not auditioned in this review. Keep the six current music tracks while proving gameplay; original faction motifs and tension/combat cues become useful once encounter pacing is established.
 
@@ -110,7 +115,7 @@ Production needs an asset registry recording role, source, generator/export vers
 
 ## Scenarios, challenge ladder and campaign
 
-**2026-09-05 update:** [D023](decisions.md#d023--open-mission-access-optional-portable-operation-record-2026-09-05)
+**2026-09-05 update:** [D023](../decisions.md#d023--open-mission-access-optional-portable-operation-record-2026-09-05)
 sets open access for all missions in the account-free browser game. Story order
 is recommended; completion records are optional and can be downloaded/restored.
 This supersedes completion-based unlock rules proposed in the initial audit below.

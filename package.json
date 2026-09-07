@@ -1,9 +1,16 @@
 {
   "name": "war-powers-tools",
   "private": true,
+  "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "test:python": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "gates": "python3 tools/lint_voices.py && python3 tools/validate_gameplay.py && python3 tools/check_content.py",
+    "test:all": "npm test && npm run test:python && npm run gates",
     "check": "python3 tools/check_content.py",
     "stage": "python3 tools/genwebstage.py",
     "serve": "python3 tools/serve.py"

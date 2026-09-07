@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in the game, the build or the tools does not behave as described.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The build identifier is the first thing we look at:
+        open **Settings → Copy diagnostics** in the game and paste the result below.
+        Remove anything personal from it first. Security problems go through the
+        repository's Security tab, not an issue.
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Build identifier and diagnostics
+      description: Paste the output of Settings → Copy diagnostics (build id, browser, boot phases). For a build or tooling bug, paste the commit and the command instead.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      description: Browser name and version, operating system and version, and whether the GPU is integrated or discrete if you know.
+      placeholder: Firefox 143 on Windows 11, integrated GPU
+    validations:
+      required: true
+  - type: input
+    id: scenario
+    attributes:
+      label: Mission, faction and difficulty
+      description: Which mission or skirmish layout, which faction you commanded, and the difficulty. Say "menu" if the problem is outside a battle.
+      placeholder: Skirmish, Ridge, Jackal Front, Standard
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps from the main menu. Mention timings (the in-game clock) and whether a checkpoint was involved.
+      placeholder: |
+        1. Deploy Field Orientation as Meridian.
+        2. Train a Fabricator, place an Exchange, then …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened instead. Screenshots or a short recording help; so does the browser console if the page showed an error code (WP-…).
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often does it happen?
+      options:
+        - Every time
+        - Most of the time
+        - Occasionally
+        - Once so far
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed personal information from the diagnostics and screenshots.
+          required: true

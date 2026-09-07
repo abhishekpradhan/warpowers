@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: MIT
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { sanitizeSettings, readSettings, applyBindings, renderOptions, recordResult, sanitizeProgress, emptyProgress,
-  serializeOperationRecord, restoreOperationRecord, OPERATION_RECORD_MAX_BYTES, mergeProgressRecords,
-  canonicalizeProgress, missionRecord, formatTime, mapLeaf } from '../web/core.js';
+  serializeOperationRecord, restoreOperationRecord, OPERATION_RECORD_MAX_BYTES, OPERATION_RECORD_MAX_LABEL,
+  mergeProgressRecords, canonicalizeProgress, missionRecord, formatTime, mapLeaf,
+  QUALITY_PRESETS, SETTING_RANGES, DEFAULT_SETTINGS, BINDINGS, BINDING_KEYS } from '../web/core.js';
 
 test('blocked or damaged storage never prevents a game boot', () => {
   assert.equal(readSettings({ getItem() { throw new Error('blocked'); } }).master, 80);
@@ -19,7 +21,34 @@ test('key remapping changes only the requested single-key commands', () => {
   assert.match(result, /CommandMap STOP\s+Key = KEY_J/);
   assert.match(result, /CommandMap CREATE_TEAM1\s+Key = KEY_1/);
   assert.match(result, /CommandMap OPTIONS\s+Key = KEY_ESC/);
-  assert.equal(sanitizeSettings({ bindings: { ...bindings, SCATTER: 'J' } }).bindings.STOP, 'S');
+});
+test('a damaged or conflicting stored binding falls back alone; other custom keys survive', () => {
+  const defaults = sanitizeSettings({}).bindings;
+  const conflicting = sanitizeSettings({ bindings: { ...defaults, STOP: 'J', SCATTER: 'J' } }).bindings;
+  assert.equal(conflicting.STOP, 'J');
+  assert.equal(conflicting.SCATTER, 'X', 'the later duplicate returns to its default');
+  const damaged = sanitizeSettings({ bindings: { STOP: 'J', SCATTER: 'F1', VIEW_COMMAND_CENTER: 'Q', TOGGLE_PAUSE: 7 } }).bindings;
+  assert.equal(damaged.STOP, 'J');
+  assert.equal(damaged.SCATTER, 'X');
+  assert.equal(damaged.VIEW_COMMAND_CENTER, 'Q');
+  assert.equal(damaged.TOGGLE_PAUSE, 'P');
+  assert.equal(damaged.SELECT_ALL, 'B', 'a default taken by a custom key moves to the first free key');
+  assert.deepEqual(Object.keys(damaged), Object.keys(BINDINGS));
+  assert.equal(new Set(Object.values(damaged)).size, Object.keys(BINDINGS).length, 'bindings stay unique');
+  assert.ok(Object.values(damaged).every(key => BINDING_KEYS.includes(key)));
+  assert.deepEqual(sanitizeSettings({ bindings: [] }).bindings, defaults);
+});
+test('shared preset and range tables drive settings, options and their bounds', () => {
+  assert.deepEqual(Object.keys(QUALITY_PRESETS), ['performance', 'balanced', 'high']);
+  assert.match(renderOptions({ quality: 'performance' }), /Resolution = 1280 720\nStaticGameLOD = Low/);
+  assert.equal(sanitizeSettings({ quality: 'ultra' }).quality, DEFAULT_SETTINGS.quality);
+  for (const [key, [min, max]] of Object.entries(SETTING_RANGES)) {
+    assert.ok(DEFAULT_SETTINGS[key] >= min && DEFAULT_SETTINGS[key] <= max, key);
+    assert.equal(sanitizeSettings({ [key]: max + 50 })[key], max, key);
+    assert.equal(sanitizeSettings({ [key]: 'x' })[key], DEFAULT_SETTINGS[key], key);
+  }
+  assert.equal(OPERATION_RECORD_MAX_LABEL, '64 KiB');
+  assert.throws(() => restoreOperationRecord(emptyProgress(), ' '.repeat(OPERATION_RECORD_MAX_BYTES + 1)), /64 KiB/);
 });
 test('engine options use bounded supported values', () => {
   assert.match(renderOptions({ quality: 'high', cameraSpeed: 999 }), /Resolution = 1920 1080/);

@@ -1,62 +1,38 @@
-"""Jackal base-loop set + both faction defenses.
+# SPDX-License-Identifier: MIT
+"""Jackal base-loop set.
 
 - JAKRIG01: the Rigger — welded half-truck builder (canon: docs/creative.md)
 - JAKCS01: the Chop Shop — open-sided vehicle garage
-- MERBUL01: the Bulwark — Meridian turret (white drum, steel gun)
-- JAKWP01: the Watchpost — Jackal gun tower
 
-Run: blender --background --python build_jackal_base.py
+The Bulwark (MERBUL01) and Watchpost (JAKWP01) that this kit once carried are
+articulated production assets owned by build_polish.py / support_kit.py.
+
+Run: blender --background --factory-startup --python tools/blender/build_jackal_base.py -- [--data DIR | --scratch DIR]
+Outputs: data/Art/W3D and data/Art/Textures. The Rigger bakes at 256px; the
+Chop Shop bakes at 512px and tools/optimize_art.py halves it to the shipped
+256px atlas.
 """
 import os
 import sys
 
 import bpy
 
-PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
-
-sys.path.insert(0, PLUGIN_REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import io_mesh_w3d  # noqa: E402
-io_mesh_w3d.register()
+from _bootstrap import KIT_PALETTE  # noqa: E402
 import wp_pipeline  # noqa: E402
 
-MODEL_DIR, TEXTURE_DIR = wp_pipeline.output_dirs()
 
-PAL = {
-    'STEEL': (0.722, 0.761, 0.800, 1.0),
-    'WHITE': (0.910, 0.925, 0.941, 1.0),
-    'GOLD': (0.843, 0.706, 0.353, 1.0),
-    'GUN': (0.353, 0.376, 0.408, 1.0),
-    'DARK': (0.290, 0.306, 0.333, 1.0),
-    'TREAD': (0.200, 0.212, 0.231, 1.0),
-    'GLASS': (0.18, 0.24, 0.30, 1.0),
-    'SAND': (0.788, 0.690, 0.541, 1.0),
-    'RUST': (0.541, 0.353, 0.235, 1.0),
-    'OXIDE': (0.435, 0.561, 0.353, 1.0),
-    'GRAPHITE': (0.290, 0.306, 0.333, 1.0),
-    'CHARCOAL': (0.180, 0.192, 0.220, 1.0),
-}
-
-
-def build(name, atlas, tga_name, fn, **comp):
-    # Articulated defenses moved to the production kit. This retained base
-    # builder may still regenerate Rigger/Chop Shop without regressing them.
-    if name in ('MERBUL01','JAKWP01'):
-        print(name+' is owned by build_polish.py; skipped')
-        return
+def build(name, atlas, tga_name, fn, model_dir, texture_dir, **comp):
     wp_pipeline.reset_scene()
-    k = wp_pipeline.Kit(PAL, roughness=0.92)
+    k = wp_pipeline.Kit(KIT_PALETTE, roughness=0.92)
     fn(k)
     obj = k.join(name)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    if wp_pipeline.maybe_portrait_exit(obj, tga_name.replace('wp_', '')):
-        return
     wp_pipeline.smart_uv(obj, 0.006)
     diff, ao, mask = wp_pipeline.bake_images(obj, atlas)
-    tga = os.path.join(TEXTURE_DIR, tga_name + '.tga')
+    tga = os.path.join(texture_dir, tga_name + '.tga')
     wp_pipeline.composite(diff, ao, mask, atlas, tga, **comp)
-    wp_pipeline.export_w3d(obj, tga, os.path.join(MODEL_DIR, name.lower() + '.w3d'), tga_name)
+    wp_pipeline.export_w3d(obj, tga, os.path.join(model_dir, name.lower() + '.w3d'), tga_name)
     print(name + '_EXPORT_OK')
 
 
@@ -102,42 +78,15 @@ def chopshop(k):
     k.box('SIGN', 'OXIDE', 0, -14.5, 13.0, 10, 0.5, 3.0, rot=(0, 0, 0.04))
 
 
-# ---------- Bulwark: Meridian turret ----------
-def bulwark(k):
-    k.box('PAD', 'DARK', 0, 0, 0.9, 16, 16, 1.8, bevel=0.5)
-    k.cyl('DRUM', 'WHITE', 0, 0, 4.4, 6.2, 5.2, verts=12)
-    k.cyl('TRIM', 'GOLD', 0, 0, 7.2, 6.4, 0.8, verts=12)
-    k.box('HEAD', 'STEEL', 0, 0, 9.2, 7.5, 6.5, 3.4, bevel=0.5)
-    k.cyl('BARREL', 'GUN', 6.4, 0, 9.2, 0.55, 8.0, axis='X', verts=10)
-    k.cyl('BRAKE', 'GUN', 10.0, 0, 9.2, 0.8, 1.2, axis='X', verts=10)
-    k.box('SENSOR', 'GLASS', 2.4, 2.6, 11.2, 1.6, 1.4, 0.9)
-    k.cyl('ANT', 'DARK', -2.6, -2.4, 11.8, 0.12, 2.4, verts=6)
+def main():
+    model_dir, texture_dir = wp_pipeline.output_dirs()
+    build('JAKRIG01', 256, 'wp_rigger', rigger, model_dir, texture_dir,
+          seed=51, shade_lo=0.50, shade_hi=0.50, grain=0.03, edge_strength=0.5, edge_radius=1)
+    build('JAKCS01', 512, 'wp_jakcs', chopshop, model_dir, texture_dir,
+          seed=52, shade_lo=0.50, shade_hi=0.50, grain=0.028, edge_strength=0.5,
+          edge_radius=2, lowfreq=0.05)
+    print('JACKAL_BASE_SET_OK')
 
 
-# ---------- Watchpost: Jackal gun tower ----------
-def watchpost(k):
-    k.box('PAD', 'CHARCOAL', 0, 0, 0.8, 14, 14, 1.6, bevel=0.4)
-    for i, (lx, ly) in enumerate(((-3.4, -3.4), (3.4, -3.4), (-3.4, 3.4), (3.4, 3.4))):
-        k.box(f'LEG{i}', 'GRAPHITE', lx, ly, 6.5, 1.2, 1.2, 11)
-    k.box('BRACE1', 'GRAPHITE', 0, -3.5, 5.5, 6.8, 0.5, 0.8)
-    k.box('BRACE2', 'GRAPHITE', -3.5, 0, 8.5, 0.5, 6.8, 0.8)
-    k.box('DECK', 'SAND', 0, 0, 12.6, 10.5, 10.5, 1.2)
-    for nm, dx, dy, sx, sy in (('N', 0, 4.8, 10.5, 0.7), ('S', 0, -4.8, 10.5, 0.7),
-                               ('E', 4.8, 0, 0.7, 9.0), ('W', -4.8, 0, 0.7, 9.0)):
-        k.box(f'WALL{nm}', 'RUST', dx, dy, 14.4, sx, sy, 2.4)
-    k.box('GUNMOUNT', 'GUN', 0, 0, 15.4, 2.4, 2.4, 1.4)
-    k.cyl('GUN1', 'CHARCOAL', 3.2, 0.7, 15.7, 0.32, 5.0, axis='X', verts=8)
-    k.cyl('GUN2', 'CHARCOAL', 3.2, -0.7, 15.7, 0.32, 5.0, axis='X', verts=8)
-    k.box('TARP', 'OXIDE', -2.5, 2.5, 16.2, 4.5, 3.5, 0.6, rot=(0.05, -0.06, 0.1))
-
-
-build('JAKRIG01', 256, 'wp_rigger', rigger,
-      seed=51, shade_lo=0.50, shade_hi=0.50, grain=0.03, edge_strength=0.5, edge_radius=1)
-build('JAKCS01', 256, 'wp_jakcs', chopshop,
-      seed=52, shade_lo=0.50, shade_hi=0.50, grain=0.028, edge_strength=0.5,
-      edge_radius=2, lowfreq=0.05)
-build('MERBUL01', 256, 'wp_bulwark', bulwark,
-      seed=53, grain=0.018, edge_strength=0.5, edge_radius=1)
-build('JAKWP01', 256, 'wp_watchpost', watchpost,
-      seed=54, shade_lo=0.50, shade_hi=0.50, grain=0.028, edge_strength=0.5, edge_radius=1)
-print('JACKAL_BASE_SET_OK')
+if __name__ == '__main__':
+    main()

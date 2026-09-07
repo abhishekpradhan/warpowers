@@ -94,7 +94,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 512
   },
   "wprock01": {
     "model": "WPROCK01",
@@ -119,7 +120,8 @@
     "role": "environment",
     "required_states": [
       "default"
-    ]
+    ],
+    "bake_size": 256
   },
   "jakvul01": {
     "turret": [
@@ -216,7 +218,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 512
   },
   "jaktank01": {
     "turret": [
@@ -286,7 +289,8 @@
       "player-color",
       "recoil"
     ],
-    "texture_size": 512
+    "texture_size": 512,
+    "bake_size": 512
   },
   "merzen01": {
     "turret": [
@@ -395,7 +399,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 512
   },
   "wpscrap01": {
     "model": "WPSCRAP01",
@@ -420,7 +425,8 @@
     "role": "environment",
     "required_states": [
       "default"
-    ]
+    ],
+    "bake_size": 512
   },
   "wprelay01": {
     "model": "WPRELAY01",
@@ -445,7 +451,8 @@
     "role": "environment",
     "required_states": [
       "default"
-    ]
+    ],
+    "bake_size": 512
   },
   "wpwall01": {
     "model": "WPWALL01",
@@ -470,7 +477,8 @@
     "role": "environment",
     "required_states": [
       "default"
-    ]
+    ],
+    "bake_size": 256
   },
   "merhaul01": {
     "bones": {
@@ -558,7 +566,8 @@
       "player-color",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "jakhaul01": {
     "bones": {
@@ -646,7 +655,8 @@
       "player-color",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "merinf02": {
     "bones": {
@@ -743,7 +753,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "jakinf02": {
     "bones": {
@@ -840,7 +851,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "merroc01": {
     "bones": {
@@ -937,7 +949,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "jakroc01": {
     "bones": {
@@ -1034,7 +1047,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "mersct01": {
     "bones": {
@@ -1131,7 +1145,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "jaksct01": {
     "bones": {
@@ -1228,7 +1243,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "merhvy01": {
     "bones": {
@@ -1325,7 +1341,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "jakhvy01": {
     "bones": {
@@ -1422,7 +1439,8 @@
       "move",
       "attack",
       "death"
-    ]
+    ],
+    "bake_size": 512
   },
   "mertank01": {
     "turret": [
@@ -1492,7 +1510,8 @@
       "player-color",
       "recoil"
     ],
-    "texture_size": 512
+    "texture_size": 512,
+    "bake_size": 512
   },
   "mertank01d": {
     "turret": [
@@ -1563,7 +1582,8 @@
       "player-color",
       "recoil"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "jaktank01d": {
     "turret": [
@@ -1634,7 +1654,8 @@
       "player-color",
       "recoil"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "merout01d": {
     "turret": [
@@ -1732,7 +1753,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "jakvul01d": {
     "turret": [
@@ -1830,7 +1852,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "merzen01d": {
     "turret": [
@@ -1940,7 +1963,8 @@
       "recoil",
       "wheel-motion"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "wpwreck01": {
     "lifecycle": "wreck",
@@ -1966,7 +1990,8 @@
     "required_states": [
       "default"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "wpwreck02": {
     "lifecycle": "wreck",
@@ -1992,7 +2017,8 @@
     "required_states": [
       "default"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "wpruin01": {
     "lifecycle": "rubble",
@@ -2018,7 +2044,8 @@
     "required_states": [
       "default"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "wpruin02": {
     "lifecycle": "rubble",
@@ -2044,7 +2071,8 @@
     "required_states": [
       "default"
     ],
-    "texture_size": 256
+    "texture_size": 256,
+    "bake_size": 256
   },
   "merjet01": {
     "asset_role": "aircraft",
@@ -2081,7 +2109,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merjet02": {
     "asset_role": "aircraft",
@@ -2118,7 +2147,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakjet01": {
     "asset_role": "aircraft",
@@ -2155,7 +2185,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakjet02": {
     "asset_role": "aircraft",
@@ -2192,7 +2223,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakpwr01": {
     "asset_role": "structure",
@@ -2229,7 +2261,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merpad01": {
     "asset_role": "structure",
@@ -2266,7 +2299,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakpad01": {
     "asset_role": "structure",
@@ -2303,7 +2337,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merex01": {
     "asset_role": "structure",
@@ -2340,7 +2375,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakex01": {
     "asset_role": "structure",
@@ -2377,7 +2413,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "mertech01": {
     "asset_role": "structure",
@@ -2414,7 +2451,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jaktech01": {
     "asset_role": "structure",
@@ -2451,7 +2489,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "meraa01": {
     "asset_role": "structure",
@@ -2500,7 +2539,8 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakaa01": {
     "asset_role": "structure",
@@ -2549,7 +2589,8 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merpill01": {
     "asset_role": "structure",
@@ -2586,7 +2627,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakpill01": {
     "asset_role": "structure",
@@ -2623,7 +2665,8 @@
       "default"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merart01": {
     "asset_role": "structure",
@@ -2672,7 +2715,8 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakart01": {
     "asset_role": "structure",
@@ -2721,7 +2765,8 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "merbul01": {
     "asset_role": "structure",
@@ -2770,7 +2815,8 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   },
   "jakwp01": {
     "asset_role": "structure",
@@ -2819,6 +2865,7 @@
       "player-color"
     ],
     "texture_size": 256,
-    "geometry_source": "tools/blender/support_kit.py"
+    "geometry_source": "tools/blender/support_kit.py",
+    "bake_size": 256
   }
 }

@@ -1,50 +1,34 @@
+# SPDX-License-Identifier: MIT
 """Meridian base-loop set: Fabricator (dozer), Power Array, Vehicle Plant
 (asset IDs keep the original Surveyor-era naming).
 
 Three models through the shared pipeline in one headless run.
-Run: blender --background --python build_meridian_base.py
-Outputs: data/Art/W3D and data/Art/Textures; --data or --scratch selects an explicit destination.
+Run: blender --background --factory-startup --python tools/blender/build_meridian_base.py -- [--data DIR | --scratch DIR]
+Outputs: data/Art/W3D and data/Art/Textures. The Fabricator bakes at 256px;
+the two buildings bake at 512px and tools/optimize_art.py halves them to the
+shipped 256px atlases.
 """
 import os
 import sys
 
 import bpy
 
-PLUGIN_REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           '..', '..', 'engine', 'references', 'OpenSAGE.BlenderPlugin')
-
-sys.path.insert(0, PLUGIN_REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import io_mesh_w3d  # noqa: E402
-io_mesh_w3d.register()
+from _bootstrap import KIT_PALETTE  # noqa: E402
 import wp_pipeline  # noqa: E402
 
-MODEL_DIR, TEXTURE_DIR = wp_pipeline.output_dirs()
 
-PAL = {
-    'STEEL': (0.722, 0.761, 0.800, 1.0),
-    'WHITE': (0.910, 0.925, 0.941, 1.0),
-    'GOLD': (0.843, 0.706, 0.353, 1.0),
-    'GUN': (0.353, 0.376, 0.408, 1.0),
-    'DARK': (0.290, 0.306, 0.333, 1.0),
-    'TREAD': (0.200, 0.212, 0.231, 1.0),
-    'GLASS': (0.18, 0.24, 0.30, 1.0),
-}
-
-
-def build(name, atlas, tga_name, w3d_name, fn, **comp):
+def build(name, atlas, tga_name, w3d_name, fn, model_dir, texture_dir, **comp):
     wp_pipeline.reset_scene()
-    k = wp_pipeline.Kit(PAL)
+    k = wp_pipeline.Kit(KIT_PALETTE)
     fn(k)
     obj = k.join(name)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    if wp_pipeline.maybe_portrait_exit(obj, tga_name.replace('wp_', '')):
-        return
     wp_pipeline.smart_uv(obj, 0.006)
     diff, ao, mask = wp_pipeline.bake_images(obj, atlas)
-    tga = os.path.join(TEXTURE_DIR, tga_name + '.tga')
+    tga = os.path.join(texture_dir, tga_name + '.tga')
     wp_pipeline.composite(diff, ao, mask, atlas, tga, **comp)
-    wp_pipeline.export_w3d(obj, tga, os.path.join(MODEL_DIR, w3d_name + '.w3d'), tga_name)
+    wp_pipeline.export_w3d(obj, tga, os.path.join(model_dir, w3d_name + '.w3d'), tga_name)
     print(name + '_EXPORT_OK')
 
 
@@ -109,10 +93,16 @@ def factory(k):
     k.box('VENT', 'GUN', 8, 13, 17.6, 6.0, 3.0, 1.2, bevel=0.3)
 
 
-build('MERSUV01', 256, 'wp_surveyor', 'mersuv01', surveyor,
-      seed=21, grain=0.02, edge_strength=0.5, edge_radius=1)
-build('MERPP01', 256, 'wp_merpp', 'merpp01', power,
-      seed=22, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
-build('MERWF01', 256, 'wp_merwf', 'merwf01', factory,
-      seed=23, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
-print('MERIDIAN_BASE_SET_OK')
+def main():
+    model_dir, texture_dir = wp_pipeline.output_dirs()
+    build('MERSUV01', 256, 'wp_surveyor', 'mersuv01', surveyor, model_dir, texture_dir,
+          seed=21, grain=0.02, edge_strength=0.5, edge_radius=1)
+    build('MERPP01', 512, 'wp_merpp', 'merpp01', power, model_dir, texture_dir,
+          seed=22, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
+    build('MERWF01', 512, 'wp_merwf', 'merwf01', factory, model_dir, texture_dir,
+          seed=23, grain=0.018, edge_strength=0.45, edge_radius=2, lowfreq=0.035)
+    print('MERIDIAN_BASE_SET_OK')
+
+
+if __name__ == '__main__':
+    main()

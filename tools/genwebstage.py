@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Assemble a reproducible, content-addressed browser release from repo sources.
 
 The manifest maps engine paths to immutable asset URLs. A separate build.json
@@ -39,7 +40,7 @@ def read_notices(root: Path) -> dict[str, bytes]:
     files = {
         'CREDITS.md': root / 'CREDITS.md', 'ASSETS.md': root / 'ASSETS.md',
         # Preserve the browser download URL when the repository guide is renamed.
-        'LICENSING.md': root / 'LICENSE.md', 'LICENSE.txt': root / 'LICENSE',
+        'LICENSING.md': root / 'LICENSING.md', 'LICENSE.txt': root / 'LICENSE',
         'ENGINE-LICENSE.md': root / 'engine/LICENSE.md',
         'DVIJOKE-LICENSE.txt': root / 'dvijoke/LICENSE',
         'FONT-LICENSE.txt': root / 'data/Fonts/LICENSE-LiberationFonts',

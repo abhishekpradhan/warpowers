@@ -7,7 +7,7 @@ under GPL-3.0 with EA's additional terms and the applicable dependency notices.
 [ASSETS.md](ASSETS.md) records content provenance and per-file licenses;
 [CREDITS.md](CREDITS.md) carries acknowledgements. The browser code dependency
 inventory and notice files are linked from [licenses/third-party.json](licenses/third-party.json).
-Policy decisions D019 and D022 are recorded in [docs/decisions.md](docs/decisions.md).
+Policy decisions D019, D022 and D025 are recorded in [docs/decisions.md](docs/decisions.md).
 
 ## Our code — MIT
 
@@ -40,13 +40,13 @@ ND imports that cannot be adapted and shared through our pipeline are excluded.
 | Import | License | Notes |
 |---|---|---|
 | Six music tracks by Kevin MacLeod (incompetech.com) | CC BY 4.0 | Re-encoded/trimmed for the browser; track credits and changes in ASSETS.md and CREDITS.md |
-| Quaternius models in `refs/quaternius-tanks/` | CC0 1.0 | Historical prototype references; current production models are project-authored replacements and these references are not staged |
+| Quaternius "Tanks" pack (historical, formerly `refs/quaternius-tanks/`) | CC0 1.0 | Prototype references only; replaced by project-authored models on 2026-09-05 and removed from the tree on 2026-09-07 (retained in git history) |
 | Liberation Sans in `data/Fonts/` | SIL OFL 1.1 | Copyright and license at `data/Fonts/LICENSE-LiberationFonts` |
 
 The former `data/Window/Menus/ExtrasMenu.wnd` was copied verbatim from the GPL
 engine repository, not merely authored using the same format. It was incorrectly
 included in the original-content declaration. The unused root copy was removed
-from the unreleased dataset on 2026-09-05; ASSETS.md preserves its provenance.
+from the dataset on 2026-09-05; ASSETS.md preserves its provenance.
 Historical copies remain GPL licensed. The engine repository retains its own copy.
 
 ## Code from other projects
@@ -73,12 +73,10 @@ Repository or file-format boundaries alone do not establish a license exception.
 
 ## Source for a public browser release
 
-The project is unreleased. The owner plans to deploy manually to Vercel and
-publish the Git repositories afterward. The corresponding source must be
-accessible to recipients **from the first public playable deployment**. If the
-repositories are still private, publish a complete immutable source archive
-first and link it from the game's credits. Making the repositories public
-before the playable deployment is another option.
+The corresponding source must be accessible to recipients **from the first
+public playable deployment**. Publish the repositories, or a complete
+immutable source archive linked from the game's credits, before or together
+with the first playable deployment — never afterwards.
 
 The source package must cover the distributed engine, vendored renderer,
 required dependency source and build scripts/instructions. Record the exact
@@ -95,5 +93,5 @@ archive matches the binary or is complete.
 
 Before release, validate a clean rebuild from the source package and download
 the source and notices without signing in. Preserve the source for every
-distributed build. The remaining checks are in
-[docs/publish-checklist.md](docs/publish-checklist.md).
+distributed build. The step-by-step process is in [RELEASING.md](RELEASING.md);
+the dependency inventory is explained in [licenses/README.md](licenses/README.md).

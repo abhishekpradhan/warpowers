@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """War Powers audio pack — synthesized SFX + processed-radio unit VO.
 
 Everything is original: weapon/explosion sounds are pure DSP; voice barks are
 eSpeak NG synthesis (output unencumbered) pushed through a radio chain
 (bandpass, soft clip, noise floor, squelch clicks) per the D014 VO direction —
 "processed radio barks: any voice usable, personality lives in the writing."
+
+External dependency: the eSpeak NG command-line synthesizer (``espeak-ng``,
+https://github.com/espeak-ng/espeak-ng) for every voice line. It is located
+from --espeak, then the ESPEAK_NG environment variable, then PATH, then the
+Homebrew default /opt/homebrew/bin/espeak-ng. The DSP sounds need nothing
+beyond the Python standard library. Voice output is not promised to be
+byte-identical across eSpeak NG versions or voice-variant data.
 
 Outputs 22050 Hz 16-bit mono WAVs into data/Data/Audio/Sounds/ (repo).
 A second output directory requires --runtime. Run: python3 tools/gensfx.py
@@ -23,7 +31,17 @@ SR = 22050
 REPO = None
 RUNTIME = None
 ONLY_PREFIX = ()
-ESPEAK = shutil.which('espeak-ng') or '/opt/homebrew/bin/espeak-ng'
+ESPEAK_DEFAULT = '/opt/homebrew/bin/espeak-ng'   # Homebrew on Apple silicon; a documented candidate, not a requirement
+ESPEAK = None
+
+
+def find_espeak(explicit=None):
+    """Resolve the eSpeak NG binary: --espeak, $ESPEAK_NG, PATH, Homebrew default."""
+    for candidate in (explicit, os.environ.get('ESPEAK_NG'), shutil.which('espeak-ng'), ESPEAK_DEFAULT):
+        if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    raise SystemExit('eSpeak NG is required for the voice lines: install espeak-ng and pass --espeak PATH '
+                     'or set ESPEAK_NG (see tools/README.md).')
 
 # ---------------- DSP helpers ----------------
 
@@ -132,15 +150,18 @@ def impact(seed):
 def tts(text, voice, pitch, speed):
     with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
         tmp = f.name
-    subprocess.run([ESPEAK, '-v', voice, '-p', str(pitch), '-s', str(speed),
-                    '-a', '160', '-w', tmp, text], check=True)
-    with wave.open(tmp, 'rb') as w:
-        sr = w.getframerate()
-        raw = w.readframes(w.getnframes())
-    os.unlink(tmp)
+    try:
+        subprocess.run([ESPEAK, '-v', voice, '-p', str(pitch), '-s', str(speed),
+                        '-a', '160', '-w', tmp, text], check=True)
+        with wave.open(tmp, 'rb') as w:
+            sr = w.getframerate()
+            raw = w.readframes(w.getnframes())
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
     x = [struct.unpack_from('<h', raw, i * 2)[0] / 32768.0
          for i in range(len(raw) // 2)]
-    if sr != SR:   # linear resample
+    if sr != SR:   # nearest-neighbour resample (sample-and-hold, no interpolation)
         ratio = sr / SR
         x = [x[min(len(x) - 1, int(i * ratio))] for i in range(int(len(x) / ratio))]
     return x
@@ -541,15 +562,19 @@ def generate_pack():
     print('audio pack complete')
 
 def main(argv=None):
-    global REPO, RUNTIME, ONLY_PREFIX
-    _parser = argparse.ArgumentParser(description=__doc__)
-    _parser.add_argument('--data', default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data'))
+    global REPO, RUNTIME, ONLY_PREFIX, ESPEAK
+    _parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    _parser.add_argument('--data', default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data'),
+                         help='dataset root; writes Data/Audio/Sounds/*.wav (default: the repository data/)')
     _parser.add_argument('--runtime', help='Optional explicit second output directory')
     _parser.add_argument('--only-prefix', default='', help='Comma-separated filename prefixes for incremental generation')
+    _parser.add_argument('--espeak', help='eSpeak NG binary (default: $ESPEAK_NG, then espeak-ng on PATH, then '
+                         + ESPEAK_DEFAULT + ')')
     _args = _parser.parse_args(argv)
     REPO = os.path.join(_args.data, 'Data', 'Audio', 'Sounds')
     RUNTIME = _args.runtime
     ONLY_PREFIX = tuple(p for p in _args.only_prefix.split(',') if p)
+    ESPEAK = find_espeak(_args.espeak)
     generate_pack()
 
 if __name__ == "__main__":

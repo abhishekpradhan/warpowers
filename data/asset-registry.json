@@ -804,6 +804,18 @@
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
     },
     {
+      "id": "wprkt01",
+      "path": "data/Art/W3D/wprkt01.w3d",
+      "triangles": 60,
+      "bytes": 6640,
+      "textures": [],
+      "source": "See ASSETS.md and tools/ generators",
+      "productionStatus": "existing-content",
+      "turret": false,
+      "muzzle": false,
+      "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
+    },
+    {
       "id": "wprock01",
       "path": "data/Art/W3D/wprock01.w3d",
       "triangles": 120,

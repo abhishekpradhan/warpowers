@@ -44,7 +44,8 @@ Specific source records:
   checked against the local upstream `v2.6` Git tag.
 
 Before releasing a different engine build, compare its fetched dependencies and
-SDK version with this inventory and update the notices when needed. In
+SDK version with this inventory and update the notices when needed (the release
+process in [RELEASING.md](../RELEASING.md) has this as its first step). In
 particular, the current engine build fetches miniaudio from `master`; its audited
 header version and SHA-256 are recorded in the manifest. This static inventory
 does not pin that download or prove the provenance of a future build. Do not

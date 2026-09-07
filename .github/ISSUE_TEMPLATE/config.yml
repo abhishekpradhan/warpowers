@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing guide
+    url: https://github.com/abhishekpradhan/warpowers/blob/main/CONTRIBUTING.md
+    about: Toolchain, build recipe, the local test and gate list, and what a good pull request looks like.
+  - name: Security report
+    url: https://github.com/abhishekpradhan/warpowers/security/advisories/new
+    about: Report a vulnerability privately through GitHub instead of opening an issue.

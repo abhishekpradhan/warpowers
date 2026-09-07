@@ -1,0 +1,32 @@
+# EditorConfig for the War Powers root repository (https://editorconfig.org).
+# The engine submodule carries its own .editorconfig; the vendored renderer
+# under dvijoke/ keeps its upstream formatting.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{js,mjs,css,html,json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.md]
+# Two trailing spaces are a Markdown line break.
+trim_trailing_whitespace = false
+
+[*.{ini,str,wnd}]
+# Game data files follow the engine's parser expectations.
+trim_trailing_whitespace = false
+
+[dvijoke/**]
+# Vendored upstream code keeps its own formatting.
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+indent_style = unset

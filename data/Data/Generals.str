@@ -1007,6 +1007,26 @@ WP:OrdersLabel
 "ORDERS"
 END
 
+WP:HudUnitsSelected
+"%d UNITS SELECTED"
+END
+
+WP:HudHealth
+"HEALTH  %d / %d"
+END
+
+WP:HudArmySummary
+"%d UNITS  /  %d STRUCTURES"
+END
+
+WP:HudControlsHint
+"%sIDLE BUILDER  /  %sHEADQUARTERS"
+END
+
+WP:HudPower
+"POWER  %d / %d"
+END
+
 WP:PowerReady
 "POWER READY"
 END
@@ -1205,4 +1225,16 @@ END
 
 TOOLTIP:SupplyWarehouse
 "\nSupplies remaining: $%d"
+END
+
+WP:Civilian
+"Civilians"
+END
+
+WP:Observer
+"Observer"
+END
+
+WP:Faction
+"Faction"
 END

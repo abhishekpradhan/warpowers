@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
-"""Serve a staged War Powers build locally with release-equivalent cache rules."""
+# SPDX-License-Identifier: MIT
+"""Serve a staged War Powers build locally with release-equivalent cache rules.
+
+python3 tools/serve.py [--directory webstage] [--port 8322] [--host 127.0.0.1]
+Directory listings are refused (404) like the production host; only files
+named by the build manifest and the page are served.
+"""
 import argparse
 from functools import partial
+from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -24,6 +31,11 @@ class GameHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return
         super().do_GET()
+
+    def list_directory(self, path):
+        # A release host never enumerates the content-addressed asset store.
+        self.send_error(HTTPStatus.NOT_FOUND, 'Directory listing is not available')
+        return None
 
     def log_message(self, fmt, *args):
         if len(args) > 1 and str(args[1]) not in ('200', '304'):

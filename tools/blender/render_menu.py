@@ -1,6 +1,7 @@
+# SPDX-License-Identifier: MIT
 """Render the original War Powers checkpoint tableau used behind the shell.
 
-blender --background --python tools/blender/render_menu.py -- --data data
+blender --background --factory-startup --python tools/blender/render_menu.py -- --data data
 All geometry comes from our runtime asset authorship functions. No stock art.
 """
 import argparse
@@ -11,12 +12,14 @@ import sys
 import bpy
 from mathutils import Vector
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from build_polish import ROOT, ASSETS, Kit, pipe
+from _bootstrap import ROOT, script_args  # noqa: E402
+from build_polish import ASSETS, Kit, pipe  # noqa: E402
 
-def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--data',type=Path,default=ROOT/'data')
-    ap.add_argument('--review',type=Path,default=Path('/tmp/warpowers-art-review'))
-    args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+def main(argv=None):
+    ap=argparse.ArgumentParser(description='Render the main-menu panorama from the production model kit (run inside Blender).')
+    ap.add_argument('--data',type=Path,default=ROOT/'data',help='dataset root; writes Art/Textures/wp_menu.tga and the WPMenuArt mapping')
+    ap.add_argument('--review',type=Path,default=Path('/tmp/warpowers-art-review'),help='JPEG contact sheet destination')
+    args=ap.parse_args(script_args(argv))
     args.data=args.data.resolve();args.review.mkdir(parents=True,exist_ok=True)
     pipe.reset_scene()
     for blocks in (bpy.data.cameras,bpy.data.lights,bpy.data.armatures):
@@ -27,7 +30,7 @@ def main():
         o.location=(x,y,0);o.rotation_euler.z=rotation;o.scale=(scale,)*3
         return o
     # Original terrain material: broad wind-scour + restrained fine grain.
-    mat=bpy.data.materials.new('Meridian corridor');mat.use_nodes=True
+    mat=bpy.data.materials.new('Meridian corridor')
     nt=mat.node_tree;b=nt.nodes['Principled BSDF'];b.inputs['Roughness'].default_value=.97
     noise=nt.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=.14;noise.inputs['Detail'].default_value=3
     ramp=nt.nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].color=(.115,.12,.10,1)
@@ -74,7 +77,7 @@ def main():
     scene.cycles.use_denoising=True;scene.render.resolution_x=1024;scene.render.resolution_y=512
     scene.render.resolution_percentage=100;scene.render.film_transparent=False
     scene.view_settings.view_transform='AgX';scene.view_settings.look='AgX - Medium High Contrast';scene.view_settings.exposure=.55
-    world=scene.world or bpy.data.worlds.new('Dawn');scene.world=world;world.use_nodes=True
+    world=scene.world or bpy.data.worlds.new('Dawn');scene.world=world
     world.node_tree.nodes['Background'].inputs[0].default_value=(.30,.40,.46,1)
     world.node_tree.nodes['Background'].inputs[1].default_value=.5
     sun=bpy.data.lights.new('Low morning sun','SUN');sun.energy=2.5;sun.angle=.085;sun.color=(1,.77,.48)
@@ -85,7 +88,7 @@ def main():
     cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();scene.camera=cam
     # Real volumetric distance haze makes large neutral forms recede naturally.
     bpy.ops.mesh.primitive_cube_add(size=1,location=(0,40,25));fog=bpy.context.object;fog.scale=(560,540,150)
-    fmat=bpy.data.materials.new('Distance haze');fmat.use_nodes=True;fmat.node_tree.nodes.clear()
+    fmat=bpy.data.materials.new('Distance haze');fmat.node_tree.nodes.clear()
     volume=fmat.node_tree.nodes.new('ShaderNodeVolumeScatter');volume.inputs['Density'].default_value=.0022
     volume.inputs['Color'].default_value=(.63,.65,.60,1);volume.inputs['Anisotropy'].default_value=.3
     out=fmat.node_tree.nodes.new('ShaderNodeOutputMaterial');fmat.node_tree.links.new(volume.outputs[0],out.inputs['Volume'])

@@ -1,0 +1,80 @@
+# GitHub Actions are disabled at the repository level until the public
+# release, so this workflow does not run yet. Enable Actions in the repository
+# settings as part of the release (see RELEASING.md); no other change is needed.
+#
+# Builds the WebAssembly engine with the pinned Emscripten release, stages the
+# browser bundle exactly as a contributor would, and uploads webstage/ as a
+# workflow artifact. Runs on demand and once a week so toolchain or dependency
+# drift is noticed before a release. It never deploys anything.
+
+name: WebAssembly build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1" # Mondays 04:17 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasm-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  wasm:
+    name: Build and stage
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out with the engine submodule
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The browser build needs only the engine; its nested submodules
+          # (DXVK, the Blender plugin) serve native development and art.
+          submodules: true
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build
+
+      - name: Set up Emscripten 6.0.8
+        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
+        with:
+          version: 6.0.8
+          actions-cache-folder: emsdk-cache
+
+      - name: Show toolchain
+        run: |
+          emcc --version | head -n 1
+          cmake --version | head -n 1
+          ninja --version
+
+      - name: Configure (wasm preset, production build without the harness)
+        working-directory: engine
+        run: emcmake cmake --preset wasm
+
+      - name: Build GeneralsXZH.js
+        working-directory: engine
+        run: cmake --build build/wasm --target GeneralsXZH.js
+
+      - name: Stage the browser bundle (runs the content gates)
+        run: python3 tools/genwebstage.py
+
+      - name: Record the build identifier
+        run: |
+          python3 -c "import json; b = json.load(open('webstage/build.json')); print('build', b['id'], 'data files', b['dataFiles'])"
+
+      - name: Upload webstage
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: webstage-${{ github.sha }}
+          path: webstage/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,6 +1,11 @@
 # OS noise
 .DS_Store
 
+# Editor and assistant state
+.claude/
+.vscode/
+.idea/
+
 # Build / tooling output
 node_modules/
 dist/
@@ -11,15 +16,12 @@ build/
 # (zero-retail rule: no EA-derived bytes enter this repo, ever)
 /gamedata-local/
 webstage/
+webstage-*/
 __pycache__/
 
-# Local credentials, editor state and test output
+# Local credentials, virtual environments and personal saves
 .env
 .env.*
 !.env.example
 .venv/
-.pytest_cache/
-coverage/
-playwright-report/
-test-results/
 *.sav

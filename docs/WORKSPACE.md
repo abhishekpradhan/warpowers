@@ -1,101 +1,73 @@
-# Workspace map — what lives where
+# Workspace map
 
-One page to answer "where is that and where does it push." The workspace is
-one git repo with one submodule (the engine); everything on disk that git
-does not track is generated output.
+Where things live and where they push. The workspace is one Git repository
+with one submodule (the engine), which in turn carries two nested submodules:
+DXVK (native macOS) and OpenSAGE.BlenderPlugin (art regeneration). Everything
+on disk that Git does not track is generated output.
 
-## Directory layout (this repo: `warpowers`)
+## Directory layout
 
-| Path | What it is | Tracked? |
+| Path | What it is | Tracked |
 |---|---|---|
-| `data/` | Original game rules, maps, models, textures, audio and layouts, plus attributed music and fonts | yes (project content CC BY 4.0; imports retain their licenses) |
-| `tools/` | Generators + gates: genmap, genwnd, genw3d, genrig, gentex, gensfx, genicons2, gencmdicons, genportraitsheet, genwebstage, lint_voices, tgadiff; `tools/blender/` hero-asset scripts | yes (MIT) |
-| `web/` | Loader + browser HUD, settings, field manual, operation record and persistent checkpoints | yes (MIT) |
-| `docs/` | vision, roadmap, decisions, engine-notes (landmine log), publish-checklist, parity, creative, perf, this file | yes |
-| `engine/` | **Submodule** → GeneralsX fork (GPL-3.0). Native + wasm engine source and build trees | gitlink |
-| `dvijoke/` | **Vendored inline** (MIT, upstream meerzulee/dvijoke; full history subtree-merged 2026-08-31 from warpowers-dvijoke @ ba6791de). `d8web/` is the D3D8→WebGL2 layer the wasm build compiles in (`engine/cmake/wasm-deps.cmake` references `../dvijoke/d8web`) | yes (MIT; its own LICENSE) |
-| `refs/` | Historical third-party source packs; retained provenance/reference inputs, excluded from web staging | yes |
-| `webstage/` | **Generated** web bundle (engine wasm + gamedata + page), output of `tools/genwebstage.py`. Serve this dir to play | ignored |
+| `data/` | Original game rules (INI), maps, models, textures, audio, layouts and strings, plus the attributed music and font | yes — CC BY 4.0 for project content; imports keep their licenses |
+| `web/` | Loader page, in-match HUD, settings, field manual, operation record, checkpoints, credits page | yes — MIT |
+| `tools/` | Generators (maps, layouts, models, rigs, textures, audio, icons, portraits), validators, the stager and the local server; `tools/blender/` holds the asset scripts | yes — MIT |
+| `tests/` | Web-state tests (`*.test.mjs`) and the packaging and tool tests (`test_*.py`) | yes — MIT |
+| `docs/` | Design and engineering documents; see [README.md](README.md) | yes — MIT |
+| `licenses/` | Browser dependency inventory (`third-party.json`) and notice files | yes |
+| `dvijoke/` | Vendored `d8web` renderer (D3D8 → WebGL2), subtree-merged with its full history (decision D020); `engine/cmake/wasm-deps.cmake` references `../dvijoke/d8web` | yes — MIT, own `LICENSE` |
+| `engine/` | The GeneralsX engine fork: native and WebAssembly sources, build presets, QA fixtures | submodule (gitlink) — GPL-3.0 with EA's additional terms |
+| `webstage/` | Generated browser bundle from `tools/genwebstage.py`; the directory `tools/serve.py` serves | ignored |
+| `webstage-*/` | Additional generated stages, for example a harness build | ignored |
 
 Inside the engine submodule:
-- `engine/references/fbraz3-dxvk` — DXVK fork (zlib), used by the native
-  macOS build when `SAGE_DXVK_USE_LOCAL_FORK` is on. Tracked by the engine
-  repo as a gitlink.
-- `engine/references/OpenSAGE.BlenderPlugin` — W3D Blender exporter used by
-  `tools/blender/` scripts. Reference checkout (gitlink).
-- `engine/build/macos-vulkan/`, `engine/build/wasm/` — build trees (ignored).
 
-## Native development
+| Path | What it is | Tracked |
+|---|---|---|
+| `engine/references/fbraz3-dxvk` | DXVK fork (zlib) used by the native macOS build when `SAGE_DXVK_USE_LOCAL_FORK=ON`; not part of the browser build | nested submodule |
+| `engine/references/OpenSAGE.BlenderPlugin` | W3D exporter used by `tools/blender/` | nested submodule |
+| `engine/build/wasm/`, `engine/build/wasm-harness/`, `engine/build/macos-vulkan/` | Build trees | ignored |
 
-The browser build and all content checks run from a fresh recursive clone;
-no runtime directory under a developer's home is required. Native macOS
-setup is documented in the engine README. Choose an explicit runtime path,
-then copy the repository's `Data`, `Maps`, `Art` and `Window` directories
-there. Generators write repository data or a requested output directory;
-deployment is a separate, deliberate action.
+## Repositories
 
-## GitHub repos (all private, all under abhishekpradhan)
+| Repository | Path | Contents |
+|---|---|---|
+| `warpowers` | workspace root | dataset, web shell, tools, docs, vendored renderer |
+| `warpowers-engine` | `engine/` | engine fork; tracks upstream GeneralsX through a fetch-only remote |
+| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | DXVK fork; native development only |
 
-| Repo | Local path | Default branch | Purpose |
-|---|---|---|---|
-| `warpowers` | workspace root | `main` | primary repo |
-| `warpowers-engine` | `engine/` | `main` | engine fork |
-| `warpowers-dxvk` | `engine/references/fbraz3-dxvk` | `main` | DXVK fork (native dev path only) |
+`origin` is the project's own remote in every checkout. Upstream projects are
+fetch-only remotes whose push URL is disabled, so upstream cannot be pushed to
+by accident. GitHub Actions are disabled at the repository level until the
+public release; see [CONTRIBUTING.md](../CONTRIBUTING.md#continuous-integration).
 
-(`warpowers-dvijoke` is **archived** read-only — its content and history now
-live inline at `dvijoke/`, decision D020.)
+## Push order
 
-Remote scheme, every checkout (normalized 2026-08-31): `origin` = our private
-repo and what local branches track; fork parents/upstreams are fetch-only
-remotes with their push URL set to `DISABLED`, so **never push upstream** is
-enforced by git itself. Engine carries `upstream` (fbraz3/GeneralsX),
-`superhackers`, `generalsxweb`; dxvk carries `upstream` (doitsujin) and
-`fbraz3`.
-
-**GitHub Actions: DISABLED at repo level on every repo (2026-08-31).** The
-engine/dxvk forks inherited upstream CI workflows that billed private-repo
-runner minutes (Windows/macOS at 2x/10x multipliers) on every push and
-drained the account's monthly Actions budget (2026-08-24). The workflow
-files are stripped from our branches AND Actions is switched off in each
-repo's settings, so even an upstream-sync branch that reintroduces
-`.github/workflows/` cannot run anything. Re-enable per-repo only if we
-ever add CI of our own.
-
-## Push routine
-
-Use the active feature branch, not a hardcoded `main`. If all three
-repositories changed, publish their commits from the deepest child outward:
+Push from the deepest child outward so that every gitlink a parent records is
+reachable before the parent is pushed:
 
 ```sh
 git -C engine/references/fbraz3-dxvk push -u origin HEAD
-# Commit the DXVK gitlink in engine, then:
+# commit the DXVK gitlink in engine, then
 git -C engine push -u origin HEAD
-# Commit the engine gitlink in the root, then:
+# commit the engine gitlink in the root, then
 git push -u origin HEAD
 ```
 
-Verify each referenced child commit is reachable on its remote before
-pushing its parent. Do not push to disabled upstream remotes. A regular
-push does not deploy this game or change repository visibility.
+Verify each referenced child commit exists on its remote before pushing its
+parent. A push never deploys the game.
 
-## Fresh clone
+## Fresh clone and native paths
 
-```
-git clone --recursive https://github.com/abhishekpradhan/warpowers.git
-```
-brings the workspace (dvijoke included inline) + the engine submodule.
-Build + play (matches the README quick start; needs emsdk active):
-
-```
-cd engine
-emcmake cmake --preset wasm
-cmake --build build/wasm --target GeneralsXZH.js
-cd ..
-python3 tools/genwebstage.py
-python3 tools/serve.py
-```
-
-The native runtime dir is only needed for the native macOS build path.
-
-Use `emcmake` for initial configuration: plain CMake may select the host compiler.
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for prerequisite versions and local tests.
+`git clone https://github.com/abhishekpradhan/warpowers.git && cd warpowers
+&& git submodule update --init engine` brings the workspace and the engine,
+which is all the browser build needs; `git submodule update --init --recursive`
+(or `git clone --recursive`) also fetches the nested DXVK and
+OpenSAGE.BlenderPlugin checkouts for native development or art regeneration.
+The build recipe is in the [README](../README.md#play-it). The browser build
+and all content checks run from such a fresh clone with no runtime directory
+outside the repository. The native macOS path is documented
+in the engine README; choose an explicit runtime directory for it and copy the
+repository's `Data`, `Maps`, `Art` and `Window` directories there. Generators
+write repository data or a requested output directory; deploying to a runtime
+directory is a separate, deliberate action.

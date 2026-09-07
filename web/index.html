@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -26,7 +27,7 @@
         <h1 id="missionTitle">The Meridian Strip</h1>
         <p id="objectiveText">Destroy the enemy headquarters. Protect your own.</p>
         <div class="objectiveMeta"><span id="objectiveProgress"></span><span id="objectiveTimer"></span></div>
-        <button id="briefingButton" class="textButton">Mission briefing <span aria-hidden="true">↗</span></button>
+        <button id="briefingButton" class="textButton"><span id="briefingLabel">Mission briefing</span> <span aria-hidden="true">↗</span></button>
         <button id="guidanceButton" class="textButton" aria-controls="guide" aria-expanded="false">Guidance</button>
       </section>
       <aside id="guide" aria-label="Command guidance" hidden>
@@ -35,21 +36,24 @@
         <strong id="guideTitle"></strong>
         <ul id="guideChecklist" aria-label="Step requirements" hidden></ul>
         <p id="guideBody"></p><p id="guideNote" class="guideNote" hidden></p>
-        <button id="guideOverview" class="textButton">All steps ↗</button>
+        <button id="guideOverview" class="textButton"><span id="guideOverviewLabel">All steps</span> <span aria-hidden="true">↗</span></button>
       </aside>
       <div id="toast" role="status" aria-live="polite" hidden></div>
-      <section id="boot" aria-label="Loading game" aria-live="polite">
+      <section id="boot" aria-label="Loading game">
         <div class="bootGrid" aria-hidden="true"></div>
         <div class="bootContent">
           <p class="eyebrow">THE MERIDIAN STRIP · COMMAND NETWORK</p>
           <div class="wordmark">WAR <span>POWERS</span></div>
           <p class="bootTagline">Build your foothold. Choose your fight.</p>
-          <div class="bootProgress"><div id="bootFill"></div></div>
-          <div class="bootStatus"><span id="bootPhase">Connecting to command…</span><span id="bootPercent">0%</span></div>
+          <div id="bootProgress" class="bootProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="bootFill"></div></div>
+          <div class="bootStatus"><span id="bootPhase" role="status" aria-live="polite">Connecting to command…</span><span id="bootPercent" aria-hidden="true">0%</span></div>
           <p id="bootHint">No install. No account. The battlefield is yours.</p>
-          <div id="bootError" hidden>
+          <div id="bootError" role="alert" hidden>
             <p id="errorMessage"></p><code id="errorCode"></code>
             <div class="actions"><button id="reloadButton" class="primary">Reload game</button><button id="diagnosticsButton">Copy diagnostics</button></div>
+          </div>
+          <div id="bootExit" role="status" hidden>
+            <div class="actions"><button id="returnButton" class="primary">Return to command</button></div>
           </div>
         </div>
         <div class="bootFooter"><span>MERIDIAN COMBINE <span class="versus">/</span> JACKAL FRONT</span><a href="credits.html" target="_blank" rel="noopener">Credits &amp; licenses</a></div>
@@ -63,7 +67,83 @@
   </main>
   <pre id="debugLog" hidden></pre>
   <pre id="testReport" aria-label="Native regression report" hidden></pre>
+
+  <!-- Static panel markup. app.js clones these into the dialog and fills in the dynamic parts. -->
+  <template id="manualTemplate">
+    <p class="manualIntro">Build a working economy, scout before committing your army, and protect your headquarters. In skirmish, destroying the enemy headquarters wins the battle. Operations display their own objectives.</p>
+    <h3 class="sectionLabel">Command</h3>
+    <dl id="controlList" class="controlList"></dl>
+    <div class="manualColumns">
+      <section>
+        <h3>Meridian Combine</h3>
+        <p>Precise, expensive hardware with a power grid to protect. Establish a Power Array and Exchange, then a Vehicle Plant. Mix Vectors with infantry support and use Outriders to find safe approaches.</p>
+        <ul><li>Wardens suppress infantry.</li><li>Lancers threaten armor and aircraft.</li><li>Zenith artillery attacks from range.</li></ul>
+      </section>
+      <section>
+        <h3>Jackal Front</h3>
+        <p>Cheap, mobile raiders with independent infrastructure. Scavengers haul supplies to Rackets without a power grid. Use Vultures to strike exposed targets, and preserve your raiding force for the next opening.</p>
+        <ul><li>Scrappers clear hostile infantry.</li><li>Stings cover armor and air threats.</li><li>Mongrels absorb pressure for raiders.</li></ul>
+      </section>
+    </div>
+    <h3 class="sectionLabel">Supply lines</h3>
+    <p class="muted">Build an Exchange or Racket near a supply cache, then train a Porter or Scavenger there. Haulers collect crates and return them to the hub for money. Protect this route and expand to the contested caches before your home supply runs out. Hubs also provide a small income trickle for recovery.</p>
+    <h3 class="sectionLabel">Faction powers</h3>
+    <p class="muted">A Directorate unlocks Meridian’s Precision Strike: a visible targeting beacon followed by a concentrated blast. A Jackal Den unlocks Tunnel Ambush: a mixed infantry squad at a scouted target. Select the completed structure, choose its power and target revealed ground. Each power must recharge before it can be used again.</p>
+    <h3 class="sectionLabel">Production &amp; survival</h3>
+    <p class="muted">Select a production building to view its units. A padlock marks unavailable orders; hover a portrait for cost, role and prerequisites. Queue units by clicking their available portraits; click a queued item to cancel it. Select a builder to place structures on revealed ground. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>
+  </template>
+  <template id="recordToolsTemplate">
+    <p class="muted">Every mission is available from the start. Follow the order below for the story, or start anywhere. Skirmish lets you choose either side.</p>
+    <div class="recordTools">
+      <div class="actions"><button id="downloadRecord">Download record</button><button id="restoreRecord">Restore record</button><input id="recordFile" type="file" accept=".json,application/json" aria-label="Operation record backup" hidden></div>
+      <p class="settingsNote">Completions and best times stay in this browser and may be cleared. Keep a backup to restore them or move browsers. Battle checkpoints are separate.</p>
+      <p id="recordStatus" class="settingsNote" role="status" hidden></p>
+    </div>
+  </template>
+  <template id="settingsTailTemplate">
+    <p id="restartNote" class="settingsNote"></p>
+    <button id="applyRestart" hidden>Restart game to apply</button>
+    <h3 class="sectionLabel">Battle checkpoint</h3>
+    <div class="saveRow">
+      <button id="saveCheckpoint">Save checkpoint</button>
+      <button id="loadCheckpoint">Resume checkpoint</button>
+      <p id="checkpointNote" class="settingsNote"></p>
+    </div>
+    <p class="settingsNote">Build <span id="buildId">loading</span>. <button class="textButton" id="copyBuild">Copy diagnostics</button></p>
+  </template>
+
   <noscript><div class="noscript">War Powers needs JavaScript and WebGL2 to run. Enable JavaScript, then reload this page.</div></noscript>
+  <script>
+    // Feature gate. This classic script runs before the module below, so a browser that cannot run the
+    // shell sees a clear message instead of a loader stuck at "Connecting to command… 0%". ES5 on purpose.
+    (function () {
+      var missing = [];
+      function need(name, supported) { if (!supported) missing.push(name); }
+      need('JavaScript modules', 'noModule' in document.createElement('script'));
+      need('WebAssembly', typeof WebAssembly === 'object' && typeof WebAssembly.instantiate === 'function');
+      need('structuredClone', typeof structuredClone === 'function');
+      need('Object.hasOwn', typeof Object.hasOwn === 'function');
+      need('dialog elements', typeof HTMLDialogElement === 'function'
+        && typeof HTMLDialogElement.prototype.showModal === 'function');
+      var gl = null;
+      try { gl = document.createElement('canvas').getContext('webgl2'); } catch (error) { gl = null; }
+      if (gl) { var lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext(); }
+      need('WebGL2', !!gl);
+      if (!missing.length) return;
+      var message = missing.length === 1 && missing[0] === 'WebGL2'
+        ? 'WebGL2 is unavailable. Enable browser graphics acceleration or use another desktop browser.'
+        : 'War Powers needs a current desktop browser. Missing: ' + missing.join(', ')
+          + '. Update your browser, or use the latest Chrome, Edge, Firefox or Safari.';
+      window.wpUnsupported = message;
+      document.getElementById('bootPhase').textContent = 'Browser not supported';
+      document.getElementById('bootHint').textContent = 'Nothing was downloaded or changed on this device.';
+      document.getElementById('errorMessage').textContent = message;
+      document.getElementById('errorCode').textContent = 'WP-BROWSER';
+      document.getElementById('diagnosticsButton').hidden = true;
+      document.getElementById('bootError').hidden = false;
+      document.getElementById('reloadButton').onclick = function () { location.reload(); };
+    })();
+  </script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

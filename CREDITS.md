@@ -21,15 +21,16 @@ are indexed in [licenses/third-party.json](licenses/third-party.json).
 
 ## Historical layout
 - **Felipe Keller Braz / GeneralsX** — the GPL `ExtrasMenu.wnd` was copied
-  into the prototype on 2026-08-21 and removed from the unreleased root dataset
-  on 2026-09-05. Its earlier description as original CC BY content was incorrect;
+  into the prototype on 2026-08-21 and removed from the root dataset on
+  2026-09-05. Its earlier description as original CC BY content was incorrect;
   historical copies retain GPL terms. ASSETS.md records the upstream commits.
 
 ## Art
-- **Quaternius** — quaternius.com, CC0. CC0 source packs used during prototyping; retained in the repository
-  as historical reference. The four former runtime adaptations have been
-  replaced by project-authored models. We retain this acknowledgement of
-  the work that helped establish the prototype.
+- **Quaternius** — quaternius.com, CC0. The "Tanks" pack was adapted for four
+  prototype vehicles, all replaced by project-authored models on 2026-09-05.
+  The reference files were removed from the tree on 2026-09-07 and remain in
+  git history; we keep this acknowledgement of the work that helped establish
+  the prototype.
 
 ## Fonts
 - **Liberation Sans** — Red Hat / liberationfonts, SIL OFL 1.1.

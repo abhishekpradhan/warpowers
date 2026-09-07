@@ -1,81 +1,61 @@
 # Web performance
 
-Updated 2026-09-05. Measurements below identify their candidate and test
-conditions; local runs do not certify other browsers, hardware or networks.
+Budgets, the reasons behind them, and how to measure against them. Past
+measurements are in
+[history/2026-09-verification.md](history/2026-09-verification.md#performance-measurements-september-2026);
+a local run never certifies other browsers, hardware or networks.
 
-## Budgets and implementation
+## Budgets
 
-- Combined staged bundle: **≤64 MiB**. Content hashes deduplicate identical
-  bytes and make engine, data, fonts and UI resources cacheable across visits.
-- Desktop boot target: **≤20 seconds** on a midrange laptop over a real
-  network. Local staging checks only the local portion of that requirement.
-- Rendering choices: 1280×720 Performance, 1600×900 Balanced (default),
-  1920×1080 High. Native UI is authored at 1280×720 and scales as a unit.
-- Target steady 60 render / 30 logic updates per second, with usable input
-  during large fights. Report rendered frames and logic separately.
-- Ordinary hidden tabs pause. Diagnostic review/test sessions opt out so
-  their explicit simulation continues while inspected in the background.
+| Budget | Value | Why |
+|---|---|---|
+| Staged bundle | ≤ 64 MiB, enforced by `tools/genwebstage.py` before it replaces a working stage | Keeps a cold visit and every content update affordable on ordinary connections |
+| Desktop boot | ≤ 20 seconds from navigation to the main menu on a midrange laptop over a real network | The web's advantage is zero friction; a long boot gives it away |
+| Cadence | 60 rendered frames and 30 logic updates per second with usable input during large fights | The engine's logic rate is fixed at 30; rendering below 60 reads as stutter |
+| Render presets | 1280×720 Performance, 1600×900 Balanced (default), 1920×1080 High; native UI authored at 1280×720 and scaled as a unit | One tested layout at three costs |
+| Hidden tabs | Ordinary sessions pause; diagnostic sessions opt out | Auto-pause is the product behaviour and it should not look like a hang |
 
-The art optimizer strips opaque alpha, uses lossless TGA RLE where smaller
-and checks decoded pixels. Explicit atlas contracts bound image sizes; solid
-menu padding lies outside the sampled crop. Music retains the six attributed
-tracks. The stager enforces the size limit before replacing a working stage.
+Implementation choices that serve these budgets: content-hashed immutable
+asset URLs (engine, data, font and UI resources cache across visits and
+identical bytes deduplicate), an art optimizer that strips opaque alpha and
+uses lossless TGA RLE where smaller, explicit atlas contracts that bound image
+sizes, and six music tracks re-encoded at 96 kbps.
 
-## Current candidate and build evidence
+## How to measure
 
-- Candidate `6631b2c96367`: **66,773,830 bytes (63.681 MiB)** staged,
-  including engine, data, UI and notices. This directory measurement was read
-  from the current local stage; it is not compressed network transfer size.
-- An earlier repaired bridge reached the main loop in **542 ms** on one local
-  cached development-browser run (64 ms download/compile stage, 343 ms data,
-  136 ms initialization). This is historical cached evidence, not a measured
-  cold-network boot for the current candidate.
-- A fresh recursive GitHub checkout configured, completed a 1,279-step clean
-  build and staged `8b0a011a5989`, **66,729,527 bytes (63.638 MiB)**.
-  That demonstrates build/size reproducibility, not browser performance or
-  byte-identical compilation.
-- The independent checkout then fetched the initial completed polish root `0ab5819`, engine
-  `05c81c9908d95f6428b14a96935694539b6c1b9d` and DXVK `538cb703`. Tests,
-  gates, incremental WASM build and staging pass with a clean tree and resolved
-  recursive pins. Its candidate `a50ecbb361a0` is **66,734,559 bytes**,
-  159 bytes above the earlier `2a5fb93551f9` stage and still below 64 MiB. This is an
-  incremental rebuild of the earlier clean checkout, not another full clean build.
+### Bundle size
 
-## Isolated crowded-battle measurement
+`python3 tools/genwebstage.py` prints the staged byte count and refuses to
+stage above the limit. The number is the uncompressed directory size, not the
+compressed transfer size; measure the wire size at the hosting URL, never by
+assuming a compression ratio.
 
-The candidate whose ID begins `6b10`, with the steering correction, ran the
-120-unit real attack-move fixture in isolation on an **M1 Max / 64 GB
-MacBookPro18,2**, Chromium in-app browser, **Balanced 1600×900**. The fixture
-reported 143 objects including its setup. No other game tab was active.
+### Boot time
 
-| Fixture observation | Render frames/s | Logic updates/s |
-|---|---:|---:|
-| 9.9 seconds | 59.9 | 30.5 |
-| 19.9 seconds | 59.9 | 30.3 |
-| 29.9 seconds | 59.9 | 30.2 |
-| 40 seconds | 59.9 | 30.1 |
-| 50 seconds | 59.9 | 30.1 |
-| 60 seconds | 59.9 | 30.1 |
+Settings → **Copy diagnostics** includes the build identifier, browser, and
+the boot phases (engine download, data staging, engine initialization,
+total). With `?debug=1` the page also logs a `[BOOT]` line. A cached local
+boot is not a network boot: measure first and repeat visits at the real URL
+and record the connection.
 
-Reported WASM heap **capacity** stayed at **512 MiB**. This is the allocated
-WASM memory buffer, not operating-system process RSS, live allocation usage
-or evidence that the browser process consumes only 512 MiB. A battle was also
-observed around the 11-minute mark; that was not a controlled soak test.
+### Crowded battle
 
-The one-minute isolated sample met the intended render/logic cadence under
-these conditions. It does not establish long-run memory behavior, worst-case
-late-game performance or performance on a lower-end computer.
+`?review=stress&map=Maps/WPTest.map` (or `WPTestJ` for the Jackal roster)
+creates a bounded 120-unit attack-move encounter and reports rendered frames
+per second, logic updates per second and WebAssembly heap capacity on screen.
+It requires the **harness build** (`wasm-harness` preset) and `?debug=1`; see
+[testing.md](testing.md). Run it in the only active game tab, in the
+foreground, and keep the result for one minute or longer.
 
-`?review=stress&map=Maps/WPTest.map` selects the explicit fixture. Settings →
-Copy diagnostics includes the build ID, browser and boot phases. Keep the
-candidate, hardware, quality preset, concurrent tabs and observation duration
-with every future measurement.
+Record with every measurement: build identifier, hardware, operating system,
+browser and version, quality preset, other open tabs, and observation
+duration. The heap figure is the allocated WebAssembly memory buffer, not
+operating-system process memory; read process memory from the browser's task
+manager or the operating system.
 
-## Remaining release evidence
+### Long sessions
 
-A controlled 30–45-minute crowded run with restart/redeploy, process-memory
-measurements, a second/lower-end desktop, full Safari and Firefox matches,
-and real-network first/repeat loading remain separate checks. A protected
-hosting preview needs owner authorization. Verify compression and cache
-behavior at that URL; do not infer wire size from the uncompressed directory
-or assume a fixed compression ratio.
+The controlled soak that the roadmap asks for is a 30–45 minute crowded match
+with a restart and a redeploy, sampling process memory and frame timing every
+few minutes. Frame pacing under a throttled or hidden tab is not a
+measurement; keep the tab visible.

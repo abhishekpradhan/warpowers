@@ -1,21 +1,31 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Diff two WP_FRAME_DUMP TGAs (18-byte header, 32-bit BGRA, top-left origin).
-Reports count of significantly-changed pixels and their bounding box, plus a
-brightness histogram summary of the second image."""
-import sys, struct
+
+Reports the count of significantly changed pixels and their bounding box, plus
+a brightness summary of the second image. A native-renderer debugging aid.
+
+python3 tools/tgadiff.py BEFORE.tga AFTER.tga [--threshold 30]
+"""
+import argparse
+from pathlib import Path
+import struct
+
 
 def load(path):
-    with open(path, "rb") as f:
-        data = f.read()
+    data = Path(path).read_bytes()
     w, h = struct.unpack_from("<HH", data, 12)
     bpp = data[16]
-    assert bpp == 32, f"expected 32bpp, got {bpp}"
+    if bpp != 32:
+        raise ValueError(f"{path}: expected a 32bpp frame dump, got {bpp}bpp")
     return w, h, data[18:18 + w * h * 4]
 
-def main(a_path, b_path, thresh=30):
+
+def compare(a_path, b_path, thresh=30):
     wa, ha, a = load(a_path)
     wb, hb, b = load(b_path)
-    assert (wa, ha) == (wb, hb), "size mismatch"
+    if (wa, ha) != (wb, hb):
+        raise ValueError(f"size mismatch: {wa}x{ha} vs {wb}x{hb}")
     changed = 0
     minx = miny = 1 << 30
     maxx = maxy = -1
@@ -36,6 +46,17 @@ def main(a_path, b_path, thresh=30):
     print(f"size={wa}x{ha} changed={changed} bbox=({minx},{miny})-({maxx},{maxy})" if maxx >= 0
           else f"size={wa}x{ha} changed=0")
     print(f"bright(>150avg) pixels in B: {bright}")
+    return changed
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("before", type=Path)
+    parser.add_argument("after", type=Path)
+    parser.add_argument("--threshold", type=int, default=30, help="summed RGB delta that counts as a change (default 30)")
+    args = parser.parse_args(argv)
+    compare(args.before, args.after, args.threshold)
+
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 30)
+    main()

@@ -1,6 +1,7 @@
+# SPDX-License-Identifier: MIT
 """Render the actual shipped W3D roster with one portrait art direction.
 
-blender --background --python tools/blender/render_roster.py --
+blender --background --factory-startup --python tools/blender/render_roster.py --
     --data data --out /tmp/warpowers-portraits [--only WPIcoOutrider]
 Then: python3 tools/genportraitsheet.py /tmp/warpowers-portraits --data data
 """
@@ -12,7 +13,9 @@ import sys
 import bpy
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from build_polish import ROOT, portrait, pipe, Kit, chunks, chunk
+from _bootstrap import ROOT, script_args  # noqa: E402
+from build_polish import portrait, pipe, Kit  # noqa: E402
+from wp_w3d import HIERARCHY, HIERARCHY_HEADER, HLOD, HLOD_HEADER, NO_PARENT, PIVOTS, chunk, chunks  # noqa: E402
 
 def power_portrait(name,path):
     pipe.reset_scene()
@@ -39,12 +42,12 @@ def power_portrait(name,path):
     obj=k.join('POWER');bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
     portrait(obj,path)
 
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument('--data',type=Path,default=ROOT/'data')
-    ap.add_argument('--out',type=Path,default=Path('/tmp/warpowers-portraits'))
-    ap.add_argument('--only',default='')
-    args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+def main(argv=None):
+    ap=argparse.ArgumentParser(description='Render one portrait per roster model from the shipped W3D files (run inside Blender).')
+    ap.add_argument('--data',type=Path,default=ROOT/'data',help='dataset root to read models and textures from')
+    ap.add_argument('--out',type=Path,default=Path('/tmp/warpowers-portraits'),help='portrait TGA output directory')
+    ap.add_argument('--only',default='',help='comma-separated WPIco* names')
+    args=ap.parse_args(script_args(argv))
     args.data=args.data.resolve();args.out=args.out.resolve();args.out.mkdir(parents=True,exist_ok=True)
     roster={}
     for name,body in re.findall(r'Object (\S+)\n(.*?)\nEnd',(args.data/'Data/INI/Default/Object.ini').read_text(),re.S):
@@ -68,18 +71,18 @@ def main():
         raw=modelpath.read_bytes();top=list(chunks(raw))
         hname=None
         for cid,sub,payload in top:
-            if cid==0x700:
+            if cid==HLOD:
                 for c,s,p in chunks(payload):
-                    if c==0x701:hname=p[24:40].split(b'\0')[0]
+                    if c==HLOD_HEADER:hname=p[24:40].split(b'\0')[0]
         if hname==b'':
             # The engine accepts hierarchy-free utility/older models; the Blender
             # importer requires a root. Supply one in the review cache only.
-            hierarchy=chunk(0x100,chunk(0x101,struct.pack('<I16sI3f',0x40001,model.encode(),1,0,0,0))+
-                chunk(0x102,struct.pack('<16sI3f3f4f',b'ROOTTRANSFORM',0xffffffff,0,0,0,0,0,0,0,0,0,1)),subs=True)
+            hierarchy=chunk(HIERARCHY,chunk(HIERARCHY_HEADER,struct.pack('<I16sI3f',0x40001,model.encode(),1,0,0,0))+
+                chunk(PIVOTS,struct.pack('<16sI3f3f4f',b'ROOTTRANSFORM',NO_PARENT,0,0,0,0,0,0,0,0,0,1)),subs=True)
             rebuilt=hierarchy
             for cid,sub,payload in top:
-                if cid==0x700:
-                    payload=b''.join(chunk(c,p[:24]+model.encode().ljust(16,b'\0') if c==0x701 else p,subs=s) for c,s,p in chunks(payload))
+                if cid==HLOD:
+                    payload=b''.join(chunk(c,p[:24]+model.encode().ljust(16,b'\0') if c==HLOD_HEADER else p,subs=s) for c,s,p in chunks(payload))
                 rebuilt+=chunk(cid,payload,subs=sub)
             cachedir=args.out/'_imports';cachedir.mkdir(exist_ok=True)
             modelpath=cachedir/(model.lower()+'.w3d');modelpath.write_bytes(rebuilt)
@@ -92,7 +95,7 @@ def main():
                 if md.type=='ARMATURE':bpy.ops.object.modifier_apply(modifier=md.name)
             matrix=o.matrix_world.copy();o.parent=None;o.matrix_world=matrix
             for mat in o.data.materials:
-                if not mat or not mat.use_nodes:continue
+                if not mat or not mat.node_tree:continue
                 b=mat.node_tree.nodes.get('Principled BSDF')
                 if b:
                     b.inputs['Roughness'].default_value=.85

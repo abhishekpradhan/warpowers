@@ -1,0 +1,91 @@
+# GitHub Actions are disabled at the repository level until the public
+# release, so this workflow does not run yet. Enable Actions in the repository
+# settings as part of the release (see RELEASING.md); no other change is needed.
+#
+# Runs the same gate list that CONTRIBUTING.md asks contributors to run
+# locally. Nothing here builds the WebAssembly engine; see wasm-build.yml.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Tests and content gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # The engine fixtures and the renderer test compile small native programs
+      # with -fsanitize=address,undefined; they read the compiler from CXX
+      # (default c++). Ubuntu runners ship clang, which supports both sanitizers.
+      CXX: clang++
+    steps:
+      - name: Check out with the engine submodule
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The engine's nested submodules (DXVK, the Blender plugin) serve
+          # native development and art regeneration only.
+          submodules: true
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "20"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Show toolchain
+        run: |
+          node --version
+          python3 --version
+          "$CXX" --version
+
+      - name: Web-state tests
+        run: node --test tests/*.test.mjs
+
+      - name: Packaging tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Content references and asset registry
+        run: python3 tools/check_content.py
+
+      - name: Gameplay contracts (map binaries, missions, AI, routes)
+        run: python3 tools/validate_gameplay.py
+
+      - name: Voice ownership
+        run: python3 tools/lint_voices.py
+
+      - name: Lower ASLR entropy for the sanitizer runtimes
+        # Older sanitizer runtimes reject the high ASLR entropy of recent
+        # runner kernels ("unexpected memory mapping"); 28 bits is safe. The
+        # engine's own qa.yml takes the same step.
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+
+      - name: Renderer resource contracts (ASan/UBSan)
+        run: python3 dvijoke/d8web/tests/test_resources.py
+
+      - name: Engine keyboard-modifier fixture
+        run: python3 engine/scripts/qa/test-keyboard-modifiers.py
+
+      - name: Engine sentence-hotkey fixture (ASan/UBSan)
+        run: python3 engine/scripts/qa/test-sentence-hotkeys.py
+
+      - name: Engine mip-filter fixture
+        run: python3 engine/scripts/qa/test-mip-filter.py
+
+      - name: Engine surface-copy fixture (ASan/UBSan)
+        run: python3 engine/scripts/qa/test-surface-copy.py

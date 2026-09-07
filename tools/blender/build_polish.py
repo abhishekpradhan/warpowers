@@ -1,34 +1,42 @@
+# SPDX-License-Identifier: MIT
 """Original War Powers production assets, with reproducible repository outputs.
 
-Run: blender --background --python tools/blender/build_polish.py -- --data data
-     --review /tmp/warpowers-art-review [--only merout01,jakvul01,wprock01]
+Run: blender --background --factory-startup --python tools/blender/build_polish.py -- --data data
+     --review /tmp/warpowers-art-review [--only merout01,jakvul01,wprock01] [--check]
 
 No imported meshes. All geometry, markings and surface detail are authored here.
 The existing shared Cycles bake and W3D exporter remain the production format.
+
+Every ASSETS entry records its BAKE size. Atlases listed in optimize_art.HALVED
+are baked at twice their shipped size and area-halved by tools/optimize_art.py;
+that two-step is what reproduces the committed bytes (a direct half-size bake
+yields different pixels). ``--check`` rebuilds the selection into a temporary
+tree, applies the optimize step and compares W3D/TGA bytes with ``--data``.
 """
 import argparse
 import json
 import math
-import os
 from pathlib import Path
 import random
 import struct
 import sys
+import tempfile
 
 import bpy
 from mathutils import Vector, Matrix
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'engine/references/OpenSAGE.BlenderPlugin'))
-sys.path.insert(0, str(ROOT / 'tools/blender'))
-sys.path.insert(0, str(ROOT / 'tools'))
-import io_mesh_w3d
-import wp_pipeline as pipe
-from genw3d import chunk, mesh_chunk, frustum, name32
-import genrig
-import support_kit
-from w3dhierarchy import canonicalize
-io_mesh_w3d.register()
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _bootstrap import ROOT, register_w3d_plugin, script_args  # noqa: E402
+import wp_pipeline as pipe  # noqa: E402
+from genw3d import frustum  # noqa: E402
+from wp_w3d import (HIERARCHY, HIERARCHY_HEADER, HLOD, HLOD_HEADER, HLOD_LOD_ARRAY,  # noqa: E402
+                    HLOD_SUB_OBJECT, MESH, MESH_HEADER3, PIVOT_SIZE, PIVOTS,
+                    SUB_OBJECT_ARRAY_HEADER, chunk, chunks, mesh_chunk, name32)
+import genrig  # noqa: E402
+import optimize_art  # noqa: E402
+import support_kit  # noqa: E402
+from w3dhierarchy import canonicalize  # noqa: E402
+register_w3d_plugin()
 
 def color(hexcode):
     return tuple(int(hexcode[i:i+2], 16) / 255 for i in (0, 2, 4)) + (1,)
@@ -393,7 +401,7 @@ def wreck(k,fn):
             v.co=p
         o.matrix_world=Matrix.Identity(4)
         o.vertex_groups.clear();g=o.vertex_groups.new(name='HULL');g.add(range(len(o.data.vertices)),1,'REPLACE')
-    for name,mat in k.mats.items():
+    for mat in k.mats.values():
         b=mat.node_tree.nodes['Principled BSDF'];l=sum(b.inputs['Base Color'].default_value[:3])/3
         b.inputs['Base Color'].default_value=(l*.30+.028,l*.27+.024,l*.23+.02,1)
     return dict(lifecycle='wreck')
@@ -415,23 +423,28 @@ def rubble(k,small=False):
     k.box('FALLENROOF','dark',1,-2,3*size,13*size,8*size,.45,rot=(.14,.08,.25))
     return dict(lifecycle='rubble')
 
+# (portrait label, texture stem, authoring function, BAKE size). The shipped
+# atlas size is optimize_art.shipped_size(texture, bake): the compact combat
+# vehicles, infantry, scrap and relay ship at half a 512px bake, rock/wall at
+# half a 256px bake; the flagship tanks ship their 512px bake and everything
+# else (haulers, damaged/wreck/ruin variants, the support kit) its 256px bake.
 ASSETS={
-    'merout01': ('outrider','wp_outrider',outrider,256),
+    'merout01': ('outrider','wp_outrider',outrider,512),
     'mertank01': ('vector','wp_vector',vector,512),
-    'jakvul01': ('vulture','wp_vulture',vulture,256),
+    'jakvul01': ('vulture','wp_vulture',vulture,512),
     'jaktank01': ('mongrel','wp_mongrel',mongrel,512),
-    'merzen01': ('zenith','wp_zenith',zenith,256),
-    'wprock01': ('rock','wp_rock',rock,128),
-    'wpscrap01': ('scrap','wp_scrap',scrap,256),
-    'wprelay01': ('relay','wp_relay',relay,256),
-    'wpwall01': ('wall','wp_wall',wall,128),
+    'merzen01': ('zenith','wp_zenith',zenith,512),
+    'wprock01': ('rock','wp_rock',rock,256),
+    'wpscrap01': ('scrap','wp_scrap',scrap,512),
+    'wprelay01': ('relay','wp_relay',relay,512),
+    'wpwall01': ('wall','wp_wall',wall,256),
     'merhaul01': ('porter','wp_porter',lambda k:hauler(k),256),
     'jakhaul01': ('scavenger','wp_scavenger',lambda k:hauler(k,True),256),
 }
 for role,suffix,mer,jak in [('rifle','inf02','warden','scrapper'),('rocket','roc01','lancer','sting'),
                            ('scout','sct01','vigil','prowler'),('heavy','hvy01','bastion','bruiser')]:
-    ASSETS['mer'+suffix]=(mer,'wp_'+mer,lambda k,r=role:infantry(k,r),256)
-    ASSETS['jak'+suffix]=(jak,'wp_'+jak,lambda k,r=role:infantry(k,r,True),256)
+    ASSETS['mer'+suffix]=(mer,'wp_'+mer,lambda k,r=role:infantry(k,r),512)
+    ASSETS['jak'+suffix]=(jak,'wp_'+jak,lambda k,r=role:infantry(k,r,True),512)
 for original in ['mertank01','jaktank01','merout01','jakvul01','merzen01']:
     label,texture,fn,res=ASSETS[original]
     ASSETS[original+'d']=(label+'-damaged',texture+'_d',lambda k,f=fn:damaged(k,f),256)
@@ -442,15 +455,6 @@ ASSETS.update({
     'wpruin02':('structure-ruin-small','wp_ruinsmall',lambda k:rubble(k,True),256),
 })
 ASSETS.update(support_kit.ASSETS)
-
-def chunks(data):
-    pos=0
-    while pos<len(data):
-        cid,size=struct.unpack_from('<II',data,pos)
-        end=pos+8+(size&0x7fffffff)
-        if end>len(data): raise ValueError('Invalid W3D chunk')
-        yield cid, bool(size&0x80000000), data[pos+8:end]
-        pos=end
 
 def final_w3d(path, model, contract):
     """Append original player-color geometry and a turret-relative muzzle bone."""
@@ -463,11 +467,11 @@ def final_w3d(path, model, contract):
         meshes.append((name,mesh_chunk(model,name,(220,220,220),frustum(x,y,z,sx,sy,sz))))
     output=b''
     for cid,sub,payload in content:
-        if cid==0x100 and contract.get('hierarchy'):continue
-        if cid==0x100 and contract.get('muzzle'):
+        if cid==HIERARCHY and contract.get('hierarchy'):continue
+        if cid==HIERARCHY and contract.get('muzzle'):
             parts=list(chunks(payload))
-            pivotdata=next(p for c,s,p in parts if c==0x102)
-            pivots=[pivotdata[i:i+60] for i in range(0,len(pivotdata),60)]
+            pivotdata=next(p for c,s,p in parts if c==PIVOTS)
+            pivots=[pivotdata[i:i+PIVOT_SIZE] for i in range(0,len(pivotdata),PIVOT_SIZE)]
             names={p[:16].split(b'\0')[0].decode():i for i,p in enumerate(pivots)}
             if 'TURRET' not in names:raise ValueError('TURRET pivot missing')
             parent='BARREL' if contract.get('barrel') else 'TURRET'
@@ -478,25 +482,25 @@ def final_w3d(path, model, contract):
             pivots.append(struct.pack('<16sI3f3f4f',b'MUZZLE',names[parent],*v,0,0,0,0,0,0,1))
             payload=b''
             for c,s,p in parts:
-                if c==0x101:
+                if c==HIERARCHY_HEADER:
                     p=p[:20]+struct.pack('<I',len(pivots))+p[24:]
-                if c==0x102:p=b''.join(pivots)
+                if c==PIVOTS:p=b''.join(pivots)
                 payload+=chunk(c,p,subs=s)
-        if cid==0x700:
+        if cid==HLOD:
             output+=b''.join(m for _,m in meshes)
             rebuilt=b''
             for c,s,p in chunks(payload):
-                if c==0x701 and contract.get('hierarchy'):
+                if c==HLOD_HEADER and contract.get('hierarchy'):
                     p=p[:24]+contract['hierarchy'].encode().ljust(16,b'\0')
-                if c==0x702:
+                if c==HLOD_LOD_ARRAY:
                     q=b''
                     for cc,ss,pp in chunks(p):
-                        if cc==0x703:pp=struct.pack('<I',struct.unpack_from('<I',pp)[0]+len(meshes))+pp[4:]
-                        if cc==0x704 and contract.get('bone_indices'):
+                        if cc==SUB_OBJECT_ARRAY_HEADER:pp=struct.pack('<I',struct.unpack_from('<I',pp)[0]+len(meshes))+pp[4:]
+                        if cc==HLOD_SUB_OBJECT and contract.get('bone_indices'):
                             name=pp[4:].split(b'\0')[0].decode().split('.')[-1]
                             pp=struct.pack('<I',contract['bone_indices'][name])+pp[4:]
                         q+=chunk(cc,pp,subs=ss)
-                    for name,_ in meshes:q+=chunk(0x704,struct.pack('<I32s',contract.get('housebone',0),name32(model+'.'+name)))
+                    for name,_ in meshes:q+=chunk(HLOD_SUB_OBJECT,struct.pack('<I32s',contract.get('housebone',0),name32(model+'.'+name)))
                     p=q
                 rebuilt+=chunk(c,p,subs=s)
             payload=rebuilt
@@ -516,7 +520,7 @@ def portrait(obj,path):
     scene.view_settings.view_transform='AgX'
     scene.view_settings.look='AgX - Medium High Contrast'
     world=scene.world or bpy.data.worlds.new('Studio')
-    scene.world=world; world.use_nodes=True
+    scene.world=world
     world.node_tree.nodes['Background'].inputs[0].default_value=(.45,.50,.56,1)
     world.node_tree.nodes['Background'].inputs[1].default_value=.35
     pts=[obj.matrix_world@Vector(v) for v in obj.bound_box]
@@ -559,7 +563,7 @@ def build(model,entry,args):
                    shade_lo=.52,shade_hi=.48,grain=.012,edge_strength=.32,edge_radius=1,lowfreq=.024)
     # Clear mask-bake emission; the final W3D uses one painted atlas.
     image=bpy.data.images.load(str(tga));image.name=texture
-    mat=bpy.data.materials.new(texture+'_skin');mat.use_nodes=True
+    mat=bpy.data.materials.new(texture+'_skin')
     bsdf=mat.node_tree.nodes['Principled BSDF'];bsdf.inputs['Roughness'].default_value=.87
     tex=mat.node_tree.nodes.new('ShaderNodeTexImage');tex.image=image
     mat.node_tree.links.new(bsdf.inputs['Base Color'],tex.outputs['Color'])
@@ -591,23 +595,49 @@ def build(model,entry,args):
     contract.update(model=model.upper(),portrait=label,texture=texture,triangles=tris+12*len(contract.get('house',[])),bounds=bbox,
                     source='tools/blender/build_polish.py',role=role,origin='original',
                     required_states=['idle','move','attack'] if role=='infantry' else (['turret','muzzle','player-color'] if contract.get('turret') else ['default']),
-                    texture_size=res)
+                    texture_size=optimize_art.shipped_size(texture,res),bake_size=res)
     print('ASSET_OK',json.dumps(contract),flush=True)
     return contract
 
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument('--data',type=Path,default=ROOT/'data')
-    ap.add_argument('--review',type=Path,default=Path('/tmp/warpowers-art-review'))
-    ap.add_argument('--only',default='')
+def check(selected,reference):
+    """Rebuild ``selected`` into a temporary tree, run the optimize step and
+    compare every W3D/TGA with the copy under ``reference``. Returns failures."""
+    failures=[]
+    with tempfile.TemporaryDirectory(prefix='warpowers-polish-check-') as temp:
+        scratch=argparse.Namespace(data=Path(temp)/'data',review=Path(temp)/'review')
+        for p in (scratch.data/'Art/W3D',scratch.data/'Art/Textures',scratch.review):p.mkdir(parents=True)
+        for model in selected:
+            contract=build(model,ASSETS[model],scratch)
+            texture=contract['texture']
+            produced={f'Art/W3D/{model}.w3d':(scratch.data/'Art/W3D'/f'{model}.w3d').read_bytes(),
+                      f'Art/Textures/{texture}.tga':optimize_art.optimized_bytes(scratch.data/'Art/Textures'/f'{texture}.tga',scratch.data)}
+            for relative,data in produced.items():
+                committed=reference/relative
+                if not committed.exists():failures.append(f'{model}: {relative} is not in {reference}')
+                elif committed.read_bytes()!=data:failures.append(f'{model}: {relative} differs from {committed}')
+                else:print('CHECK_OK',relative,flush=True)
+    for failure in failures:print('CHECK_DIFF',failure,flush=True)
+    return failures
+
+def main(argv=None):
+    ap=argparse.ArgumentParser(description='Build the painted War Powers production assets (run inside Blender).')
+    ap.add_argument('--data',type=Path,default=ROOT/'data',help='dataset root to write, or the reference for --check')
+    ap.add_argument('--review',type=Path,default=Path('/tmp/warpowers-art-review'),help='portrait renders and the build manifest')
+    ap.add_argument('--only',default='',help='comma-separated model ids (default: every catalog model)')
     ap.add_argument('--catalog-only',action='store_true',help='Refresh catalog metadata from existing exports without rebuilding')
-    args=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+    ap.add_argument('--check',action='store_true',help='rebuild into a temporary directory, optimize, and diff against --data; writes nothing')
+    args=ap.parse_args(script_args(argv))
     args.data=args.data.resolve();args.review=args.review.resolve()
-    for p in [args.data/'Art/W3D',args.data/'Art/Textures',args.review]:p.mkdir(parents=True,exist_ok=True)
-    selected=[m.strip().lower() for m in args.only.split(',')] if args.only else ASSETS
+    selected=[m.strip().lower() for m in args.only.split(',')] if args.only else list(ASSETS)
     if args.catalog_only:selected=[]
     unknown=set(selected)-set(ASSETS)
     if unknown:ap.error('Unknown model(s): '+', '.join(sorted(unknown)))
+    if args.check:
+        failures=check(selected,args.data)
+        print(f'CHECK_DONE {len(selected)-len(failures)} of {len(selected)} models reproduce {args.data}',flush=True)
+        if failures:raise SystemExit(1)
+        return
+    for p in [args.data/'Art/W3D',args.data/'Art/Textures',args.review]:p.mkdir(parents=True,exist_ok=True)
     manifest={}
     manifestpath=args.review/'asset-contracts.json'
     catalogpath=ROOT/'tools/blender/polish_assets.json'
@@ -621,20 +651,21 @@ def main():
     # engine-facing contract without guessing from filenames or historical prose.
     for model,contract in manifest.items():
         if model not in ASSETS:continue
-        label,texture,fn,res=ASSETS[model]
+        label,texture,_,res=ASSETS[model]
         role=contract.get('asset_role') or ('infantry' if contract.get('hierarchy') else ('vehicle' if contract.get('turret') or model.endswith('haul01') else 'environment'))
         states=['idle','move','attack','death'] if role=='infantry' else (['turret','muzzle','player-color'] if contract.get('turret') else ['default'])
         if model.endswith('haul01'):states=['default','cargo','player-color']
         if contract.get('barrel'):states+=['recoil']
         if contract.get('wheels'):states+=['wheel-motion']
         contract.update(source='tools/blender/build_polish.py',origin='original',
-                        portrait=label,texture=texture,texture_size=res,role=role,required_states=states)
+                        portrait=label,texture=texture,texture_size=optimize_art.shipped_size(texture,res),bake_size=res,
+                        role=role,required_states=states)
         if model in support_kit.ASSETS:contract['geometry_source']='tools/blender/support_kit.py'
         w3d=args.data/'Art/W3D'/(model+'.w3d')
         if w3d.exists():
             contract['triangles']=sum(struct.unpack_from('<I',q,40)[0]
-                for c,s,p in chunks(w3d.read_bytes()) if c==0
-                for d,t,q in chunks(p) if d==0x1f)
+                for c,s,p in chunks(w3d.read_bytes()) if c==MESH
+                for d,t,q in chunks(p) if d==MESH_HEADER3)
     manifestpath.write_text(json.dumps(manifest,indent=2)+'\n')
     # Scratch exports carry a scratch catalog. Only production exports update
     # the tracked metadata used by the release validator.

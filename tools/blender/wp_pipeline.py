@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Shared War Powers asset pipeline: bake, composite, export.
 
 Every painted model script funnels through this
@@ -14,29 +15,27 @@ Composite recipe (v2):
   + fine grain
 build_polish.py supplies separate HOUSECOLOR meshes after the texture bake;
 these receive the owning player's color through the native W3D asset manager.
+
+The composite is written at bake size as a raw bottom-left TGA; the shipped
+file is produced by tools/optimize_art.py (area halving for the contracted
+atlases, RLE, top-left).
 """
 import math
 import os
 import random
-import struct
 import sys
-from pathlib import Path
 
 import bpy
 import bmesh
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _bootstrap import kit_output_dirs, register_w3d_plugin  # noqa: E402
+import wp_tga  # noqa: E402
+
 
 def output_dirs():
     """Consistent explicit destinations for the retained original building kits."""
-    import argparse
-    parser=argparse.ArgumentParser()
-    parser.add_argument('--data',type=Path,default=Path(__file__).resolve().parents[2]/'data')
-    parser.add_argument('--scratch',type=Path,help='Explicit flat review directory for models and textures')
-    args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-    modeldir=args.scratch or args.data/'Art/W3D'
-    texturedir=args.scratch or args.data/'Art/Textures'
-    for path in (modeldir,texturedir):path.mkdir(parents=True,exist_ok=True)
-    return modeldir,texturedir
+    return kit_output_dirs()
 
 
 class Kit:
@@ -50,8 +49,8 @@ class Kit:
 
     def mat(self, name):
         if name not in self.mats:
+            # Blender 5 materials are node trees from creation (use_nodes is deprecated).
             m = bpy.data.materials.new(name)
-            m.use_nodes = True
             bsdf = m.node_tree.nodes['Principled BSDF']
             bsdf.inputs['Base Color'].default_value = self.pal[name]
             bsdf.inputs['Roughness'].default_value = self.rough
@@ -258,21 +257,17 @@ def composite(diff, ao, mask, atlas, out_path, *, seed=5,
             row += bytes((int(px[2] * 255), int(px[1] * 255), int(px[0] * 255)))
         rows.append(bytes(row))
 
-    hdr = bytearray(18)
-    hdr[2] = 2
-    struct.pack_into('<HH', hdr, 12, atlas, atlas)
-    hdr[16] = 24
     # Blender image origin is bottom-left; TGA default is bottom-up too.
     with open(out_path, 'wb') as f:
-        f.write(bytes(hdr) + b''.join(rows))
+        f.write(wp_tga.header(atlas, atlas, top_left=False) + b''.join(rows))
 
 
 def export_w3d(obj, tga_path, w3d_path, image_name):
     """Swap to a single textured material and export via the OpenSAGE plugin."""
+    register_w3d_plugin()
     final_img = bpy.data.images.load(tga_path)
     final_img.name = image_name
     export_mat = bpy.data.materials.new(image_name + '_skin')
-    export_mat.use_nodes = True
     bsdf = export_mat.node_tree.nodes['Principled BSDF']
     texn = export_mat.node_tree.nodes.new('ShaderNodeTexImage')
     texn.image = final_img
@@ -288,60 +283,3 @@ def export_w3d(obj, tga_path, w3d_path, image_name):
     )
     from legacy_contracts import apply
     apply(w3d_path)
-
-def render_portrait(obj, out_path, size=128):
-    """Render a 3/4-view cameo of the object (flat materials, transparent bg).
-
-    Cheap EEVEE still — call before the bake with WP_PORTRAIT_DIR set and the
-    script can exit early; icon sheets get real silhouettes for free.
-    """
-    import mathutils
-    scene = bpy.context.scene
-    try:
-        scene.render.engine = 'BLENDER_EEVEE_NEXT'
-    except TypeError:
-        scene.render.engine = 'BLENDER_EEVEE'
-    scene.render.film_transparent = True
-    scene.render.resolution_x = size
-    scene.render.resolution_y = size
-    scene.render.image_settings.file_format = 'TARGA'
-    scene.render.filepath = out_path
-
-    bb = [obj.matrix_world @ mathutils.Vector(c) for c in obj.bound_box]
-    ctr = sum(bb, mathutils.Vector()) / 8
-    radius = max((v - ctr).length for v in bb)
-
-    cam_data = bpy.data.cameras.new('WPPortraitCam')
-    cam_data.lens = 60
-    cam = bpy.data.objects.new('WPPortraitCam', cam_data)
-    bpy.context.collection.objects.link(cam)
-    direction = mathutils.Vector((1.0, -0.9, 0.65)).normalized()
-    cam.location = ctr + direction * radius * 2.35
-    cam.rotation_euler = (ctr - cam.location).to_track_quat('-Z', 'Y').to_euler()
-    scene.camera = cam
-
-    sun_data = bpy.data.lights.new('WPSun', 'SUN')
-    sun_data.energy = 3.0
-    sun = bpy.data.objects.new('WPSun', sun_data)
-    bpy.context.collection.objects.link(sun)
-    sun.rotation_euler = (0.9, 0.2, 0.6)
-    world = bpy.data.worlds.new('WPPortraitWorld') if not scene.world else scene.world
-    scene.world = world
-    world.use_nodes = True
-    bgn = world.node_tree.nodes.get('Background')
-    if bgn:
-        bgn.inputs[0].default_value = (0.6, 0.6, 0.65, 1.0)
-        bgn.inputs[1].default_value = 0.7
-
-    bpy.ops.render.render(write_still=True)
-    print('PORTRAIT_OK', out_path)
-
-
-def maybe_portrait_exit(obj, name):
-    """Env-gated portrait mode: render and skip the expensive bake/export."""
-    d = os.environ.get('WP_PORTRAIT_DIR')
-    if not d:
-        return False
-    os.makedirs(d, exist_ok=True)
-    render_portrait(obj, os.path.join(d, name + '.tga'))
-    return True

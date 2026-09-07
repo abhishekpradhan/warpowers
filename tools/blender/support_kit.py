@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Original aircraft and support architecture for build_polish.py.
 
 +X is forward. Everything is authored here; no imported geometry or images.

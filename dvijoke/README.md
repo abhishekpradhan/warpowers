@@ -3,7 +3,9 @@
 > links. Maintained inline in the War Powers workspace since 2026-08-31
 > (full upstream history subtree-merged; the former warpowers-dvijoke fork
 > repo is archived). Upstream: meerzulee/dvijoke. License: MIT (this
-> directory's LICENSE). Upstream README follows.
+> directory's LICENSE). The upstream README below describes the original
+> project's bring-your-own-game-files workflow, which does not apply to War
+> Powers: it ships its own freely licensed dataset and needs no retail files.
 
 # Dvijoke
 

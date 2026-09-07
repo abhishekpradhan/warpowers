@@ -1,21 +1,31 @@
 #!/usr/bin/env python3
-"""War Powers terrain texture generator.
+# SPDX-License-Identifier: MIT
+"""War Powers terrain, sprite and placeholder texture generator.
 
 Paints wp_ground.tga: a 256x256 desert sheet the engine reads as a 4x4 grid
 of 64x64 tiles (16 variants; genmap indexes them per-cell to kill repetition).
 Stylized-clean per the creative bible: desaturated sand base, low-contrast
 grain, sparse pebble speckle, occasional streak tiles. Deterministic (seeded).
-Raw 24-bit TGA, top-left origin, no deps. Also emits the ash ground variant,
-the concrete sheet, and the shadow/glow/soft/rally-line/scorch sprite set
-(one writer function per file below).
+Also emits the ash ground variant, the concrete sheet, the shadow/glow/soft/
+rally-line/scorch sprite set, the HUD icon strip and the solid-colour
+placeholders whose retail-style names the engine hardcodes (one writer
+function per file below). Every file is written in its committed form
+(top-left origin, RLE when smaller, alpha only when used), so a rerun is
+byte-identical and tools/optimize_art.py finds nothing to change.
+
+python3 tools/gentex.py [--data DIR]
 """
-import os
+import argparse
+from pathlib import Path
 import random
-import struct
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import wp_tga  # noqa: E402
 
 SIZE, TILE = 256, 64
 BASE = (171, 158, 136)   # desaturated warm sand (RGB)
+
 
 def value_noise_grid(n, cells, lo, hi, seed):
     """n x n bilinear-interpolated value noise in [lo, hi]."""
@@ -36,162 +46,147 @@ def value_noise_grid(n, cells, lo, hi, seed):
             out[y][x] = a * (1 - fy) + b * fy
     return out
 
+
 def clamp(v):
     return 0 if v < 0 else 255 if v > 255 else int(v)
 
-# full-sheet RGB buffer, seeded with the base sand color
-img = [[BASE for _ in range(SIZE)] for _ in range(SIZE)]
 
-for ty in range(SIZE // TILE):
-    for tx in range(SIZE // TILE):
-        tile_i = ty * 4 + tx
-        seed = 100 + tile_i
-        # tile-level tone shift keeps variants distinguishable but subtle
-        tone = random.Random(seed).uniform(-7, 7)
-        coarse = value_noise_grid(TILE, 4, -9, 9, seed * 3 + 1)
-        fine = value_noise_grid(TILE, 16, -5, 5, seed * 3 + 2)
-        for y in range(TILE):
-            for x in range(TILE):
-                d = tone + coarse[y][x] + fine[y][x]
-                px = (clamp(BASE[0] + d), clamp(BASE[1] + d * 0.96), clamp(BASE[2] + d * 0.88))
-                img[ty * TILE + y][tx * TILE + x] = px
-        # sparse pebbles: small darker clusters
-        r = random.Random(seed * 7)
-        for _ in range(r.randint(4, 9)):
-            cx, cy = r.randrange(2, TILE - 2), r.randrange(2, TILE - 2)
-            dk = r.uniform(14, 26)
-            for oy in range(-1, 2):
-                for ox in range(-1, 2):
-                    if abs(ox) + abs(oy) > 1 and r.random() < 0.5:
-                        continue
-                    yy, xx = ty * TILE + cy + oy, tx * TILE + cx + ox
-                    p = img[yy][xx]
-                    img[yy][xx] = (clamp(p[0] - dk), clamp(p[1] - dk), clamp(p[2] - dk * 0.9))
-        # streak tiles: a few variants carry faint wind-scour lines
-        if tile_i in (3, 6, 9, 12):
-            r2 = random.Random(seed * 11)
-            for _ in range(r2.randint(2, 3)):
-                yline = r2.randrange(6, TILE - 6)
-                amp = r2.uniform(5, 9)
+def save(path, rows):
+    """Write rows of (r, g, b[, a]) tuples in the committed storage form."""
+    size = wp_tga.write(path, rows)
+    print(f"wrote {path} ({size} bytes)")
+
+
+def ground_sheet():
+    """The full desert sheet as RGB rows, seeded with the base sand color."""
+    img = [[BASE for _ in range(SIZE)] for _ in range(SIZE)]
+    for ty in range(SIZE // TILE):
+        for tx in range(SIZE // TILE):
+            tile_i = ty * 4 + tx
+            seed = 100 + tile_i
+            # tile-level tone shift keeps variants distinguishable but subtle
+            tone = random.Random(seed).uniform(-7, 7)
+            coarse = value_noise_grid(TILE, 4, -9, 9, seed * 3 + 1)
+            fine = value_noise_grid(TILE, 16, -5, 5, seed * 3 + 2)
+            for y in range(TILE):
                 for x in range(TILE):
-                    yy = ty * TILE + yline + int(2.2 * (value_noise_grid(1, 1, -1, 1, x)[0][0]))
-                    yy = max(ty * TILE, min(ty * TILE + TILE - 1, yy))
-                    p = img[yy][tx * TILE + x]
-                    img[yy][tx * TILE + x] = (clamp(p[0] - amp), clamp(p[1] - amp), clamp(p[2] - amp))
+                    d = tone + coarse[y][x] + fine[y][x]
+                    px = (clamp(BASE[0] + d), clamp(BASE[1] + d * 0.96), clamp(BASE[2] + d * 0.88))
+                    img[ty * TILE + y][tx * TILE + x] = px
+            # sparse pebbles: small darker clusters
+            r = random.Random(seed * 7)
+            for _ in range(r.randint(4, 9)):
+                cx, cy = r.randrange(2, TILE - 2), r.randrange(2, TILE - 2)
+                dk = r.uniform(14, 26)
+                for oy in range(-1, 2):
+                    for ox in range(-1, 2):
+                        if abs(ox) + abs(oy) > 1 and r.random() < 0.5:
+                            continue
+                        yy, xx = ty * TILE + cy + oy, tx * TILE + cx + ox
+                        p = img[yy][xx]
+                        img[yy][xx] = (clamp(p[0] - dk), clamp(p[1] - dk), clamp(p[2] - dk * 0.9))
+            # streak tiles: a few variants carry faint wind-scour lines
+            if tile_i in (3, 6, 9, 12):
+                r2 = random.Random(seed * 11)
+                for _ in range(r2.randint(2, 3)):
+                    yline = r2.randrange(6, TILE - 6)
+                    amp = r2.uniform(5, 9)
+                    for x in range(TILE):
+                        yy = ty * TILE + yline + int(2.2 * (value_noise_grid(1, 1, -1, 1, x)[0][0]))
+                        yy = max(ty * TILE, min(ty * TILE + TILE - 1, yy))
+                        p = img[yy][tx * TILE + x]
+                        img[yy][tx * TILE + x] = (clamp(p[0] - amp), clamp(p[1] - amp), clamp(p[2] - amp))
+    return img
 
-def write_tga(path):
-    hdr = bytearray(18)
-    hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, SIZE, SIZE)
-    hdr[16] = 24
-    hdr[17] = 0x20  # top-left origin
-    body = bytearray()
-    for row in img:
-        for (r, g, b) in row:
-            body += bytes((b, g, r))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path} ({len(hdr) + len(body)} bytes)")
 
-def write_tga_ash(path):
+def write_ground(path, img):
+    save(path, img)
+
+
+def write_ground_ash(path, img):
     """same ground detail, desaturated to a cold ash/graphite biome tint"""
-    hdr = bytearray(18)
-    hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, SIZE, SIZE)
-    hdr[16] = 24
-    hdr[17] = 0x20
-    body = bytearray()
+    rows = []
     for row in img:
+        out = []
         for (r, g, b) in row:
             L = 0.3 * r + 0.5 * g + 0.2 * b
-            body += bytes((clamp(L * 0.90), clamp(L * 0.92), clamp(L * 0.91)))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+            out.append((clamp(L * 0.91), clamp(L * 0.92), clamp(L * 0.90)))
+        rows.append(out)
+    save(path, rows)
+
 
 def write_shadow(path):
     """64x64 multiplicative blob: white field, soft dark ellipse."""
     n = 64
-    hdr = bytearray(18)
-    hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, n, n)
-    hdr[16] = 24
-    hdr[17] = 0x20
-    body = bytearray()
+    rows = []
     for y in range(n):
+        row = []
         for x in range(n):
             dx, dy = (x - 31.5) / 27.0, (y - 31.5) / 27.0
             r = (dx * dx + dy * dy) ** 0.5
             t = max(0.0, min(1.0, (r - 0.55) / 0.45))
             t = t * t * (3 - 2 * t)                 # 0 center -> 1 edge
             v = clamp(110 + 145 * t)                # 110 core, 255 rim
-            body += bytes((v, v, v))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path} ({len(hdr) + len(body)} bytes)")
+            row.append((v, v, v))
+        rows.append(row)
+    save(path, rows)
 
 
 def write_glow(path):
     """32x32 additive sprite: black field, warm-white radial core."""
     n = 32
-    hdr = bytearray(18); hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 24; hdr[17] = 0x20
-    body = bytearray()
+    rows = []
     for y in range(n):
+        row = []
         for x in range(n):
             dx, dy = (x - 15.5) / 14.0, (y - 15.5) / 14.0
             r = (dx * dx + dy * dy) ** 0.5
             t = max(0.0, 1.0 - r)
             v = t * t
-            body += bytes((clamp(255 * v * 0.55), clamp(255 * v * 0.85), clamp(255 * v)))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+            row.append((clamp(255 * v), clamp(255 * v * 0.85), clamp(255 * v * 0.55)))
+        rows.append(row)
+    save(path, rows)
+
 
 def write_soft(path):
     """32x32 alpha sprite: neutral gray, radial alpha falloff (smoke/dust)."""
     n = 32
-    hdr = bytearray(18); hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 32; hdr[17] = 0x28
-    body = bytearray()
+    rows = []
     for y in range(n):
+        row = []
         for x in range(n):
             dx, dy = (x - 15.5) / 15.0, (y - 15.5) / 15.0
             r = (dx * dx + dy * dy) ** 0.5
             t = max(0.0, 1.0 - r)
-            a = clamp(255 * t * t)
-            body += bytes((150, 158, 168, a))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+            row.append((168, 158, 150, clamp(255 * t * t)))
+        rows.append(row)
+    save(path, rows)
+
 
 def write_rallyline(path):
     """64x8 additive line texture, tiled along rally/waypoint segmented
     lines: bright gold core dash with soft head/tail so tiling reads as a
     dotted energy path."""
     w, h = 64, 8
-    hdr = bytearray(18); hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, w, h); hdr[16] = 24; hdr[17] = 0x20
-    body = bytearray()
+    rows = []
     for y in range(h):
         dy = abs((y - 3.5) / 3.5)
         vy = max(0.0, 1.0 - dy * dy)
+        row = []
         for x in range(w):
             t = x / (w - 1.0)
             dash = max(0.0, 1.0 - abs(t - 0.5) * 2.6)
             v = vy * (dash ** 1.5)
-            body += bytes((clamp(255 * v * 0.35), clamp(255 * v * 0.72), clamp(255 * v)))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+            row.append((clamp(255 * v), clamp(255 * v * 0.72), clamp(255 * v * 0.35)))
+        rows.append(row)
+    save(path, rows)
+
 
 def write_scorch(path):
     """256px scorch atlas (engine hardcodes EXScorch01.tga; 4x4 UV grid,
     SCORCH_PER_ROW=3 with 1.5-cell spacing -> marks at cells (0,0),(1,0),
     (2,0),(0,1), each mark spanning a quarter of the texture, alpha-blended)."""
     n = 256
-    hdr = bytearray(18); hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, n, n); hdr[16] = 32; hdr[17] = 0x28
     px = [[(0, 0, 0, 0)] * n for _ in range(n)]
     centers = [(32, 32, 1), (128, 32, 2), (224, 32, 3), (32, 128, 4)]
     for cx, cy, seed in centers:
@@ -212,19 +207,13 @@ def write_scorch(path):
                 shade = rng.uniform(0.85, 1.0)
                 px[y][x] = (int(24 * shade), int(20 * shade), int(16 * shade),
                             clamp(235 * a))
-    body = bytearray()
-    for y in range(n):
-        for x in range(n):
-            r, g, b, a = px[y][x]
-            body += bytes((b, g, r, a))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+    save(path, px)
+
 
 def write_concrete(path):
-    """256x512 concrete sheet: 4x8 grid of 64px tiles. Rows 0-3 clean panels
-    (seam lines, subtle stains), rows 4-7 worn (cracks, sand encroachment) for
-    apron edges. Same top-left-origin 24-bit TGA as the ground sheet."""
+    """256x256 concrete sheet: 4x4 grid of 64px tiles. Rows 0-1 clean panels
+    (seam lines, subtle stains), rows 2-3 worn (cracks, sand encroachment) for
+    apron edges. Same top-left-origin 24-bit sheet as the ground."""
     CW, CH = 256, 256
     CBASE = (152, 149, 142)
     SAND = BASE
@@ -292,24 +281,12 @@ def write_concrete(path):
                                 clamp(pxl[0] * (1 - f) + SAND[0] * f),
                                 clamp(pxl[1] * (1 - f) + SAND[1] * f),
                                 clamp(pxl[2] * (1 - f) + SAND[2] * f))
-    hdr = bytearray(18)
-    hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, CW, CH)
-    hdr[16] = 24
-    hdr[17] = 0x20
-    body = bytearray()
-    for row in cimg:
-        for (r, g, b) in row:
-            body += bytes((b, g, r))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+    save(path, cimg)
+
 
 def write_icons(path):
     """64x32 icon sheet, 32-bit alpha: heal cross (0..31), no-power bolt (32..63)."""
     W2, H2 = 64, 32
-    hdr = bytearray(18); hdr[2] = 2
-    struct.pack_into("<HH", hdr, 12, W2, H2); hdr[16] = 32; hdr[17] = 0x28
     px = [[(0, 0, 0, 0)] * W2 for _ in range(H2)]
     # heal cross: green with white outline feel
     for y in range(32):
@@ -328,6 +305,7 @@ def write_icons(path):
             r = (cx * cx + cy * cy) ** 0.5
             if r < 14:
                 px[y][x] = (30, 30, 34, 170)
+
     def line(x0, y0, x1, y1):
         n = max(abs(x1 - x0), abs(y1 - y0)) * 2 + 1
         for i in range(int(n) + 1):
@@ -339,35 +317,60 @@ def write_icons(path):
                         px[yy + oy][xx + ox] = (255, 210, 80, 255)
     for i in range(len(bolt) - 1):
         line(*bolt[i], *bolt[i + 1])
-    body = bytearray()
-    for y in range(H2):
-        for x in range(W2):
-            r, g, b, a = px[y][x]
-            body += bytes((b, g, r, a))
-    with open(path, "wb") as f:
-        f.write(bytes(hdr) + bytes(body))
-    print(f"wrote {path}")
+    save(path, px)
 
-def main():
-    import argparse
-    from pathlib import Path
-    parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('targets',nargs='*',type=Path)
-    parser.add_argument('--data',type=Path,default=Path(__file__).resolve().parents[1]/'data')
-    args=parser.parse_args()
-    targets=args.targets or [args.data/'Art/Terrain/wp_ground.tga']
-    for t in targets:
-        Path(t).parent.mkdir(parents=True,exist_ok=True)
-        write_tga(t)
-        write_tga_ash(os.path.join(os.path.dirname(t), "wp_ground_ash.tga"))
-        texdir = os.path.join(os.path.dirname(os.path.dirname(t)), "Textures")
-        Path(texdir).mkdir(parents=True,exist_ok=True)
-        write_shadow(os.path.join(texdir, "shadow.tga"))
-        write_glow(os.path.join(texdir, "wp_glow.tga"))
-        write_soft(os.path.join(texdir, "wp_soft.tga"))
-        write_scorch(os.path.join(texdir, "EXScorch01.tga"))
-        write_rallyline(os.path.join(texdir, "wp_rallyline.tga"))
-        write_concrete(os.path.join(os.path.dirname(t), "wp_concrete.tga"))
-        write_icons(os.path.join(texdir, "wp_icons.tga"))
 
-if __name__=='__main__':main()
+# Solid-colour stand-ins for retail texture names the engine hardcodes (see
+# the engine sources named below) or that the water/sky sets reference. They
+# are shipped so the renderer never falls back to a missing-texture path:
+# name -> (size, RGB, alpha or None).
+PLACEHOLDERS = {
+    'TBBib': (64, (90, 80, 66), None),                    # W3DBibBuffer.cpp structure bib
+    'TBRedBib': (64, (110, 70, 60), None),                # W3DBibBuffer.cpp highlighted bib
+    'TSCloudMed': (64, (255, 255, 255), None),            # TerrainTex.cpp cloud shadow layer
+    'TSNoiseUrb': (64, (255, 255, 255), None),            # TerrainTex.cpp terrain noise layer
+    'exlaser': (64, (255, 60, 60), None),                 # laser/beam draw texture (engine default name)
+    'exmask_g': (64, (255, 255, 255), None),              # W3DShaderManager.cpp fade pattern
+    'noise0000': (64, (255, 255, 255), None),             # W3DWater.cpp water noise
+    'tsmoonlarg': (64, (200, 200, 210), None),            # W3DWater.cpp sky body
+    'twalphaedge': (64, (255, 255, 255), None),           # W3DWater.cpp river alpha edge
+    'twwater01': (64, (60, 110, 140), 180),               # Water.h standing water
+    'watersurfacebubbles': (64, (200, 220, 235), 90),     # W3DWater.cpp water sparkles
+    'wp_sky': (32, (140, 168, 190), None),                # Water.ini SkyTexture
+    'wp_water': (32, (18, 62, 82), None),                 # Water.ini WaterTexture
+}
+
+
+def write_placeholders(texdir):
+    for name, (size, rgb, alpha) in PLACEHOLDERS.items():
+        colour = rgb if alpha is None else rgb + (alpha,)
+        save(texdir / f'{name}.tga', [[colour] * size for _ in range(size)])
+    # Boot-slice test box: an orange field with dark top/bottom bands.
+    save(texdir / 'wp_box.tga',
+         [[(140, 80, 30) if y < 4 or y >= 60 else (235, 150, 60)] * 64 for y in range(64)])
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--data', type=Path, default=Path(__file__).resolve().parents[1] / 'data',
+                        help='dataset root; writes Art/Terrain/ and Art/Textures/ (default: the repository data/)')
+    args = parser.parse_args(argv)
+    terrain = args.data / 'Art/Terrain'
+    texdir = args.data / 'Art/Textures'
+    terrain.mkdir(parents=True, exist_ok=True)
+    texdir.mkdir(parents=True, exist_ok=True)
+    img = ground_sheet()
+    write_ground(terrain / 'wp_ground.tga', img)
+    write_ground_ash(terrain / 'wp_ground_ash.tga', img)
+    write_concrete(terrain / 'wp_concrete.tga')
+    write_shadow(texdir / 'shadow.tga')
+    write_glow(texdir / 'wp_glow.tga')
+    write_soft(texdir / 'wp_soft.tga')
+    write_scorch(texdir / 'EXScorch01.tga')
+    write_rallyline(texdir / 'wp_rallyline.tga')
+    write_icons(texdir / 'wp_icons.tga')
+    write_placeholders(texdir)
+
+
+if __name__ == '__main__':
+    main()

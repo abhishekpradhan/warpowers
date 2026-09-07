@@ -347,11 +347,22 @@ public:
         return store(m_textures, t);
     }
 
+    // Diagnostic upload trace, off by default. Gated 2026-09-07 on IG_TRACE=1 in
+    // the host environment (the War Powers page sets it under ?debug=1) so the
+    // first uploads no longer print on every boot.
+    static bool uploadTraceEnabled() {
+        static const bool on = [] {
+            const char* e = std::getenv("IG_TRACE");
+            return e && *e && *e != '0';
+        }();
+        return on;
+    }
+
     void updateTexture(BackendHandle h, UINT level, UINT width, UINT height,
                        TexFormat format, const void* data, UINT byteSize) override {
         TextureSlot& t = m_textures[h - 1];
         if (level < 32) t.uploadedMask |= (1u << level);
-        if (++m_texUploads <= 8)
+        if (++m_texUploads <= 8 && uploadTraceEnabled())
             std::fprintf(stderr, "[d8web] texUpload #%llu h=%u lvl=%u %ux%u fmt=%d bytes=%u first=%02X%02X%02X%02X\n",
                          (unsigned long long)m_texUploads, h, level, width, height, int(format),
                          byteSize, ((const BYTE*)data)[0], ((const BYTE*)data)[1],

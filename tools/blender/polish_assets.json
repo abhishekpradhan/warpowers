@@ -2867,5 +2867,341 @@
     "texture_size": 256,
     "geometry_source": "tools/blender/support_kit.py",
     "bake_size": 256
+  },
+  "mercc01": {
+    "asset_role": "structure",
+    "house": [
+      [
+        -2,
+        -5,
+        28.46,
+        4.2,
+        4.2,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 11,
+      "shade_lo": 0.52,
+      "shade_hi": 0.48,
+      "grain": 0.018,
+      "edge_strength": 0.45,
+      "edge_radius": 2,
+      "lowfreq": 0.035
+    },
+    "model": "MERCC01",
+    "portrait": "command-center",
+    "texture": "wp_mercc",
+    "triangles": 752,
+    "bounds": [
+      [
+        -23.0,
+        -23.0,
+        0.0
+      ],
+      [
+        23.0,
+        23.0,
+        39.0
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "structure",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 512,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "jakcp01": {
+    "asset_role": "structure",
+    "house": [
+      [
+        -3,
+        0,
+        12.27,
+        4.5,
+        4.5,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 17,
+      "shade_lo": 0.5,
+      "shade_hi": 0.5,
+      "grain": 0.028,
+      "edge_strength": 0.5,
+      "edge_radius": 2,
+      "lowfreq": 0.05
+    },
+    "model": "JAKCP01",
+    "portrait": "command-post",
+    "texture": "wp_jakcp",
+    "triangles": 976,
+    "bounds": [
+      [
+        -20.0,
+        -18.0,
+        0.0
+      ],
+      [
+        20.0,
+        18.0,
+        24.799999237060547
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "structure",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 512,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "merpp01": {
+    "asset_role": "structure",
+    "house": [
+      [
+        -2,
+        0,
+        14.12,
+        4.5,
+        5,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 22,
+      "shade_lo": 0.52,
+      "shade_hi": 0.48,
+      "grain": 0.018,
+      "edge_strength": 0.45,
+      "edge_radius": 2,
+      "lowfreq": 0.035
+    },
+    "model": "MERPP01",
+    "portrait": "power-array",
+    "texture": "wp_merpp",
+    "triangles": 736,
+    "bounds": [
+      [
+        -20.0,
+        -17.0,
+        0.0
+      ],
+      [
+        20.0,
+        17.0,
+        22.600000381469727
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "structure",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 512,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "merwf01": {
+    "asset_role": "structure",
+    "house": [
+      [
+        21,
+        -6,
+        10.36,
+        4.5,
+        5,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 23,
+      "shade_lo": 0.52,
+      "shade_hi": 0.48,
+      "grain": 0.018,
+      "edge_strength": 0.45,
+      "edge_radius": 2,
+      "lowfreq": 0.035
+    },
+    "model": "MERWF01",
+    "portrait": "vehicle-plant",
+    "texture": "wp_merwf",
+    "triangles": 344,
+    "bounds": [
+      [
+        -24.0,
+        -20.0,
+        0.0
+      ],
+      [
+        25.049999237060547,
+        20.0,
+        21.5
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "structure",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 512,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "jakcs01": {
+    "asset_role": "structure",
+    "house": [
+      [
+        0,
+        0,
+        16.67,
+        7,
+        2,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 52,
+      "shade_lo": 0.5,
+      "shade_hi": 0.5,
+      "grain": 0.028,
+      "edge_strength": 0.5,
+      "edge_radius": 2,
+      "lowfreq": 0.05
+    },
+    "model": "JAKCS01",
+    "portrait": "chop-shop",
+    "texture": "wp_jakcs",
+    "triangles": 468,
+    "bounds": [
+      [
+        -22.0,
+        -18.0,
+        0.0
+      ],
+      [
+        22.0,
+        18.0,
+        16.600000381469727
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "structure",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 512,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "mersuv01": {
+    "asset_role": "vehicle",
+    "house": [
+      [
+        -1.8,
+        0,
+        8.36,
+        2.1,
+        2.7,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 21,
+      "shade_lo": 0.52,
+      "shade_hi": 0.48,
+      "grain": 0.02,
+      "edge_strength": 0.5,
+      "edge_radius": 1,
+      "lowfreq": 0.045
+    },
+    "model": "MERSUV01",
+    "portrait": "fabricator",
+    "texture": "wp_surveyor",
+    "triangles": 260,
+    "bounds": [
+      [
+        -6.75,
+        -5.699999809265137,
+        0.40000009536743164
+      ],
+      [
+        8.600000381469727,
+        5.699999809265137,
+        10.350000381469727
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "vehicle",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 256,
+    "geometry_source": "tools/blender/base_kit.py"
+  },
+  "jakrig01": {
+    "asset_role": "vehicle",
+    "house": [
+      [
+        5,
+        0,
+        6.76,
+        2.4,
+        2.8,
+        0.1
+      ]
+    ],
+    "uv_margin": 0.006,
+    "composite": {
+      "seed": 51,
+      "shade_lo": 0.5,
+      "shade_hi": 0.5,
+      "grain": 0.03,
+      "edge_strength": 0.5,
+      "edge_radius": 1,
+      "lowfreq": 0.045
+    },
+    "model": "JAKRIG01",
+    "portrait": "rigger",
+    "texture": "wp_rigger",
+    "triangles": 296,
+    "bounds": [
+      [
+        -6.899999618530273,
+        -4.099999904632568,
+        0.0
+      ],
+      [
+        8.100000381469727,
+        4.099999904632568,
+        7.669332981109619
+      ]
+    ],
+    "source": "tools/blender/build_polish.py",
+    "role": "vehicle",
+    "origin": "original",
+    "required_states": [
+      "default"
+    ],
+    "texture_size": 256,
+    "bake_size": 256,
+    "geometry_source": "tools/blender/base_kit.py"
   }
 }

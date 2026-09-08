@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Skirmish layouts ship one map per faction: WP<Name> (Meridian) and WP<Name>J.
 SKIRMISH_LAYOUTS = {"flats": "WPTest", "ridge": "WPRidge", "scrap": "WPScrap", "basin": "WPBasin", "range": "WPRange"}
 RIDGE_LAYOUTS = ("ridge", "range")   # the only layouts that author cliff collision
+AMBIENT_EMITTER = "WP_AmbientWind"   # the one carrier of the Limit 1 looping weather bed
 SCRIPT_ENGINE = "GeneralsMD/Code/GameEngine/Source/GameLogic/ScriptEngine/ScriptEngine.cpp"
 
 
@@ -241,6 +242,17 @@ def training_requirements(mission, game_map, objects):
         check(advances == [("WP_ObjectiveStage", stage + 1)], f"training stage {stage}: gate must advance to the next guidance stage")
 
 
+def ambient_emitter_placement(game_map):
+    """Each map carries exactly one weather-bed emitter, neutral and unnamed, at the playable
+    centre: the bed is a looping Limit 1 event, so a second carrier is re-requested and
+    rejected by the sound system every frame for the whole match."""
+    emitters = [o for o in game_map["objects"] if o["template"] == AMBIENT_EMITTER]
+    check(len(emitters) == 1, f"a Limit 1 looping ambient tolerates exactly one {AMBIENT_EMITTER} carrier, found {len(emitters)}")
+    check(emitters[0]["props"] == {"originalOwner": "team"}, f"{AMBIENT_EMITTER} must be neutral, unnamed scenery")
+    width, height = game_map["terrain"]["playable"]
+    check((emitters[0]["x"], emitters[0]["y"]) == (width * 5.0, height * 5.0), f"{AMBIENT_EMITTER} must sit at the playable centre")
+
+
 def validate_links(game_map, objects, strings, templates):
     named = {o["props"]["objectName"] for o in game_map["objects"] if "objectName" in o["props"]}
     for o in game_map["objects"]:
@@ -263,6 +275,7 @@ def validate_links(game_map, objects, strings, templates):
                     check(value in strings, f"missing objective string: {value}")
     caches = [o for o in game_map["objects"] if o["template"] == "WP_SupplyCache"]
     check(len(caches) == 4, "each map needs home and contested supply sites")
+    ambient_emitter_placement(game_map)
     scripts_by_name = {s["name"]: s for s in game_map["scripts"]}
     for team in game_map["teams"]:
         for key in ("teamProductionCondition", "teamOnCreateScript"):
@@ -503,6 +516,30 @@ def object_contract(name, obj, locomotors, creation_lists):
         check(not re.search(r"KindOf\s*=.*\bPOWERED\b", obj), f"Jackal powered structure: {name}")
 
 
+def ambient_contract(objects, audio):
+    """A looping Limit 1 ambient tolerates one carrier template, and that carrier is inert
+    scenery: Drawable::updateDrawable re-requests a non-playing looping ambient every frame,
+    so every extra carrier is rejected ~30x/s for the whole match (the wind bed once rode on
+    both command centers)."""
+    carriers = {}
+    for name, obj in objects.items():
+        for event in re.findall(r"(?m)^\s*SoundAmbient\s*=\s*(\w+)", obj):
+            carriers.setdefault(event, set()).add(name)
+    for event, templates in sorted(carriers.items()):
+        check(event in audio, f"{event}: missing ambient audio event")
+        if re.search(r"(?mi)^\s*Control\s*=.*\bloop\b", audio[event]) and re.search(r"(?m)^\s*Limit\s*=\s*1\s*(?:;|$)", audio[event]):
+            check(templates == {AMBIENT_EMITTER}, f"{event}: a looping Limit 1 ambient must ride only on {AMBIENT_EMITTER}, not {sorted(templates)}")
+    check(AMBIENT_EMITTER in objects and any(AMBIENT_EMITTER in templates for templates in carriers.values()),
+          f"{AMBIENT_EMITTER}: the weather-bed emitter must exist and carry an ambient")
+    emitter = objects[AMBIENT_EMITTER]
+    kinds = re.search(r"(?m)^\s*KindOf\s*=\s*([^;\n]+)", emitter)
+    kinds = set(kinds[1].split()) if kinds else set()
+    check({"IMMOBILE", "INERT", "UNATTACKABLE", "NO_COLLIDE"} <= kinds and not kinds & {"SELECTABLE", "STRUCTURE", "SCORE", "MP_COUNT_FOR_VICTORY"},
+          f"{AMBIENT_EMITTER}: the emitter must be inert, unattackable, passable, unselectable scenery")
+    check(re.search(r"(?m)^\s*Model\s*=\s*NONE\s*$", emitter) and "Body =" in emitter,
+          f"{AMBIENT_EMITTER}: the emitter is invisible but ambient startup needs a body")
+
+
 def balance_contracts(objects, weapons, maps):
     for structure in ("WP_Bulwark", "WP_Skyspear", "WP_Rampart", "WP_Longbow", "WP_Directorate"):
         check(re.search(r"KindOf\s*=.*\bPOWERED\b", objects[structure]), f"{structure}: power-grid counterplay must disable defenses/strike recharge")
@@ -541,6 +578,7 @@ def validate(data, engine):
     weapons = blocks(ini / "Weapon.ini", "Weapon")
     locomotors = blocks(ini / "Locomotor.ini", "Locomotor")
     creation_lists = blocks(ini / "ObjectCreationList.ini", "ObjectCreationList")
+    audio = blocks(ini / "SoundEffects.ini", "AudioEvent")
     attempt("CommandButton.ini", combat_commands, blocks(ini / "Default/CommandButton.ini", "CommandButton"),
             blocks(ini / "CommandSet.ini", "CommandSet"))
     for name, locomotor in locomotors.items():
@@ -577,6 +615,7 @@ def validate(data, engine):
         attempt(mission["id"], mission_contract, mission, ids, strings, objects, maps)
     for name, obj in objects.items():
         attempt("Object.ini", object_contract, name, obj, locomotors, creation_lists)
+    attempt("ambient", ambient_contract, objects, audio)
     attempt("balance", balance_contracts, objects, weapons, maps)
     return failures, len(maps), len(missions)
 
@@ -593,7 +632,7 @@ def main(argv=None):
     if failures:
         return 1
     print(f"PASS: {map_count} binary maps; {mission_count} mission success/failure/edge cases; native script signatures; "
-          "combat orders, cliff/pass routes, paid AI responses, supply, faction and opening-budget contracts.")
+          "combat orders, cliff/pass routes, paid AI responses, supply, weather-bed carrier, faction and opening-budget contracts.")
     return 0
 
 

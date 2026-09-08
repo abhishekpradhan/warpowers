@@ -22,6 +22,10 @@ import struct
 ROOT = Path(__file__).resolve().parents[1]
 LAYOUT_NAMES = ("flats", "ridge", "scrap", "basin", "range")
 FACTIONS = ("meridian", "jackal")
+# One neutral, invisible WP_AMB_Wind carrier per map (Object.ini WP_AmbientWind):
+# the engine re-requests a non-playing looping ambient every frame and the event
+# is Limit 1, so a second carrier is rejected ~30x/s for the whole match.
+AMBIENT_EMITTER = "WP_AmbientWind"
 
 
 def load_missions(root=ROOT):
@@ -494,7 +498,8 @@ def generate(layout, faction, mission=None, preview=False):
     def obj(x, y, angle, name, pairs):
         if MISSION_ID == "training" and name in (F["enemy_tower"], F["enemy_aa"]):
             return b""  # Orientation teaches mobile combat before fortified bases.
-        if not name.startswith(("WP_Prop", "*Waypoints/")):
+        # scenery and the passable emitter have no footprint: keep their authored spots
+        if not name.startswith(("WP_Prop", "*Waypoints/")) and name != AMBIENT_EMITTER:
             x, y = clear_ridge_point(x, y)
         payload = struct.pack("<ffff", x, y, 0.0, angle)
         payload += struct.pack("<i", 0)  # flags
@@ -581,6 +586,8 @@ def generate(layout, faction, mission=None, preview=False):
     for fraction, offset in ((0.31, -165), (0.69, 175)):
         objects_payload += placed("WP_PropRelay", lane(fraction, offset), angle=_toP)
         objects_payload += placed("WP_PropBarrier", lane(fraction, offset + 36), angle=_toP)
+    # The map-wide weather bed: one passable, invisible emitter at the playable centre.
+    objects_payload += placed(AMBIENT_EMITTER, (PLAY * 5.0, PLAY * 5.0))
 
     # Finite supplies give expansions and raids a physical purpose. Home caches
     # are visible from the opening base; the two lateral caches reward map control.

@@ -37,8 +37,8 @@
       "textures": [
         "wp_jakcp.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -51,8 +51,8 @@
       "textures": [
         "wp_jakcs.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -203,8 +203,8 @@
       "textures": [
         "wp_rigger.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -395,8 +395,8 @@
       "textures": [
         "wp_mercc.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -557,12 +557,12 @@
       "id": "merpp01",
       "path": "data/Art/W3D/merpp01.w3d",
       "triangles": 736,
-      "bytes": 103383,
+      "bytes": 89127,
       "textures": [
         "wp_merpp.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -603,8 +603,8 @@
       "textures": [
         "wp_surveyor.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"
@@ -659,8 +659,8 @@
       "textures": [
         "wp_merwf.tga"
       ],
-      "source": "See ASSETS.md and tools/ generators",
-      "productionStatus": "existing-content",
+      "source": "tools/blender/build_polish.py",
+      "productionStatus": "production-pass",
       "turret": false,
       "muzzle": false,
       "license": "CC BY 4.0; see ASSETS.md for per-file provenance"

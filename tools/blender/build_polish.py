@@ -12,6 +12,12 @@ are baked at twice their shipped size and area-halved by tools/optimize_art.py;
 that two-step is what reproduces the committed bytes (a direct half-size bake
 yields different pixels). ``--check`` rebuilds the selection into a temporary
 tree, applies the optimize step and compares W3D/TGA bytes with ``--data``.
+
+Geometry lives here and in two kit modules: support_kit.py (aircraft, support
+and defense structures) and base_kit.py (the seven established base buildings
+and builders). A builder's contract may set ``uv_margin`` and ``composite``
+to keep a model's own smart-UV margin and painted-composite recipe instead of
+the house defaults below; base_kit.py uses that to preserve its look.
 """
 import argparse
 import json
@@ -34,6 +40,7 @@ from wp_w3d import (HIERARCHY, HIERARCHY_HEADER, HLOD, HLOD_HEADER, HLOD_LOD_ARR
                     SUB_OBJECT_ARRAY_HEADER, chunk, chunks, mesh_chunk, name32)
 import genrig  # noqa: E402
 import optimize_art  # noqa: E402
+import base_kit  # noqa: E402
 import support_kit  # noqa: E402
 from w3dhierarchy import canonicalize  # noqa: E402
 register_w3d_plugin()
@@ -51,7 +58,9 @@ PAL = {k: color(v) for k, v in dict(
 
 class Kit(pipe.Kit):
     def __init__(self):
-        super().__init__(PAL)
+        # Materials are created on first use, so the base-kit colours cost
+        # nothing for models that never name them.
+        super().__init__({**PAL, **base_kit.PALETTE})
         self.group = 'HULL'
     def _register(self, obj, material):
         super()._register(obj, material)
@@ -425,9 +434,10 @@ def rubble(k,small=False):
 
 # (portrait label, texture stem, authoring function, BAKE size). The shipped
 # atlas size is optimize_art.shipped_size(texture, bake): the compact combat
-# vehicles, infantry, scrap and relay ship at half a 512px bake, rock/wall at
-# half a 256px bake; the flagship tanks ship their 512px bake and everything
-# else (haulers, damaged/wreck/ruin variants, the support kit) its 256px bake.
+# vehicles, infantry, scrap, relay and the five base-kit buildings ship at
+# half a 512px bake, rock/wall at half a 256px bake; the flagship tanks ship
+# their 512px bake and everything else (haulers, damaged/wreck/ruin variants,
+# the support kit, the two builders) its 256px bake.
 ASSETS={
     'merout01': ('outrider','wp_outrider',outrider,512),
     'mertank01': ('vector','wp_vector',vector,512),
@@ -455,6 +465,8 @@ ASSETS.update({
     'wpruin02':('structure-ruin-small','wp_ruinsmall',lambda k:rubble(k,True),256),
 })
 ASSETS.update(support_kit.ASSETS)
+ASSETS.update(base_kit.ASSETS)
+GEOMETRY_SOURCES=[('tools/blender/support_kit.py',support_kit.ASSETS),('tools/blender/base_kit.py',base_kit.ASSETS)]
 
 def final_w3d(path, model, contract):
     """Append original player-color geometry and a turret-relative muzzle bone."""
@@ -556,11 +568,12 @@ def build(model,entry,args):
     bbox=[tuple(min(v[i] for v in bounds) for i in range(3)),tuple(max(v[i] for v in bounds) for i in range(3))]
     tris=sum(len(p.vertices)-2 for p in obj.data.polygons)
     portrait(obj,args.review/(label+'.tga'))
-    pipe.smart_uv(obj,.009)
+    pipe.smart_uv(obj,contract.get('uv_margin',.009))
     diff,ao,mask=pipe.bake_images(obj,res)
     tga=args.data/'Art/Textures'/(texture+'.tga')
-    pipe.composite(diff,ao,mask,res,str(tga),seed=sum(map(ord,model)),
-                   shade_lo=.52,shade_hi=.48,grain=.012,edge_strength=.32,edge_radius=1,lowfreq=.024)
+    recipe=dict(seed=sum(map(ord,model)),shade_lo=.52,shade_hi=.48,grain=.012,edge_strength=.32,edge_radius=1,lowfreq=.024)
+    recipe.update(contract.get('composite',{}))
+    pipe.composite(diff,ao,mask,res,str(tga),**recipe)
     # Clear mask-bake emission; the final W3D uses one painted atlas.
     image=bpy.data.images.load(str(tga));image.name=texture
     mat=bpy.data.materials.new(texture+'_skin')
@@ -660,7 +673,8 @@ def main(argv=None):
         contract.update(source='tools/blender/build_polish.py',origin='original',
                         portrait=label,texture=texture,texture_size=optimize_art.shipped_size(texture,res),bake_size=res,
                         role=role,required_states=states)
-        if model in support_kit.ASSETS:contract['geometry_source']='tools/blender/support_kit.py'
+        for source,kit in GEOMETRY_SOURCES:
+            if model in kit:contract['geometry_source']=source
         w3d=args.data/'Art/W3D'/(model+'.w3d')
         if w3d.exists():
             contract['triangles']=sum(struct.unpack_from('<I',q,40)[0]

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
-"""Shared War Powers asset pipeline: bake, composite, export.
+"""Shared War Powers asset pipeline: modeling kit, bake, composite.
 
-Every painted model script funnels through this
-module so the painted look stays uniform and quality upgrades land on all
-assets at once.
+Every painted model funnels through this module (driven by build_polish.py)
+so the painted look stays uniform and quality upgrades land on all assets at
+once.
 
 Composite recipe (v2):
   diffuse * shaped-AO            -- painted shading baked in
@@ -13,8 +13,9 @@ Composite recipe (v2):
                                     edges -> reads as painted edge highlights)
   + low-frequency value noise    -- breaks up flat color fields
   + fine grain
-build_polish.py supplies separate HOUSECOLOR meshes after the texture bake;
-these receive the owning player's color through the native W3D asset manager.
+build_polish.py exports the W3D and appends separate HOUSECOLOR meshes after
+the texture bake; these receive the owning player's color through the native
+W3D asset manager.
 
 The composite is written at bake size as a raw bottom-left TGA; the shipped
 file is produced by tools/optimize_art.py (area halving for the contracted
@@ -29,13 +30,8 @@ import bpy
 import bmesh
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _bootstrap import kit_output_dirs, register_w3d_plugin  # noqa: E402
+import _bootstrap  # noqa: E402,F401  (puts tools/ on sys.path for wp_tga)
 import wp_tga  # noqa: E402
-
-
-def output_dirs():
-    """Consistent explicit destinations for the retained original building kits."""
-    return kit_output_dirs()
 
 
 class Kit:
@@ -260,26 +256,3 @@ def composite(diff, ao, mask, atlas, out_path, *, seed=5,
     # Blender image origin is bottom-left; TGA default is bottom-up too.
     with open(out_path, 'wb') as f:
         f.write(wp_tga.header(atlas, atlas, top_left=False) + b''.join(rows))
-
-
-def export_w3d(obj, tga_path, w3d_path, image_name):
-    """Swap to a single textured material and export via the OpenSAGE plugin."""
-    register_w3d_plugin()
-    final_img = bpy.data.images.load(tga_path)
-    final_img.name = image_name
-    export_mat = bpy.data.materials.new(image_name + '_skin')
-    bsdf = export_mat.node_tree.nodes['Principled BSDF']
-    texn = export_mat.node_tree.nodes.new('ShaderNodeTexImage')
-    texn.image = final_img
-    export_mat.node_tree.links.new(bsdf.inputs['Base Color'], texn.outputs['Color'])
-    obj.data.materials.clear()
-    obj.data.materials.append(export_mat)
-
-    bpy.ops.export_mesh.westwood_w3d(
-        filepath=w3d_path,
-        file_format='W3D',
-        export_mode='HM',
-        force_vertex_materials=True,
-    )
-    from legacy_contracts import apply
-    apply(w3d_path)

@@ -42,6 +42,15 @@ public build, whose build identifier will head the first release section.
 
 ### Changed
 
+- The seven base-kit models (Meridian Command Center, Power Array, Vehicle
+  Plant and Fabricator; Jackal Command Post, Chop Shop and Rigger) are built
+  by `tools/blender/build_polish.py` from `tools/blender/base_kit.py` with
+  their original palette and painted recipe, so `build_polish.py --check`
+  reproduces all 54 catalog models byte-for-byte; the four kit scripts and
+  `legacy_contracts.py` are retired. Parts the old exports had rotated about
+  the world origin through a Blender operator-state leak (the Command Post's
+  crates, tarp and tower roof; the Rigger's crane arm; the Chop Shop's roof
+  and sign) sit at their authored positions again.
 - The diagnostic harness (scripted self-play, click tests, review scenes) is
   compiled only with the CMake option `WP_HARNESS=ON` (`wasm-harness`
   preset); production builds ignore its variables. The engine traces stay in
@@ -68,6 +77,12 @@ public build, whose build identifier will head the first release section.
   (removed from the dataset on 2026-09-05; its provenance is recorded).
 
 ### Fixed
+- The map-wide wind ambient now rides on one neutral, invisible emitter per map
+  instead of both command centers, so the second copy is no longer rejected and
+  retried every frame; `tools/validate_gameplay.py` enforces the emitter contract.
+- `WP_VOLUME` is applied once, as the seed of the master slider, instead of also
+  scaling the MiniAudio engine master (native runs with a value below 100 were
+  playing at the square of the requested level).
 
 - Retry after a defeat could crash the engine through mip-filter reference
   ownership, released texture storage and unchecked surface copies; sentence

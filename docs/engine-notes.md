@@ -165,6 +165,11 @@ values.
 - Every map-placed object with a Draw module needs a Body module, scenery
   included: `Drawable::onLevelStart` asks the body for its damage state while
   preparing ambient sound. `tools/check_content.py` enforces this.
+- A looping `Limit = 1` ambient (`WP_AMB_Wind`) tolerates exactly one carrier:
+  `Drawable::updateDrawable` re-requests a non-playing looping ambient every
+  frame, so a second carrier is rejected by `GameSounds` ~30×/s for the whole
+  match. `tools/genmap.py` places one neutral, invisible `WP_AmbientWind`
+  emitter at the playable centre; `tools/validate_gameplay.py` enforces both.
 - `tools/genmap.py` writes all of the above; `tools/validate_gameplay.py`
   decodes the binaries independently.
 

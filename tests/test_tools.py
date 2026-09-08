@@ -156,6 +156,43 @@ class MapReaderTests(unittest.TestCase):
                 validate_gameplay.read_map(path)
 
 
+class AmbientEmitterTests(unittest.TestCase):
+    """The wind bed is a looping Limit 1 event: one neutral invisible carrier per map, never a second."""
+
+    @staticmethod
+    def decode(layout, faction, mission=None):
+        name, data = genmap.generate(layout, faction, mission)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / f'{name}.map'
+            path.write_bytes(data)
+            return validate_gameplay.read_map(path)
+
+    def test_generated_maps_carry_one_neutral_emitter_at_the_playable_centre(self):
+        training = next(m for m in genmap.load_missions() if m['id'] == 'training')
+        for layout, faction, mission in (('flats', 'meridian', None), ('range', 'jackal', None),
+                                         (training['layout'], training['faction'], training)):
+            game_map = self.decode(layout, faction, mission)
+            validate_gameplay.ambient_emitter_placement(game_map)
+            emitters = [o for o in game_map['objects'] if o['template'] == genmap.AMBIENT_EMITTER]
+            width, height = game_map['terrain']['playable']
+            self.assertEqual([(o['x'], o['y'], o['props']) for o in emitters],
+                             [(width * 5.0, height * 5.0, {'originalOwner': 'team'})], layout)
+            game_map['objects'].append(dict(emitters[0]))
+            with self.assertRaisesRegex(validate_gameplay.Failure, 'exactly one'):
+                validate_gameplay.ambient_emitter_placement(game_map)
+
+    def test_a_looping_limit_one_ambient_tolerates_a_single_carrier_template(self):
+        objects = validate_gameplay.blocks(ROOT / 'data/Data/INI/Default/Object.ini', 'Object')
+        audio = validate_gameplay.blocks(ROOT / 'data/Data/INI/SoundEffects.ini', 'AudioEvent')
+        validate_gameplay.ambient_contract(objects, audio)
+        self.assertNotIn('SoundAmbient = WP_AMB_Wind', objects['WP_CommandCenter'])
+        doubled = dict(objects, WP_CommandCenter=objects['WP_CommandCenter'].replace(
+            '\n  Side = WP\n', '\n  SoundAmbient = WP_AMB_Wind\n  Side = WP\n', 1))
+        self.assertNotEqual(doubled['WP_CommandCenter'], objects['WP_CommandCenter'])
+        with self.assertRaisesRegex(validate_gameplay.Failure, 'WP_AMB_Wind'):
+            validate_gameplay.ambient_contract(doubled, audio)
+
+
 class GenW3dTests(unittest.TestCase):
     def test_catalog_name_collision_is_fatal_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as temp:

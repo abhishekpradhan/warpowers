@@ -1447,6 +1447,11 @@ if (TEST_HARNESS) {
     progressBytes, fetchBytes, fetchJSON, verifyAsset, instantiateEngine, loadEngineScript, engineArguments,
     quiesceEngine,
   };
+} else if (window.wpDesktopOnly) {
+  // The inline desktop gate is showing its notice; nothing downloads until the
+  // player chooses to continue (or reloads on a desktop).
+  window.wpContinue = startBoot;
+  window.addEventListener('wp-continue', startBoot, { once: true });
 } else {
   startBoot();
 }

@@ -69,6 +69,12 @@
           <div id="bootProgress" class="bootProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="bootFill"></div></div>
           <div class="bootStatus"><span id="bootPhase" role="status" aria-live="polite">Connecting to command…</span><span id="bootPercent" aria-hidden="true">0%</span></div>
           <p id="bootHint">No install. No account. The battlefield is yours.</p>
+          <div id="deviceNotice" role="status" hidden>
+            <p id="deviceMessage">War Powers is built for desktop. It needs a mouse, a keyboard and a desktop browser with WebGL2, and it downloads about 65 MB. Open this address on a desktop computer to play:</p>
+            <p class="deviceLink"><code id="deviceLink">{{PUBLIC_URL}}</code></p>
+            <div class="actions"><button id="copyLinkButton" class="primary">Copy link</button><button id="continueAnywayButton">Continue anyway</button></div>
+            <p id="deviceNote" class="deviceNote">Continue anyway starts the download here; the game needs a pointer that can right-click and a keyboard to be playable.</p>
+          </div>
           <div id="bootError" role="alert" hidden>
             <p id="errorMessage"></p><code id="errorCode"></code>
             <div class="actions"><button id="reloadButton" class="primary">Reload game</button><button id="diagnosticsButton">Copy diagnostics</button></div>
@@ -150,7 +156,7 @@
       try { gl = document.createElement('canvas').getContext('webgl2'); } catch (error) { gl = null; }
       if (gl) { var lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext(); }
       need('WebGL2', !!gl);
-      if (!missing.length) return;
+      if (!missing.length) { desktopGate(); return; }
       var message = missing.length === 1 && missing[0] === 'WebGL2'
         ? 'WebGL2 is unavailable. Enable browser graphics acceleration or use another desktop browser.'
         : 'War Powers needs a current desktop browser. Missing: ' + missing.join(', ')
@@ -163,6 +169,57 @@
       document.getElementById('diagnosticsButton').hidden = true;
       document.getElementById('bootError').hidden = false;
       document.getElementById('reloadButton').onclick = function () { location.reload(); };
+
+      // Desktop gate. The game needs hover, right-click and a keyboard, so a phone or a touch-only
+      // tablet gets a notice before anything is downloaded. Capabilities decide, not the user agent
+      // alone: a tablet with a mouse or trackpad passes, a phone never boots by itself. The player
+      // can still continue (remembered for the session) or add ?desktop=1 to the address.
+      function desktopGate() {
+        function media(query) {
+          try { return typeof matchMedia === 'function' && matchMedia(query).matches; } catch (error) { return false; }
+        }
+        var override = /(?:^|[?&])desktop=1(?:&|$)/.test(location.search || '');
+        try { override = override || sessionStorage.getItem('wpDesktopOverride') === '1'; } catch (error) {}
+        if (override) return;
+        var agent = (typeof navigator === 'object' && navigator.userAgent) || '';
+        var phone = /Android.*Mobile|iPhone|iPod|Windows Phone|Mobile Safari|Opera Mini|IEMobile/i.test(agent);
+        var finePointer = media('(any-pointer: fine)') || media('(any-hover: hover)');
+        var coarseOnly = media('(pointer: coarse)') && !finePointer;
+        if (!phone && !coarseOnly) return;
+        window.wpDesktopOnly = true;
+        document.getElementById('bootPhase').textContent = 'Desktop required';
+        document.getElementById('bootHint').textContent = 'Nothing was downloaded on this device.';
+        document.getElementById('bootProgress').hidden = true;
+        document.getElementById('bootPercent').hidden = true;
+        document.getElementById('deviceNotice').hidden = false;
+        var link = document.getElementById('deviceLink');
+        var address = (link && link.textContent) || '';
+        if (typeof location === 'object' && location.origin && (!address || address.indexOf('{{') === 0)) {
+          address = location.origin + '/';
+          if (link) link.textContent = address;
+        }
+        document.getElementById('copyLinkButton').onclick = function () {
+          var done = function () { document.getElementById('copyLinkButton').textContent = 'Link copied'; };
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(address).then(done, function () {}); return; }
+          } catch (error) {}
+          try {
+            var range = document.createRange(); range.selectNodeContents(link);
+            var selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+          } catch (error) {}
+        };
+        document.getElementById('continueAnywayButton').onclick = function () {
+          try { sessionStorage.setItem('wpDesktopOverride', '1'); } catch (error) {}
+          window.wpDesktopOnly = false;
+          document.getElementById('deviceNotice').hidden = true;
+          document.getElementById('bootProgress').hidden = false;
+          document.getElementById('bootPercent').hidden = false;
+          document.getElementById('bootPhase').textContent = 'Connecting to command…';
+          document.getElementById('bootHint').textContent = 'No install. No account. The battlefield is yours.';
+          if (typeof Event === 'function') window.dispatchEvent(new Event('wp-continue'));
+          else if (window.wpContinue) window.wpContinue();
+        };
+      }
     })();
   </script>
   <script type="module" src="app.js"></script>

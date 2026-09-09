@@ -566,9 +566,14 @@ test('the inline feature gate reports unsupported browsers before the module loa
   assert.ok(match, 'index.html must carry an inline classic feature gate');
   assert.ok(page.indexOf(match[0]) < page.indexOf('<script type="module" src="app.js">'), 'the gate runs first');
   assert.match(page, /<noscript>/);
-  function runGate({ modules = true, webgl = true, clone = true, dialog = true, wasm = true } = {}) {
+  function runGate({
+    modules = true, webgl = true, clone = true, dialog = true, wasm = true,
+    agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/152.0', media = {}, search = '',
+    session = {},
+  } = {}) {
     const elements = new Map();
     let reloads = 0;
+    const events = [];
     const element = id => {
       if (!elements.has(id)) elements.set(id, { hidden: true, textContent: '' });
       return elements.get(id);
@@ -577,8 +582,12 @@ test('the inline feature gate reports unsupported browsers before the module loa
     Dialog.prototype.showModal = function () {};
     const gl = { getExtension: () => ({ loseContext() {} }) };
     const context = vm.createContext({
-      window: {},
-      location: { reload() { reloads++; } },
+      window: { dispatchEvent(event) { events.push(event.type); }, getSelection: () => ({ removeAllRanges() {}, addRange() {} }) },
+      location: { reload() { reloads++; }, search, origin: 'https://example.test' },
+      navigator: { userAgent: agent },
+      matchMedia: query => ({ matches: Boolean(media[query]) }),
+      sessionStorage: { getItem: key => session[key] ?? null, setItem(key, value) { session[key] = value; } },
+      Event: class { constructor(type) { this.type = type; } },
       document: {
         getElementById: element,
         createElement(tag) {
@@ -592,7 +601,10 @@ test('the inline feature gate reports unsupported browsers before the module loa
       WebAssembly: wasm ? WebAssembly : undefined,
     });
     vm.runInContext(match[1], context);
-    return { message: context.window.wpUnsupported, element, reload: () => reloads };
+    return {
+      message: context.window.wpUnsupported, desktopOnly: context.window.wpDesktopOnly === true,
+      element, reload: () => reloads, events, session,
+    };
   }
   const supported = runGate();
   assert.equal(supported.message, undefined);
@@ -610,4 +622,69 @@ test('the inline feature gate reports unsupported browsers before the module loa
   // The module itself defers to the gate's verdict instead of painting over it.
   const context = vm.createContext({ ...core, window: { wpUnsupported: 'unsupported here' } });
   assert.throws(() => vm.runInContext(application, context), /unsupported here/);
+});
+
+test('the desktop gate holds phones and touch-only devices before any download', () => {
+  const match = /<script>([\s\S]*?)<\/script>/.exec(page);
+  const runGate = options => {
+    const elements = new Map();
+    const events = [];
+    const session = options.session ?? {};
+    const element = id => {
+      if (!elements.has(id)) elements.set(id, { hidden: true, textContent: id === 'deviceLink' ? '{{PUBLIC_URL}}' : '' });
+      return elements.get(id);
+    };
+    const Dialog = function () {};
+    Dialog.prototype.showModal = function () {};
+    const gl = { getExtension: () => ({ loseContext() {} }) };
+    const context = vm.createContext({
+      window: { dispatchEvent(event) { events.push(event.type); } },
+      location: { reload() {}, search: options.search ?? '', origin: 'https://example.test' },
+      navigator: { userAgent: options.agent ?? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/152.0' },
+      matchMedia: query => ({ matches: Boolean((options.media ?? {})[query]) }),
+      sessionStorage: { getItem: key => session[key] ?? null, setItem(key, value) { session[key] = value; } },
+      Event: class { constructor(type) { this.type = type; } },
+      document: {
+        getElementById: element,
+        createElement(tag) {
+          if (tag === 'script') return { noModule: false };
+          if (tag === 'canvas') return { getContext: () => gl };
+          return {};
+        },
+      },
+      structuredClone, HTMLDialogElement: Dialog, WebAssembly,
+    });
+    vm.runInContext(match[1], context);
+    return { desktopOnly: context.window.wpDesktopOnly === true, element, events, session };
+  };
+  const desktop = runGate({ media: { '(any-pointer: fine)': true, '(any-hover: hover)': true } });
+  assert.equal(desktop.desktopOnly, false);
+  assert.equal(desktop.element('deviceNotice').hidden, true);
+  const phone = runGate({
+    agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+    media: { '(pointer: coarse)': true },
+  });
+  assert.equal(phone.desktopOnly, true);
+  assert.equal(phone.element('deviceNotice').hidden, false);
+  assert.equal(phone.element('bootProgress').hidden, true);
+  assert.equal(phone.element('bootPhase').textContent, 'Desktop required');
+  assert.equal(phone.element('deviceLink').textContent, 'https://example.test/', 'an unstaged page still shows a real address');
+  const touchTablet = runGate({ agent: 'Mozilla/5.0 (X11; Linux; Tablet) Chrome/152.0', media: { '(pointer: coarse)': true } });
+  assert.equal(touchTablet.desktopOnly, true, 'touch-only input holds even without a phone user agent');
+  const tabletWithMouse = runGate({ agent: 'Mozilla/5.0 (X11; Linux; Tablet) Chrome/152.0',
+    media: { '(pointer: coarse)': true, '(any-pointer: fine)': true } });
+  assert.equal(tabletWithMouse.desktopOnly, false, 'a fine pointer anywhere passes the gate');
+  const overridden = runGate({ agent: 'Mozilla/5.0 (iPhone) Mobile Safari', media: { '(pointer: coarse)': true }, search: '?desktop=1' });
+  assert.equal(overridden.desktopOnly, false);
+  const remembered = runGate({ agent: 'Mozilla/5.0 (iPhone) Mobile Safari', media: { '(pointer: coarse)': true },
+    session: { wpDesktopOverride: '1' } });
+  assert.equal(remembered.desktopOnly, false);
+  // Continue anyway: remembers the choice for the session and releases the module without a reload.
+  phone.element('continueAnywayButton').onclick();
+  assert.equal(phone.session.wpDesktopOverride, '1');
+  assert.deepEqual(phone.events, ['wp-continue']);
+  assert.equal(phone.element('deviceNotice').hidden, true);
+  assert.equal(phone.element('bootProgress').hidden, false);
+  // The module waits for that event instead of booting behind the notice.
+  assert.match(application, /else if \(window\.wpDesktopOnly\) \{[\s\S]*?addEventListener\('wp-continue', startBoot, \{ once: true \}\)/);
 });

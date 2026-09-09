@@ -7,6 +7,14 @@ All notable changes to War Powers are documented here. The format follows
 
 Nothing yet.
 
+## [0.1.2] - 2026-09-09
+
+### Added
+
+- Phones and touch-only devices see a desktop-required notice before anything
+  downloads, with a copyable address and a session-scoped "Continue anyway";
+  `?desktop=1` skips the gate. A tablet with a mouse or trackpad passes.
+
 ## [0.1.1] - 2026-09-09
 
 ### Added

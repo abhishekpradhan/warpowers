@@ -138,6 +138,11 @@ button:disabled::before {
 .versus { margin: 0 12px; color: var(--gold); }
 #bootError { margin-top: 24px; border-top: 1px solid #624336; padding-top: 14px; }
 #bootExit { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 4px; }
+#deviceNotice { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 14px; }
+#deviceMessage { font-size: 14px; line-height: 1.6; color: #d9e2e7; }
+.deviceLink { margin-top: 14px; }
+.deviceLink code { font-size: 15px; color: var(--gold); letter-spacing: .02em; user-select: all; -webkit-user-select: all; }
+.deviceNote { font-size: 11px; color: #7c909d; margin-top: 14px; line-height: 1.6; }
 #errorMessage { font-size: 14px; line-height: 1.6; color: #eab9a5; }
 #errorCode { font-size: 10px; color: var(--muted); }
 .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }

@@ -370,3 +370,24 @@ Revisit if GitHub changes how the License tab is populated, if community bug
 reports need the harness in a shipped build (then behind a build flag the
 release process checks), or if Actions minutes become a problem again after
 enabling.
+
+## D026 — Publish under the personal profile; Vercel subdomain first (2026-09-09)
+
+The maintainer chose to publish the repositories under the existing
+`github.com/abhishekpradhan` account rather than a new organization, and to
+launch on `warpowers.vercel.app` with a purchased domain to follow later.
+
+Naming is a two-form convention: **"War Powers"** stays the display name on
+every player-facing and documentation surface (wordmark, window title, README,
+credits, `WP:` string keys), and **`warpowers`** is the single identifier for
+everything machine-readable (repository names, the Vercel project and
+subdomain, the future domain). Availability checked on 2026-09-08: the GitHub
+handle `warpowers` was free, `warpowers.gg/.app/.game/.io/.dev` unregistered,
+`warpowers.com` parked. A web search found no shipped game titled "War Powers";
+the formal trademark pass in D006 remains a launch step.
+
+Consequences: every Git URL already points at the personal account, so the
+"When the repositories move" list in RELEASING.md needs no action for the
+first release; the launch sequence is tag, make the three repositories public,
+publish the GitHub release that the credits page links to as corresponding
+source, then deploy the release stage to production.

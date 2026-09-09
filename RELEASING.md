@@ -94,9 +94,10 @@ Tag the root, engine and DXVK repositories with the same release name.
 
 ## When the repositories move
 
-The project's Git URLs (`github.com/abhishekpradhan/…`) are written into the
-files below. Update all of them when the repositories transfer to another
-account or organization, then rebuild and restage so the credits page and the
+The first release publishes under the personal account (D026), so nothing in
+this section applies to it. The project's Git URLs (`github.com/abhishekpradhan/…`)
+are written into the files below. Update all of them only if the repositories
+later transfer to another account or organization, then rebuild and restage so the credits page and the
 submodule pointers agree. Confirm the list with
 `git grep -l "github.com/abhishekpradhan"` in each repository before editing.
 
@@ -119,6 +120,13 @@ DXVK repository (`engine/references/fbraz3-dxvk`): `README.md` and
 `CONTRIBUTING.md` — project and engine links.
 
 Existing clones keep working after `git submodule sync --recursive`.
+
+## Launch URL
+
+The playable URL is `https://warpowers.vercel.app` until a purchased domain
+replaces it (D026). When a domain arrives, add it to the Vercel project, keep the
+`vercel.app` address as a redirect, and update the README play link; nothing in
+the game bundle embeds the hostname.
 
 ## Hosting before the public release
 

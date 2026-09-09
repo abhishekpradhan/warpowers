@@ -20,6 +20,8 @@ Nothing yet.
 
 ### Changed
 
+- Browser builds always use the Emscripten zlib port; a fresh machine no
+  longer compiles a second zlib that collided with the FreeType port at link.
 - The Vercel project is connected to the GitHub repository for commit
   metadata, with git-triggered builds disabled; repositories carry
   descriptions, topics and the play URL.

@@ -117,7 +117,31 @@ running `build.json` cannot be resumed.
 `build.json` (mutable, `no-cache`):
 `{schemaVersion: 1, id, compatibility, engine: {js: {url, size, sha256}, wasm: {url, size, sha256}}, font: {url, size, sha256}, manifest, operations, dataFiles, dataBytes, source}`.
 `compatibility` hashes the data manifest and the wasm; `id` also covers the
-shell, notices and credits, so UI-only releases keep saves compatible.
+shell, notices, credits, the static files and the public URL, so UI-only
+releases keep saves compatible.
+
+### Static files and the public URL
+
+`web/static/` ships at the stage root under fixed names, never hashed, because
+browsers and link previews fetch these by address: `favicon.svg`,
+`favicon-32.png`, `apple-touch-icon.png` (180 px), `icon-192.png`,
+`icon-512.png`, `social-card.jpg` (1200×630), `site.webmanifest`, `robots.txt`
+and `404.html` (self-contained, served by the host for any unknown path). The
+stager refuses to run when one is missing, skips dotfiles, and rejects a
+static name that would shadow a generated file (`index.html`, `build.json`,
+`app.*`, …). The PNG icons are rendered from the SVG by
+`tools/genstatic.py` (`--check` reports stale ones; `test_staging.py` compares
+the shipped pixels with a fresh render). The card is a centre crop of the
+README panorama, made once with
+`sips --resampleHeight 630 -c 630 1200 docs/media/warpowers-panorama.jpg -s format jpeg -s formatOptions 88 --out web/static/social-card.jpg`.
+
+`index.html`, `credits.html` and `404.html` carry a `{{PUBLIC_URL}}` token in
+their canonical links, Open Graph and Twitter tags and the 404 page's icon
+links, because previews and a page served at an arbitrary path need absolute
+addresses. `tools/genwebstage.py --public-url` (default
+`https://warpowers.vercel.app`; https, an optional path, no trailing slash,
+credentials, query or fragment) fills it, in HTML files only: a non-HTML static
+file containing the token aborts the stage.
 
 Manifest (`assets/manifest.<hash>.json`): an array of `{p, s, u, h}` = engine
 path, size, immutable asset URL, SHA-256 hex. `source.json`:

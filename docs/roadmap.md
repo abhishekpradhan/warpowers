@@ -30,11 +30,12 @@ do not replace it.
 
 ## Now
 
-- **Open-source readiness**, until the public release: documentation
-  restructure, self-play and review scenes compiled out of production builds
-  (the traces stay, runtime-gated), diagnostic URL parameters gated on
-  `?debug=1`, engine switches in `GameData.ini`, repository hygiene, CI
-  workflows ready to enable.
+- **0.1.0 is live** at <https://warpowers.vercel.app> (released 2026-09-09;
+  source public, CI and the release-driven deploy workflow enabled). The next
+  patch batch collects what the public build and the playtests below surface:
+  the builder's command order (the Exchange sits in the fifth slot although
+  the training asks for it first), structure portraits that read alike until
+  hovered, and the one-tick lag of the selected-unit panel behind the orders bar.
 - **Human playtests:** a full match on every difficulty and faction, and the
   training and campaign missions without coaching; record confusing controls,
   first contact, viable openings and recovery.
@@ -48,12 +49,13 @@ do not replace it.
   Firefox; a second, lower-end desktop with its OS, GPU and browser recorded.
 - A controlled 30–45 minute crowded run with restart and redeploy, measuring
   process memory and frame timings (see [perf.md](perf.md)).
-- First and repeat visits over a real network against the ≤ 20-second boot
-  budget.
+- Repeat-visit and lower-end-machine boot numbers over a real network; the
+  first-visit figure is 3.3 s on a desktop against the 20-second budget (see
+  [perf.md](perf.md)).
 - Audio listening pass: intelligibility, repetition, balance, impact timing.
 - Balance pass from match evidence, then AI variety where the evidence asks
   for it.
-- Enable GitHub Actions and the workflows in `.github/workflows/`.
+- A purchased domain in front of the Vercel address (D026).
 
 ## Before 1.0
 

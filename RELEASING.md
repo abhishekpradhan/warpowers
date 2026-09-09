@@ -160,13 +160,13 @@ settings (Social preview); `web/static/social-card.*` is the image to use.
 
 ## GitHub repository settings
 
-`.github/workflows/ci.yml` (the gate list on every push and pull request) and
+`.github/workflows/ci.yml` (the gate list on every push and pull request),
 `.github/workflows/wasm-build.yml` (an on-demand and weekly engine build that
-uploads `webstage/` as an artifact) are committed, but **Actions are disabled
-at the repository level** on the root, engine and DXVK repositories. Enable
-them in each repository's settings as part of the public release. The engine
-repository carries its own `.github/workflows/qa.yml`; the DXVK repository
-carries no workflows on the project branch.
+uploads `webstage/` as an artifact) and `.github/workflows/deploy.yml` (the
+release-driven production deploy) run on the root repository; the engine
+repository carries `.github/workflows/qa.yml`; the DXVK repository carries no
+workflows on the project branch. Actions and private vulnerability reporting
+are enabled on all three repositories since the 0.1.0 release; keep them on.
 
 In the same pass, enable **private vulnerability reporting** (Settings →
 Code security) on the root, engine and DXVK repositories. `SECURITY.md`,

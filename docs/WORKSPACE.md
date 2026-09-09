@@ -64,7 +64,7 @@ parent. A push never deploys the game.
 which is all the browser build needs; `git submodule update --init --recursive`
 (or `git clone --recursive`) also fetches the nested DXVK and
 OpenSAGE.BlenderPlugin checkouts for native development or art regeneration.
-The build recipe is in the [README](../README.md#play-it). The browser build
+The build recipe is in the [README](../README.md#run-it-locally). The browser build
 and all content checks run from such a fresh clone with no runtime directory
 outside the repository. The native macOS path is documented
 in the engine README; choose an explicit runtime directory for it and copy the

@@ -6,14 +6,18 @@ in `history/`. Root-level guides: [README](../README.md),
 [CONTRIBUTING](../CONTRIBUTING.md), [RELEASING](../RELEASING.md),
 [LICENSING](../LICENSING.md), [ASSETS](../ASSETS.md), [CREDITS](../CREDITS.md),
 [CHANGELOG](../CHANGELOG.md), [SECURITY](../SECURITY.md) and the
-[code of conduct](../CODE_OF_CONDUCT.md).
+[code of conduct](../CODE_OF_CONDUCT.md). Component guides:
+[tools/README.md](../tools/README.md) (every generator and validator),
+[licenses/README.md](../licenses/README.md) (browser dependency notices) and
+the [engine README](https://github.com/abhishekpradhan/warpowers-engine#readme)
+(presets, native builds, diagnostics).
 
 | Document | One line |
 |---|---|
 | [vision.md](vision.md) | What the game is for: link-to-play, the real feel, readable chaos, data-driven content |
 | [creative.md](creative.md) | The creative bible: factions, naming rules, roster, art specification, operations tone, audio identity |
 | [roadmap.md](roadmap.md) | What ships today, what is being worked on now, what comes next, what is not planned |
-| [decisions.md](decisions.md) | The numbered decision log (D001–D025): what was decided, why, and what would reopen it |
+| [decisions.md](decisions.md) | The numbered decision log (D001–D026): what was decided, why, and what would reopen it |
 | [WORKSPACE.md](WORKSPACE.md) | Directory layout, the submodule map and the child-before-parent push order |
 | [testing.md](testing.md) | Every local gate, what it proves, the harness build and the diagnostic modes and traces |
 | [perf.md](perf.md) | Performance budgets and how to measure against them |

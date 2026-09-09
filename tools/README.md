@@ -25,6 +25,7 @@ files under the repository `data/` tree.
 | `genwnd.py` | nothing | 11 `.wnd` layouts under `data/Window/` | Yes (`--out DIR`) |
 | `gentex.py` | nothing | `data/Art/Terrain/{wp_ground,wp_ground_ash,wp_concrete}.tga`; `data/Art/Textures/` sprites (`shadow`, `wp_glow`, `wp_soft`, `wp_rallyline`, `wp_icons`, `EXScorch01`), the 11 engine-required placeholders, `wp_sky`, `wp_water`, `wp_box` | Yes (`--data DIR`) |
 | `gencmdicons.py` | nothing | `data/Art/Textures/wp_cmdglyphs.tga` | Yes (`--data DIR` or `--out FILE`) |
+| `genstatic.py` | `web/static/favicon.svg` | `web/static/` PNG icons (32/180/192/512) and `favicon.ico`; `--check` reports stale icons | No (writes `web/static/`) |
 | `gentactical.py` | `data/Maps` | `data/Art/Textures/wp_map_previews.tga`, `MappedImages/HandCreated/WPMapPreviews.ini` | Yes (`--data DIR`) |
 | `genportraitsheet.py` | `SOURCE/WPIco*.tga` renders from `blender/render_roster.py` | `data/Art/Textures/wp_cmdicons{,2}.tga`, `WPCmdIcons{,2}.ini` | Yes (`--data DIR`) |
 | `genw3d.py` | `blender/polish_assets.json` (name-collision check) | 11 utility models in `data/Art/W3D/` (projectiles, markers, scaffolds, boot-slice troopers) | Yes (`OUTPUT_DIR`) |

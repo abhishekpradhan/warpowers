@@ -1,0 +1,5 @@
+<!-- SPDX-License-Identifier: MIT -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <path fill="#0d1218" d="M0 0h64v64H0z"/>
+  <path fill="#d7b45a" d="m9 14 8 36h10l5-19 5 19h10l8-36H44l-3 22-4-16H27l-4 16-3-22z"/>
+</svg>

@@ -23,7 +23,7 @@ Nothing is installed with a package manager and nothing phones home.
 
 ## Build, stage, serve
 
-The full quick start is in the [README](README.md#play-it). In short:
+The full quick start is in the [README](README.md#run-it-locally). In short:
 `emcmake cmake --preset wasm` and `cmake --build build/wasm --target
 GeneralsXZH.js` inside `engine/`, then `python3 tools/genwebstage.py` and
 `python3 tools/serve.py` from the root.
@@ -128,7 +128,7 @@ Anything else needs a decision-log entry before import. See
 
 Root code is MIT; project-authored content is CC BY 4.0; imported files keep
 their recorded license. Contributions to `engine/` follow
-[its contribution guide](engine/CONTRIBUTING.md) and are GPL-3.0 with EA's
+[its contribution guide](https://github.com/abhishekpradhan/warpowers-engine/blob/main/CONTRIBUTING.md) and are GPL-3.0 with EA's
 additional terms. Keep every inherited notice intact. By contributing you
 agree that your contribution is licensed under the license of the file or
 directory it lands in.

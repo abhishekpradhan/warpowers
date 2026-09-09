@@ -1,0 +1,67 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0d1218">
+  <meta name="robots" content="noindex">
+  <title>Not found · War Powers</title>
+  <!-- Served for any missing path, so the icons need absolute addresses. -->
+  <link rel="icon" href="{{PUBLIC_URL}}/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{PUBLIC_URL}}/favicon-32.png">
+  <style>
+    /* Self-contained: the shell's stylesheet is content-addressed and its name changes per build. */
+    :root { color-scheme: dark; --ink: #d9e1e5; --muted: #94a2ae; --gold: #d7b45a; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
+      font-family: Arial, Helvetica, sans-serif; color: var(--ink);
+      background: radial-gradient(ellipse at 65% 42%, #273539 0, transparent 48%), linear-gradient(115deg, #0a141d, #111e27 55%, #142025);
+    }
+    main { position: relative; width: 100%; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .grid {
+      position: absolute; inset: 0; opacity: .18;
+      background-image: linear-gradient(#b5b2a022 1px, transparent 1px), linear-gradient(90deg, #b5b2a022 1px, transparent 1px);
+      background-size: 64px 64px; mask-image: linear-gradient(115deg, transparent, black); -webkit-mask-image: linear-gradient(115deg, transparent, black);
+    }
+    .grid::after { content: ''; position: absolute; width: 40%; height: 80%; right: 0; top: -10%; border: 1px solid #d7b45a55; transform: rotate(35deg); }
+    .content { width: min(540px, 75%); position: relative; }
+    .eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; margin: 0 0 24px; line-height: 1.6; }
+    .wordmark { font-size: clamp(35px, 5.2vw, 72px); font-weight: 700; letter-spacing: .06em; white-space: nowrap; color: #eee8d9; }
+    .wordmark span { color: var(--gold); }
+    .tagline { font-size: 15px; font-weight: 400; color: #a5b3bb; letter-spacing: .04em; margin: 16px 0 26px; }
+    .hint { font-size: 11px; color: #7c909d; line-height: 1.6; margin: 0; }
+    code { display: block; font-size: 10px; color: var(--muted); margin-top: 8px; }
+    .actions { margin-top: 24px; }
+    .primary {
+      display: inline-block; padding: 10px 15px; border: 1px solid var(--gold); border-radius: 3px;
+      background: var(--gold); color: #131b20; font-weight: 700; text-decoration: none;
+    }
+    .primary:hover { background: #ecd086; border-color: #ecd086; }
+    a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+    .footer {
+      position: absolute; left: 30px; right: 30px; bottom: 24px; display: flex; justify-content: space-between; gap: 20px;
+      color: #788d99; font-size: 9px; letter-spacing: .11em;
+    }
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--gold); }
+    .versus { margin: 0 12px; color: var(--gold); }
+  </style>
+</head>
+<body>
+  <main aria-label="Page not found">
+    <div class="grid" aria-hidden="true"></div>
+    <div class="content">
+      <p class="eyebrow">THE MERIDIAN STRIP · COMMAND NETWORK</p>
+      <div class="wordmark">WAR <span>POWERS</span></div>
+      <h1 class="tagline">Nothing is stationed here.</h1>
+      <p class="hint">The address you followed is not part of the command network. The game itself is one step away.</p>
+      <code>HTTP 404</code>
+      <p class="actions"><a class="primary" href="/">Return to command</a></p>
+    </div>
+    <div class="footer"><span>MERIDIAN COMBINE <span class="versus">/</span> JACKAL FRONT</span><a href="/credits.html">Credits &amp; licenses</a></div>
+  </main>
+</body>
+</html>

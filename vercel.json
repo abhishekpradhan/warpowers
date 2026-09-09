@@ -4,7 +4,7 @@
   "buildCommand": null,
   "headers": [
     {
-      "source": "/(favicon\\.svg|favicon-32\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|social-card\\.png|site\\.webmanifest|robots\\.txt)",
+      "source": "/(favicon\\.svg|favicon\\.ico|favicon-32\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|social-card\\.jpg|site\\.webmanifest|robots\\.txt)",
       "headers": [
         {
           "key": "Cache-Control",

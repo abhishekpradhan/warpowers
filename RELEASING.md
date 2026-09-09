@@ -120,6 +120,17 @@ DXVK repository (`engine/references/fbraz3-dxvk`): `README.md` and
 
 Existing clones keep working after `git submodule sync --recursive`.
 
+## Hosting before the public release
+
+The Vercel Hobby plan cannot put Vercel Authentication on production
+deployments, and a project's first deployment is promoted to production
+automatically. Keep the production slot occupied by a blank placeholder page
+(no game files, `noindex`) so that `warpowers.vercel.app` reveals nothing, and
+deploy the game only as preview deployments, which Standard Protection guards
+behind a Vercel login. Never run `vercel deploy --prod` with the game until the
+public release. The placeholder lives outside the repository; any static page
+with a `vercel.json` sending `X-Robots-Tag: noindex, nofollow` will do.
+
 ## GitHub repository settings
 
 `.github/workflows/ci.yml` (the gate list on every push and pull request) and

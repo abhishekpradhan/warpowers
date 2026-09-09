@@ -25,3 +25,5 @@ __pycache__/
 !.env.example
 .venv/
 *.sav
+.vercel
+.env*

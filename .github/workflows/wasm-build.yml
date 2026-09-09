@@ -36,9 +36,14 @@ jobs:
           python-version: "3.12"
 
       - name: Install Ninja
+        # The runner image normally ships Ninja; only touch apt when it is missing.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build
+          if command -v ninja >/dev/null; then
+            ninja --version
+          else
+            sudo apt-get update -o Acquire::Retries=3 || true
+            sudo apt-get install -y --no-install-recommends ninja-build
+          fi
 
       - name: Set up Emscripten 6.0.8
         uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14

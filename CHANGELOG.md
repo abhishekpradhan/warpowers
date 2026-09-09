@@ -5,6 +5,10 @@ All notable changes to War Powers are documented here. The format follows
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.1.1] - 2026-09-09
+
 ### Added
 
 - Link previews and site polish: Open Graph and Twitter card tags, a social

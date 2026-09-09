@@ -4,6 +4,24 @@
   "buildCommand": null,
   "headers": [
     {
+      "source": "/(favicon\\.svg|favicon-32\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|social-card\\.png|site\\.webmanifest|robots\\.txt)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/site\\.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
         {
@@ -56,5 +74,8 @@
         }
       ]
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }

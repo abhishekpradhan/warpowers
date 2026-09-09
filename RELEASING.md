@@ -139,6 +139,25 @@ behind a Vercel login. Never run `vercel deploy --prod` with the game until the
 public release. The placeholder lives outside the repository; any static page
 with a `vercel.json` sending `X-Robots-Tag: noindex, nofollow` will do.
 
+## Vercel project and automated deploys
+
+The Vercel project `warpowers` is connected to this GitHub repository for
+commit metadata, but git-triggered builds are disabled twice over: the
+project's "ignored build step" is `exit 0`, and `vercel.json` sets
+`git.deploymentEnabled: false`. Production changes only through
+`.github/workflows/deploy.yml`, which runs when a GitHub release is published
+(or manually with a tag), builds the engine at that tag, stages with
+`--release --source-url <release page>` and deploys with the Vercel CLI; or
+through a manual `vercel deploy --prod` from a release stage. The workflow
+needs the repository secret `VERCEL_TOKEN` (create it under Vercel account
+settings → Tokens) and the repository variables `VERCEL_ORG_ID` and
+`VERCEL_PROJECT_ID`, which are already set.
+
+Link previews use the absolute URLs the stager writes for `--public-url`
+(default `https://warpowers.vercel.app`); pass the new domain when it changes.
+GitHub's own social preview for each repository is set in the repository
+settings (Social preview); `web/static/social-card.*` is the image to use.
+
 ## GitHub repository settings
 
 `.github/workflows/ci.yml` (the gate list on every push and pull request) and

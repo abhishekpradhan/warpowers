@@ -1,0 +1,93 @@
+# Deploys a published GitHub release to production on Vercel.
+#
+# Trigger: publishing a release (or a manual run with a release tag). The job
+# builds the engine at the tagged commit, stages a release bundle whose
+# credits and source.json point at that release page (the corresponding
+# source), and deploys it with the Vercel CLI. Git-triggered Vercel builds are
+# disabled for this project (vercel.json `git.deploymentEnabled`), so this
+# workflow and manual `vercel deploy --prod` are the only ways production changes.
+#
+# Required repository configuration:
+#   secrets.VERCEL_TOKEN        a Vercel access token (Account settings → Tokens)
+#   vars.VERCEL_ORG_ID          the Vercel team/user id of the project
+#   vars.VERCEL_PROJECT_ID      the Vercel project id
+name: Deploy release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy (must exist as a published release)
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+          submodules: true
+
+      - name: Resolve the release page
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url --jq .url)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Corresponding source: $url"
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
+        with:
+          version: 6.0.8
+          actions-cache-folder: emsdk-cache
+
+      - name: Install CMake and Ninja
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build
+
+      - name: Build the engine
+        working-directory: engine
+        run: |
+          emcmake cmake --preset wasm
+          cmake --build build/wasm --target GeneralsXZH.js
+
+      - name: Stage the release bundle
+        run: python3 tools/genwebstage.py --release --source-url "${{ steps.release.outputs.url }}"
+
+      - name: Deploy to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+        run: |
+          test -n "$VERCEL_TOKEN" || { echo "VERCEL_TOKEN secret is not set"; exit 1; }
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+
+      - name: Verify the production site
+        run: |
+          served=$(curl -sf https://warpowers.vercel.app/build.json | python3 -c 'import json,sys;print(json.load(sys.stdin)["id"])')
+          staged=$(python3 -c 'import json;print(json.load(open("webstage/build.json"))["id"])')
+          echo "served=$served staged=$staged"
+          test "$served" = "$staged"
+          curl -sf https://warpowers.vercel.app/source.json | grep -q "${{ steps.release.outputs.url }}"

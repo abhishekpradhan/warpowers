@@ -5,7 +5,20 @@ All notable changes to War Powers are documented here. The format follows
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- Link previews and site polish: Open Graph and Twitter card tags, a social
+  preview image, SVG and PNG favicons, a web manifest, `robots.txt` and a
+  styled 404 page; the stager takes `--public-url` for the absolute links.
+- A release-driven deploy workflow (`deploy.yml`): publishing a GitHub release
+  builds the tagged engine, stages the release bundle and deploys it to
+  production.
+
+### Changed
+
+- The Vercel project is connected to the GitHub repository for commit
+  metadata, with git-triggered builds disabled; repositories carry
+  descriptions, topics and the play URL.
 
 ## [0.1.0] - 2026-09-09
 

@@ -8,8 +8,9 @@ the precise, power-hungry **Meridian Combine** or the scrappy, mobile
 **Jackal Front** across the contested Meridian Strip. Nothing to install, no
 game files to supply, no account.
 
-**Status: pre-release.** War Powers is playable today by building it locally
-(see [Play it](#play-it)). A hosted build is planned; nothing is deployed yet.
+**Play now: <https://warpowers.vercel.app>** (desktop browser with WebGL2).
+Release 0.1.0 is the first public build; see the [changelog](CHANGELOG.md).
+You can also build and run it locally (see [Play it](#play-it)).
 
 ![Original War Powers models: tanks, a hauler, infantry and a relay station on the Meridian Strip](docs/media/warpowers-panorama.jpg)
 

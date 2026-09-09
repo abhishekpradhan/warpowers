@@ -1,11 +1,16 @@
 # Changelog
 
 All notable changes to War Powers are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project has no
-version numbers yet, so everything sits under *Unreleased* until the first
-public build, whose build identifier will head the first release section.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+Nothing yet.
+
+## [0.1.0] - 2026-09-09
+
+First public release: <https://warpowers.vercel.app>. Source is tagged
+`v0.1.0` in the root, engine and DXVK repositories.
 
 ### Added
 

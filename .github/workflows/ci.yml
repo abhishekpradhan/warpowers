@@ -1,7 +1,3 @@
-# GitHub Actions are disabled at the repository level until the public
-# release, so this workflow does not run yet. Enable Actions in the repository
-# settings as part of the release (see RELEASING.md); no other change is needed.
-#
 # Runs the same gate list that CONTRIBUTING.md asks contributors to run
 # locally. Nothing here builds the WebAssembly engine; see wasm-build.yml.
 

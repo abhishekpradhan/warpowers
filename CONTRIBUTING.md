@@ -150,9 +150,9 @@ order are in [docs/WORKSPACE.md](docs/WORKSPACE.md).
 ## Continuous integration
 
 Workflows for the gate list above and for a scheduled WebAssembly build exist
-in `.github/workflows/`. GitHub Actions are **disabled at the repository
-level** until the public release; run the gate list locally before opening a
-pull request.
+in `.github/workflows/`; the gate workflow runs on pushes and pull requests.
+Run the gate list locally before opening a pull request so the workflow only
+confirms what you already checked.
 
 ## Reporting problems
 

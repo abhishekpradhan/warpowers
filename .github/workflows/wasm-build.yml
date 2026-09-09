@@ -1,7 +1,3 @@
-# GitHub Actions are disabled at the repository level until the public
-# release, so this workflow does not run yet. Enable Actions in the repository
-# settings as part of the release (see RELEASING.md); no other change is needed.
-#
 # Builds the WebAssembly engine with the pinned Emscripten release, stages the
 # browser bundle exactly as a contributor would, and uploads webstage/ as a
 # workflow artifact. Runs on demand and once a week so toolchain or dependency

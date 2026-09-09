@@ -38,8 +38,8 @@ Inside the engine submodule:
 
 `origin` is the project's own remote in every checkout. Upstream projects are
 fetch-only remotes whose push URL is disabled, so upstream cannot be pushed to
-by accident. GitHub Actions are disabled at the repository level until the
-public release; see [CONTRIBUTING.md](../CONTRIBUTING.md#continuous-integration).
+by accident. GitHub Actions run the gate workflow on the root repository; see
+[CONTRIBUTING.md](../CONTRIBUTING.md#continuous-integration).
 
 ## Push order
 

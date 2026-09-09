@@ -1238,3 +1238,31 @@ END
 WP:Faction
 "Faction"
 END
+
+GUI:Command&ConquerGenerals
+"War Powers"
+END
+
+Version:GameTitle
+"%ls"
+END
+
+Version:Format2
+"%d.%d"
+END
+
+Version:ProductTitle
+"War Powers"
+END
+
+Version:ProductVersion
+"development"
+END
+
+Version:ProductAuthor
+"War Powers project"
+END
+
+Version:BuildUser
+"-"
+END

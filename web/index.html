@@ -69,12 +69,14 @@
           <div id="bootProgress" class="bootProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="bootFill"></div></div>
           <div class="bootStatus"><span id="bootPhase" role="status" aria-live="polite">Connecting to command…</span><span id="bootPercent" aria-hidden="true">0%</span></div>
           <p id="bootHint">No install. No account. The battlefield is yours.</p>
-          <div id="deviceNotice" role="status" hidden>
-            <p id="deviceMessage">War Powers is built for desktop. It needs a mouse, a keyboard and a desktop browser with WebGL2, and it downloads about 65 MB. Open this address on a desktop computer to play:</p>
-            <p class="deviceLink"><code id="deviceLink">{{PUBLIC_URL}}</code></p>
-            <div class="actions"><button id="copyLinkButton" class="primary">Copy link</button><button id="continueAnywayButton">Continue anyway</button></div>
-            <p id="deviceNote" class="deviceNote">Continue anyway starts the download here; the game needs a pointer that can right-click and a keyboard to be playable.</p>
-          </div>
+          <section id="deviceNotice" class="deviceCard" role="status" aria-labelledby="deviceTitle" hidden>
+            <p class="eyebrow deviceEyebrow">Desktop required</p>
+            <h2 id="deviceTitle">Built for the big screen.</h2>
+            <p id="deviceMessage">War Powers is a real-time strategy game that needs a mouse, a keyboard and a desktop browser with WebGL2. Open it on a desktop computer to play.</p>
+            <div class="deviceAddress" aria-label="Game address"><span class="deviceAddressLabel">Play at</span><code id="deviceLink">{{PUBLIC_URL}}</code></div>
+            <div class="deviceActions"><button id="copyLinkButton" class="primary">Copy link</button><button id="continueAnywayButton" class="textButton deviceContinue">Continue on this device anyway</button></div>
+            <p id="deviceNote" class="deviceNote">Continuing downloads about 65 MB here; without a pointer that can right-click and a keyboard, the battlefield will be hard to command.</p>
+          </section>
           <div id="bootError" role="alert" hidden>
             <p id="errorMessage"></p><code id="errorCode"></code>
             <div class="actions"><button id="reloadButton" class="primary">Reload game</button><button id="diagnosticsButton">Copy diagnostics</button></div>
@@ -187,11 +189,15 @@
         var coarseOnly = media('(pointer: coarse)') && !finePointer;
         if (!phone && !coarseOnly) return;
         window.wpDesktopOnly = true;
+        var boot = document.getElementById('boot');
+        if (boot && boot.classList) boot.classList.add('desktopGate');
         document.getElementById('bootPhase').textContent = 'Desktop required';
         document.getElementById('bootHint').textContent = 'Nothing was downloaded on this device.';
         document.getElementById('bootProgress').hidden = true;
         document.getElementById('bootPercent').hidden = true;
         document.getElementById('deviceNotice').hidden = false;
+        var canShare = typeof navigator === 'object' && typeof navigator.share === 'function';
+        if (canShare) document.getElementById('copyLinkButton').textContent = 'Send me the link';
         var link = document.getElementById('deviceLink');
         var address = (link && link.textContent) || '';
         if (typeof location === 'object' && location.origin && (!address || address.indexOf('{{') === 0)) {
@@ -199,9 +205,15 @@
           if (link) link.textContent = address;
         }
         document.getElementById('copyLinkButton').onclick = function () {
-          var done = function () { document.getElementById('copyLinkButton').textContent = 'Link copied'; };
+          var button = document.getElementById('copyLinkButton');
+          var copied = function () { button.textContent = 'Link copied'; };
+          if (canShare) {
+            navigator.share({ title: 'War Powers', text: 'War Powers, a free browser RTS. Open on a desktop computer:', url: address })
+              .then(function () {}, function () {});
+            return;
+          }
           try {
-            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(address).then(done, function () {}); return; }
+            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(address).then(copied, function () {}); return; }
           } catch (error) {}
           try {
             var range = document.createRange(); range.selectNodeContents(link);
@@ -211,6 +223,7 @@
         document.getElementById('continueAnywayButton').onclick = function () {
           try { sessionStorage.setItem('wpDesktopOverride', '1'); } catch (error) {}
           window.wpDesktopOnly = false;
+          if (boot && boot.classList) boot.classList.remove('desktopGate');
           document.getElementById('deviceNotice').hidden = true;
           document.getElementById('bootProgress').hidden = false;
           document.getElementById('bootPercent').hidden = false;

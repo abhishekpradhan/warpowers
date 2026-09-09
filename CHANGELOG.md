@@ -7,6 +7,14 @@ All notable changes to War Powers are documented here. The format follows
 
 Nothing yet.
 
+## [0.1.3] - 2026-09-09
+
+### Changed
+
+- The desktop-required notice is a designed full-screen page: it escapes the
+  16:9 game frame on portrait phones, presents the address in its own box with
+  a share or copy action, and keeps the continue option as a quiet link.
+
 ## [0.1.2] - 2026-09-09
 
 ### Added

@@ -30,9 +30,9 @@ do not replace it.
 
 ## Now
 
-- **0.1.0 is live** at <https://warpowers.vercel.app> (released 2026-09-09;
-  source public, CI and the release-driven deploy workflow enabled). The
-  first playtest feedback (2026-09-26, see [CHANGELOG](../CHANGELOG.md)
+- **0.1.4 is live** at <https://warpowers.vercel.app> (0.1.0 on 2026-09-09,
+  0.1.4 on 2026-09-26; source public, CI and the release-driven deploy
+  workflow enabled). The first playtest feedback (2026-09-26, see [CHANGELOG](../CHANGELOG.md)
   Unreleased) was answered with keyboard orders and build hotkeys, page-driven
   edge scrolling, Shift queuing, camera bookmarks, wheel and rotation
   settings, tracking projectiles, structure auto-attack, the cancel fix and a

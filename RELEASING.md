@@ -36,6 +36,13 @@ Record, in the release notes and next to the archive:
 
 Build with the `wasm` preset only. Never ship a `wasm-harness` build.
 
+The engine embeds `git describe --always --dirty` as its build identifier
+(`wp_build_id.cmake`), so a rebuild of the same commit reproduces the shipped
+bytes only when that string matches: the release workflow's shallow checkout
+sees no tags and embeds the commit hash, a local tagged checkout embeds the
+tag. Compare builds after normalising that string, or compare the runner's
+bundle against the commit it names.
+
 ## 3. Prepare the corresponding source
 
 The package must let a recipient rebuild the shipped engine: the root

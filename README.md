@@ -14,7 +14,7 @@ A free real-time strategy game that runs in a desktop browser. Nothing to instal
 
 **<https://warpowers.vercel.app>** — open it in a current desktop browser with WebGL2 (Chrome, Edge, Firefox or Safari), with a keyboard and mouse. It boots in a few seconds on a normal connection. It is a single-player game: choose **Tutorial** on the Deployment screen for the guided first battle, then **Campaign** or **Skirmish** against the computer at the difficulty of your choice.
 
-Release [v0.1.0](https://github.com/abhishekpradhan/warpowers/releases/tag/v0.1.0) (2026-09-09) is the first public build. The release page carries the web bundle; the [changelog](CHANGELOG.md) lists what is in it.
+The [latest release](https://github.com/abhishekpradhan/warpowers/releases/latest) is what the site serves; each release page carries the exact web bundle and the [changelog](CHANGELOG.md) lists what is in it. The first public build was [v0.1.0](https://github.com/abhishekpradhan/warpowers/releases/tag/v0.1.0) on 2026-09-09.
 
 ## What it is
 

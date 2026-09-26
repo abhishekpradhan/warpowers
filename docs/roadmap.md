@@ -31,11 +31,18 @@ do not replace it.
 ## Now
 
 - **0.1.0 is live** at <https://warpowers.vercel.app> (released 2026-09-09;
-  source public, CI and the release-driven deploy workflow enabled). The next
-  patch batch collects what the public build and the playtests below surface:
-  the builder's command order (the Exchange sits in the fifth slot although
-  the training asks for it first), structure portraits that read alike until
-  hovered, and the one-tick lag of the selected-unit panel behind the orders bar.
+  source public, CI and the release-driven deploy workflow enabled). The
+  first playtest feedback (2026-09-26, see [CHANGELOG](../CHANGELOG.md)
+  Unreleased) was answered with keyboard orders and build hotkeys, page-driven
+  edge scrolling, Shift queuing, camera bookmarks, wheel and rotation
+  settings, tracking projectiles, structure auto-attack, the cancel fix and a
+  plain-language copy pass. Still open from that feedback: units read alike at
+  a glance (silhouettes and trims), terrain readability (cliff and slope
+  cues), the Normal opponent folds to a straight unit rush, structure
+  portraits that read alike until hovered, and the one-tick lag of the
+  selected-unit panel behind the orders bar. A side command bar was
+  considered and declined: the bottom bar is the Generals idiom the game
+  follows.
 - **Human playtests:** a full match on every difficulty and faction, and the
   training and campaign missions without coaching; record confusing controls,
   first contact, viable openings and recovery.

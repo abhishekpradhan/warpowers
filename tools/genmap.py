@@ -47,6 +47,7 @@ def faction_table(faction):
                  enemy_income='WP_Exchange', enemy_pad='WP_LaunchPad',
                  player_income='WPJ_Racket', player_power='WPJ_Dynamo',
                  player_hauler='WPJ_Scavenger', player_tank='WPJ_Mongrel',
+                 player_builder='WPJ_Rigger',
                  player_air='WPJ_Buzzard', player_strafer='WPJ_Gnat',
                  raid_a='WP_Outrider',
                  assault_a='WP_Tank', assault_b='WP_Zenith',
@@ -63,6 +64,7 @@ def faction_table(faction):
                  enemy_income='WPJ_Racket', enemy_pad='WPJ_Roost',
                  player_income='WP_Exchange', player_power='WP_PowerArray',
                  player_hauler='WP_Porter', player_tank='WP_Tank',
+                 player_builder='WP_Fabricator',
                  player_air='WP_Kestrel', player_strafer='WP_Shrike',
                  raid_a='WPJ_Vulture',
                  assault_a='WPJ_Mongrel', assault_b='WPJ_Vulture',
@@ -597,6 +599,10 @@ def generate(layout, faction, mission=None, preview=False):
     if MISSION_ID != "training":
         objects_payload += placed("WPJ_Scavenger" if F.get("is_jackal") else "WP_Porter",
                                   (PX - 65, PY + 55), "teamPlayerA")
+    if MISSION_ID not in ("training", "op03", "challenge-meridian"):
+        # A builder from the first second, as the genre expects. The tutorial
+        # teaches training one; The Long Watch and Glass Rampart place their own.
+        objects_payload += placed(F["player_builder"], (PX + 70, PY + 60), "teamPlayerA")
     objects_payload += placed("WP_Porter" if F.get("is_jackal") else "WPJ_Scavenger",
                               (_inc[0] + 20, _inc[1] + 45), "teamPlayerB")
 

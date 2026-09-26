@@ -1,6 +1,9 @@
 # Credits
 
-War Powers uses work from the projects and creators below. Content provenance
+War Powers is designed, written and maintained by **Abhishek Pradhan**
+([github.com/abhishekpradhan](https://github.com/abhishekpradhan)): game design,
+the two factions, the content pipelines, the browser shell and the engine port.
+It uses work from the projects and creators below. Content provenance
 is recorded in ASSETS.md; browser dependency licenses and their complete notices
 are indexed in [licenses/third-party.json](licenses/third-party.json).
 

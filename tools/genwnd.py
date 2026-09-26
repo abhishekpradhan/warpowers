@@ -113,7 +113,10 @@ def control_bar():
     """ControlBar.wnd: the in-game HUD in native 1280x720 coordinates."""
     children = []
     # All required context windows remain, with mutually exclusive selection UI.
+    # PassSelectedButtonsToParentSystem on the container: without it the Cancel
+    # button's GBM_SELECTED stops at this window and never reaches ControlBarSystem.
     children.append(window("UnderConstructionWindow", (20, 594, 368, 674), bg=DARK, border=DARK, native=True,
+        syscb="PassSelectedButtonsToParentSystem",
         children=[hud_label("UnderConstructionDesc", (130, 606, 354, 630)),
                   window("ButtonCancelConstruction", (228, 637, 354, 669), wtype="PUSHBUTTON",
                          status="ENABLED", syscb="PassSelectedButtonsToParentSystem",
@@ -173,7 +176,9 @@ def popup_description():
     PBG = "17 23 30 252"
     popup = window("PopupParent", (386, 438, 766, 550), status="ENABLED+NOFOCUS",
         bg=PBG, border="67 80 91 255", native=True, children=[
-            window("StaticTextName", (399, 447, 753, 469), wtype="STATICTEXT", status="ENABLED",
+            # HOTKEY_TEXT hides the "&" in the button label and draws the hotkey letter in
+            # GameData HotKeyTextColor.
+            window("StaticTextName", (399, 447, 753, 469), wtype="STATICTEXT", status="ENABLED+HOTKEY_TEXT",
                    bg="0 0 0 0", border="0 0 0 0", textcolor="225 191 107 255", fontsize=15, bold=1,
                    extra="  STATICTEXTDATA = CENTERED: 0;\n", native=True),
             window("StaticTextCost", (399, 473, 753, 492), wtype="STATICTEXT", status="ENABLED",

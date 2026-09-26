@@ -7,6 +7,75 @@ All notable changes to War Powers are documented here. The format follows
 
 Nothing yet.
 
+## [0.1.4] - 2026-09-26
+
+Feedback batch from the first public playtests.
+
+### Added
+
+- Keyboard orders: `A` enters attack-move targeting and `G` guard targeting
+  (new bindable `TOGGLE_ATTACKMOVE` and `GUARD` commands; guard presses the
+  button named by the new `GuardCommandButton` GameData switch). Both are
+  remappable in Settings.
+- Build and train hotkeys: every command button carries a letter (`&` in its
+  label), shown highlighted in the tooltip while the builder or factory is
+  selected; the tooltip name text uses `HOTKEY_TEXT`. `C` on a construction
+  site cancels it.
+- Shift queues movement orders as waypoints and adds units to the selection
+  (`PreferSelectionQueuesWaypoints` GameData switch; the prefer-selection
+  modifier was not bound before).
+- Camera bookmarks: Ctrl + F5–F8 save a view, F5–F8 recall it.
+- Screen-edge scrolling in the browser, driven by the page (the engine only
+  edge-scrolls with a captured cursor): the pointer in the edge band of the
+  battlefield or beyond it, on the black frame, holds the arrow keys down;
+  a HUD control, an open panel, a hidden tab or lost focus release them.
+  Settings toggle, on by default.
+- Optional WASD camera keys (Settings → Camera keys): the engine pans on
+  W/A/S/D and the shell moves Attack move to `F`, Stop to `H` and View
+  headquarters to `J`.
+- Settings for mouse-wheel zoom speed (default 3× the stock step) and a
+  camera-rotation lock (on by default; middle-button drag and the rotate keys
+  are ignored, a middle click still resets the view).
+- Skirmish and campaign starts include a builder next to the headquarters;
+  the tutorial still teaches training one.
+- The debrief shows the difficulty the battle was played at and, after a win
+  below Hard, points at the Difficulty row on the Deployment screen.
+- Credits name the author.
+
+### Changed
+
+- Deployment screen modes read Tutorial, Skirmish, Campaign and Challenges;
+  the OPPOSITION row is DIFFICULTY with Easy, Normal and Hard; the main-menu
+  tagline, loader and field manual say the game is single-player.
+- Every unit, structure, faction, difficulty and battlefield description is
+  rewritten as plain information (role, strengths, weaknesses, requirement)
+  instead of slogans; Jackal build labels are "Build X" like the Combine's.
+- Headquarters produce the builder and infantry only; the Vector and Mongrel
+  come from the Vehicle Plant and Chop Shop. Builder menus list economy and
+  production structures on the first row and defenses on the second.
+- Shells and rockets follow a moving target (`FlightPathAdjustDistPerSecond`
+  on the projectile objects) and fly faster; artillery keeps a slow, dodgeable
+  arc.
+- Idle units and attack-move now engage enemy structures
+  (`AutoAcquireEnemiesWhenIdle = Yes ATTACK_BUILDINGS`); before, only base
+  defenses were attacked without an explicit order.
+- Right-button panning starts only after the pointer leaves the click
+  tolerance (now 20 game pixels), so a quick right-click with some hand motion
+  is still an order.
+- Trackpad wheel deltas below one notch are accumulated instead of truncated
+  away, so two-finger scrolling zooms.
+- Comma, period, minus, equals, brackets, slash and the keypad reach the
+  engine (the rotate keys never worked in the browser).
+- Home (camera reset) restores the zoom as well as the angle.
+- The web page never navigates away on a two-finger swipe during a right-drag
+  (`overscroll-behavior: none`), and closing or leaving the page during a
+  battle asks first.
+
+### Fixed
+
+- Cancel construction did nothing: the under-construction window in
+  `ControlBar.wnd` did not forward its button to the command bar.
+
 ## [0.1.3] - 2026-09-09
 
 ### Changed

@@ -17,7 +17,7 @@ WP:Mongrel
 END
 
 WP:BuildTank
-"Build Vector"
+"Build &Vector"
 END
 
 GUI:ControlBarMoneyDisplay
@@ -33,15 +33,15 @@ WP:TankShell
 END
 
 WP:BuildFabricator
-"Build Fabricator"
+"Build Fabri&cator"
 END
 
 WP:BuildPowerArray
-"Construct Power Array"
+"Build P&ower Array"
 END
 
 WP:BuildVehiclePlant
-"Construct Vehicle Plant"
+"Build &Vehicle Plant"
 END
 
 WP:Fabricator
@@ -57,35 +57,35 @@ WP:VehiclePlant
 END
 
 WP:BuildOutrider
-"Build Outrider"
+"Build &Outrider"
 END
 
 WP:BuildZenith
-"Build Zenith"
+"Build &Zenith"
 END
 
 WP:BuildVulture
-"Build Vulture"
+"Build &Vulture"
 END
 
 WP:BuildMongrel
-"Build Mongrel"
+"Build &Mongrel"
 END
 
 WP:BuildRigger
-"Build Rigger"
+"Build &Rigger"
 END
 
 WP:BuildBulwark
-"Construct Bulwark"
+"Build &Bulwark"
 END
 
 WP:BuildChopShop
-"Bolt together a Chop Shop"
+"Build &Chop Shop"
 END
 
 WP:BuildWatchpost
-"Prop up a Watchpost"
+"Build Watchp&ost"
 END
 
 WP:Outrider
@@ -125,7 +125,7 @@ CONTROLBAR:UnderConstructionDesc
 END
 
 WP:CancelConstruction
-"Cancel Construction"
+"&Cancel Construction"
 END
 
 TOOLTIP:Cost
@@ -141,55 +141,55 @@ TOOLTIP:TooltipCannotPurchaseBecauseQueueFull
 END
 
 WP:DescVector
-"Precision battle tank. Strong armor and long reach; vulnerable to rockets. Requires a Vehicle Plant."
+"Main battle tank. Heavy armor and a long-range gun; strong against vehicles and structures, weak against rocket infantry and aircraft. Requires a Vehicle Plant."
 END
 
 WP:DescFabricator
-"Construction vehicle. Builds and repairs Meridian structures."
+"Construction vehicle. Builds and repairs Meridian structures. Unarmed; keep it behind your lines and replace it if it is lost."
 END
 
 WP:DescPowerArray
-"Generates 12 power. A power shortage slows Combine production; keep a reserve."
+"Generates 12 power. Meridian production and defenses slow down or stop when power runs short, so build one before your second production structure."
 END
 
 WP:DescVehiclePlant
-"Produces Meridian armor: the Vector, Outrider, and Zenith."
+"Produces Meridian vehicles: Vector tanks, Outrider scout cars and Zenith artillery. Uses 3 power."
 END
 
 WP:DescOutrider
-"Fast recon car. Spots ambushes and suppresses infantry; avoid tanks."
+"Fast scout car with a machine gun and a wide sight range. Good against infantry and for finding the enemy; weak against tanks and defenses."
 END
 
 WP:DescZenith
-"Long-range siege gun. Devastating at a distance, helpless up close."
+"Self-propelled artillery. Very long range and a large blast against structures and grouped units; cannot fire at close range and has thin armor. Keep it behind tanks."
 END
 
 WP:DescVulture
-"Light raiding truck. Cheap and quick, with a gun for supply-line attacks. Fragile in a stand-up fight."
+"Fast, cheap raiding truck with a light gun. Good for scouting and for attacking haulers and unguarded structures; loses a straight fight with tanks or defenses."
 END
 
 WP:DescMongrel
-"Fast, affordable battle tank. Outnumbers expensive armor; keep rifles nearby. Requires a Chop Shop."
+"Light battle tank. Cheap and quick to build; wins by numbers rather than armor. Weak against rocket infantry. Requires a Chop Shop."
 END
 
 WP:DescRigger
-"Salvage rig. Builds and repairs Jackal structures."
+"Construction vehicle. Builds and repairs Jackal structures. Unarmed; keep it behind your lines and replace it if it is lost."
 END
 
 WP:DescBulwark
-"Automated defense turret. Holds the line while your armor is away. Requires power to fire."
+"Automated gun turret. Strong against vehicles and infantry that come within range. Needs power to fire and cannot attack aircraft."
 END
 
 WP:DescChopShop
-"Produces Jackal vehicles: the Mongrel and the Vulture."
+"Produces Jackal vehicles: Mongrel tanks and Vulture raiders. Needs no power."
 END
 
 WP:DescWatchpost
-"Ground-defense tower. Holds off hostile ground units. Use Flakhuts against aircraft."
+"Guard tower with a cannon. Holds off ground attacks near your base; cannot attack aircraft. Build Flakhuts for air defense."
 END
 
 WP:DescCancelConstruction
-"Stop construction and refund the full cost."
+"Stops construction and refunds the full cost. Hotkey: C."
 END
 
 CONTROLBAR:Requirements
@@ -277,19 +277,19 @@ WP:Scrapper
 END
 
 WP:BuildWarden
-"Train Warden"
+"Train Wa&rden"
 END
 
 WP:BuildScrapper
-"Train Scrapper"
+"Train S&crapper"
 END
 
 WP:DescWarden
-"Meridian rifle trooper. Cheap, quick to train, chews up other infantry."
+"Rifle infantry. Cheap and quick to train; good against other infantry, weak against vehicles. Train at the Command Center."
 END
 
 WP:DescScrapper
-"Jackal scattergunner. Nasty up close, allergic to tank shells."
+"Shotgun infantry. Cheap and quick to train; strong against infantry at short range, weak against vehicles. Train at the Command Post."
 END
 
 // Pause menu + confirm dialogs (QuitMenu.cpp / gogoMessageBox contracts)
@@ -404,7 +404,7 @@ WP:TitlePowers
 END
 
 WP:Tagline
-"A FREE BROWSER RTS - BUILD, DEFEND, DESTROY"
+"SINGLE-PLAYER RTS  -  TUTORIAL, CAMPAIGN AND SKIRMISH AGAINST THE AI"
 END
 
 WP:Engage
@@ -428,7 +428,7 @@ WP:Deployment
 END
 
 WP:DeployHint
-"Pick a battlefield, then deploy your faction - the battle begins at once."
+"Choose a mode and a battlefield, set the difficulty, then deploy. The battle starts at once."
 END
 
 WP:DeployMeridian
@@ -490,7 +490,7 @@ CONTROLBAR:GeneralsExp
 END
 
 CONTROLBAR:GeneralsExpDescription
-"Not in service yet."
+"Not used in this game."
 END
 
 // Order-command buttons (attack-move / guard / stop)
@@ -499,7 +499,7 @@ WP:AttackMove
 END
 
 WP:DescAttackMove
-"Advance to a point, engaging every hostile on the way."
+"Move to a point and attack every enemy met on the way, including structures. Hotkey: A, then click the destination."
 END
 
 WP:Guard
@@ -507,7 +507,7 @@ WP:Guard
 END
 
 WP:DescGuard
-"Hold and defend an area, chasing off attackers."
+"Hold a position and engage anything that comes near, then return. Hotkey: G, then click the position."
 END
 
 WP:Stop
@@ -515,7 +515,7 @@ WP:Stop
 END
 
 WP:DescStop
-"Halt all current orders."
+"Cancel the current orders and stop. Hotkey: S."
 END
 
 GUI:RallyPointNoPath
@@ -531,11 +531,11 @@ WP:Lancer
 END
 
 WP:DescLancer
-"Anti-armor and anti-air rockets. Outranges tanks; vulnerable to rifle infantry. Support your armor with Lancers."
+"Rocket infantry. Strong against vehicles, structures and aircraft; weak against rifle infantry and fast scouts. Escort your tanks with Lancers."
 END
 
 WP:BuildLancer
-"Train Lancer"
+"Train &Lancer"
 END
 
 WP:Sting
@@ -543,11 +543,11 @@ WP:Sting
 END
 
 WP:DescSting
-"Affordable rocket specialist. Counters armor and aircraft; protect it from rifle infantry."
+"Rocket infantry. Strong against vehicles, structures and aircraft; weak against rifle infantry. Escort your Mongrels with Stings."
 END
 
 WP:BuildSting
-"Train Sting"
+"Train S&ting"
 END
 
 WP:Rocket
@@ -559,11 +559,11 @@ WP:Kestrel
 END
 
 WP:DescKestrel
-"VTOL strike craft. Fast precision missiles; fragile against massed rockets."
+"Missile gunship. Fast and precise against vehicles and structures; fragile against Flakhuts, Skyspears and rocket infantry. Requires a Launch Pad."
 END
 
 WP:BuildKestrel
-"Deploy Kestrel"
+"Build &Kestrel"
 END
 
 WP:Buzzard
@@ -571,11 +571,11 @@ WP:Buzzard
 END
 
 WP:DescBuzzard
-"Junk-built rocket rig. Slow, loud, and devastating in a volley."
+"Rocket gunship. Slow, with heavy volleys against vehicles and structures; fragile against anti-air defenses and rocket infantry. Requires a Roost."
 END
 
 WP:BuildBuzzard
-"Rig up a Buzzard"
+"Build &Buzzard"
 END
 
 WP:LaunchPad
@@ -583,11 +583,11 @@ WP:LaunchPad
 END
 
 WP:DescLaunchPad
-"Airfield platform. Produces Kestrel missile craft and, with a Directorate, Shrike strafers."
+"Airfield. Produces Kestrel gunships, and Shrike strafers once a Directorate stands. Uses 2 power."
 END
 
 WP:BuildLaunchPad
-"Construct Launch Pad"
+"Build &Launch Pad"
 END
 
 WP:Roost
@@ -595,11 +595,11 @@ WP:Roost
 END
 
 WP:DescRoost
-"Air production for Buzzards and, with a Den, Gnats. No power grid required."
+"Airfield. Produces Buzzard gunships, and Gnat strafers once a Den stands. Needs no power."
 END
 
 WP:BuildRoost
-"Hammer up a Roost"
+"Build &Roost"
 END
 
 WP:Exchange
@@ -607,11 +607,11 @@ WP:Exchange
 END
 
 WP:DescExchange
-"Supply hub. Trains Porters and accepts their deliveries. Also earns $25 every five seconds. Build near a supply cache."
+"Supply hub. Produces Porters and receives the supplies they haul; also earns a small steady income. Build it next to a supply cache."
 END
 
 WP:BuildExchange
-"Construct Exchange"
+"Build Ex&change"
 END
 
 WP:Racket
@@ -619,11 +619,11 @@ WP:Racket
 END
 
 WP:DescRacket
-"Salvage hub. Trains Scavengers and accepts their deliveries. Earns $20 every five seconds without power. Build near a cache."
+"Supply hub. Produces Scavengers and receives the supplies they haul; also earns a small steady income. Build it next to a supply cache. Needs no power."
 END
 
 WP:BuildRacket
-"Set up the Racket"
+"Build Rac&ket"
 END
 
 GUI:AddCash
@@ -651,15 +651,15 @@ WP:ChooseFront
 END
 
 WP:MapFlatsDesc
-"Open dunes across a wide diagonal. The classic front."
+"Open dunes with the bases at opposite corners. No terrain to hide behind."
 END
 
 WP:MapRidgeDesc
-"A mountain wall split by two passes. Fight for the lanes."
+"A ridge wall with two passes separates the bases. Whoever holds the passes controls the map."
 END
 
 WP:MapScrapDesc
-"Close quarters and no cover. The brawl starts immediately."
+"A small map with the bases close together. Expect an early attack."
 END
 
 WP:ArrowLeft
@@ -691,11 +691,11 @@ WP:Vigil
 END
 
 WP:DescVigil
-"Recon trooper. Fastest boots in the Combine, huge sight radius, sidearm only."
+"Scout infantry. Fast, with the widest sight range in the Combine. Armed with a pistol only; use it to find the enemy, not to fight."
 END
 
 WP:BuildVigil
-"Train Vigil"
+"Train &Vigil"
 END
 
 WP:Prowler
@@ -703,11 +703,11 @@ WP:Prowler
 END
 
 WP:DescProwler
-"Scrapyard scout. Sees far, runs fast, shoots last."
+"Scout infantry. Fast, with a wide sight range. Armed with a pistol only; use it to find the enemy, not to fight."
 END
 
 WP:BuildProwler
-"Train Prowler"
+"Train Pr&owler"
 END
 
 WP:Bastion
@@ -715,11 +715,11 @@ WP:Bastion
 END
 
 WP:DescBastion
-"Heavy gunner. Slow and armored; the cannon shreds infantry. Requires a Directorate."
+"Heavy gunner. Slow and well armored; the rapid-fire cannon shreds infantry. Weak against tanks. Requires a Directorate."
 END
 
 WP:BuildBastion
-"Train Bastion"
+"Train &Bastion"
 END
 
 WP:Bruiser
@@ -727,11 +727,11 @@ WP:Bruiser
 END
 
 WP:DescBruiser
-"Walking scrap-cannon. Slow, mean, and very hard to put down. Requires a Den."
+"Heavy gunner. Slow and well armored; the rapid-fire cannon shreds infantry. Weak against tanks. Requires a Den."
 END
 
 WP:BuildBruiser
-"Train Bruiser"
+"Train &Bruiser"
 END
 
 WP:Shrike
@@ -739,11 +739,11 @@ WP:Shrike
 END
 
 WP:DescShrike
-"Strafing VTOL. Rapid fire that chews infantry; keep it away from flak. Requires a Directorate."
+"Strafing aircraft. Rapid fire against infantry; keep it away from anti-air defenses. Requires a Directorate."
 END
 
 WP:BuildShrike
-"Deploy Shrike"
+"Build Sh&rike"
 END
 
 WP:Gnat
@@ -751,11 +751,11 @@ WP:Gnat
 END
 
 WP:DescGnat
-"Cheap flying pest with a scrap gun. Annoying in numbers. Requires a Den."
+"Light strafing aircraft. Cheap, with a gun that is best against infantry; keep it away from anti-air defenses. Requires a Den."
 END
 
 WP:BuildGnat
-"Rig up a Gnat"
+"Build G&nat"
 END
 
 WP:Skyspear
@@ -763,11 +763,11 @@ WP:Skyspear
 END
 
 WP:DescSkyspear
-"Anti-air battery. Long-reach flak; cannot target ground units. Requires power to fire."
+"Anti-air battery. Long-range flak against aircraft; cannot attack ground units. Needs power to fire."
 END
 
 WP:BuildSkyspear
-"Construct Skyspear"
+"Build S&kyspear"
 END
 
 WP:Flakhut
@@ -775,11 +775,11 @@ WP:Flakhut
 END
 
 WP:DescFlakhut
-"Sandbagged quad-flak. Shreds aircraft; blind to ground threats."
+"Anti-air battery. Flak against aircraft; cannot attack ground units. Needs no power."
 END
 
 WP:BuildFlakhut
-"Pile up a Flakhut"
+"Build &Flakhut"
 END
 
 WP:Directorate
@@ -787,11 +787,11 @@ WP:Directorate
 END
 
 WP:DescDirectorate
-"Unlocks Bastions, Shrikes, Longbows and Precision Strike. The strike charges for 150 seconds. Requires 3 power; outages pause the strike."
+"Technology center. Unlocks Bastions, Shrikes, Longbow Batteries and the Precision Strike power (150 second recharge). Uses 3 power."
 END
 
 WP:BuildDirectorate
-"Construct Directorate"
+"Build Di&rectorate"
 END
 
 WP:Den
@@ -799,11 +799,11 @@ WP:Den
 END
 
 WP:DescDen
-"Unlocks Bruisers, Gnats, Lobbers and Tunnel Ambush. The ambush charges for 120 seconds. No power grid required."
+"Technology center. Unlocks Bruisers, Gnats, Lobber Pits and the Tunnel Ambush power (120 second recharge). Needs no power."
 END
 
 WP:BuildDen
-"Dig out a Den"
+"Build De&n"
 END
 
 WP:Rampart
@@ -811,11 +811,11 @@ WP:Rampart
 END
 
 WP:DescRampart
-"Hardened pillbox. Anti-infantry ground defense. Requires power to fire."
+"Machine-gun bunker. Strong against infantry near your base; weak against tanks and cannot attack aircraft. Needs power to fire."
 END
 
 WP:BuildRampart
-"Construct Rampart"
+"Build Ra&mpart"
 END
 
 WP:Nest
@@ -823,11 +823,11 @@ WP:Nest
 END
 
 WP:DescNest
-"Gun nest behind scrap plate. Chews up infantry."
+"Machine-gun nest. Strong against infantry near your base; weak against tanks and cannot attack aircraft."
 END
 
 WP:BuildNest
-"Pile up a Nest"
+"Build Nes&t"
 END
 
 WP:Dynamo
@@ -835,11 +835,11 @@ WP:Dynamo
 END
 
 WP:DescDynamo
-"Jackal generator. Loud, leaky, and it keeps the lights on."
+"Generator. Not used by the Jackal Front, whose structures need no power."
 END
 
 WP:BuildDynamo
-"Wire up a Dynamo"
+"Build Dynamo"
 END
 
 WP:MapBasin
@@ -847,7 +847,7 @@ WP:MapBasin
 END
 
 WP:MapBasinDesc
-"A sunken bowl ringed by a high rim. Hold the floor or rain fire from the edge."
+"A sunken bowl ringed by a rim. Units on the rim see the whole floor."
 END
 
 WP:MapRange
@@ -855,7 +855,7 @@ WP:MapRange
 END
 
 WP:MapRangeDesc
-"A long field crossed by two trench walls. Push the gaps, lane by lane."
+"A long field crossed by two trench walls with gaps. Fights happen at the gaps."
 END
 
 GUI:CantBuildThere
@@ -891,11 +891,11 @@ WP:Longbow
 END
 
 WP:BuildLongbow
-"Construct Longbow Battery"
+"Build Lo&ngbow Battery"
 END
 
 WP:DescLongbow
-"Long-range siege cannon. Devastating against structures and packed armor, but blind up close.\nRequires a Directorate and 3 power to fire."
+"Siege battery. Extreme range and a large blast against structures and grouped units; cannot fire at close range. Requires a Directorate and 3 power."
 END
 
 WP:Lobber
@@ -903,11 +903,11 @@ WP:Lobber
 END
 
 WP:BuildLobber
-"Sink a Lobber Pit"
+"Build &Lobber Pit"
 END
 
 WP:DescLobber
-"Junk mortar with a wide blast radius. Shorter reach than the Longbow; blind up close. Requires a Den. No power needed."
+"Siege mortar. Long range and a wide blast against structures and grouped units; cannot fire at close range. Requires a Den. Needs no power."
 END
 
 WP:IdleWorker
@@ -915,35 +915,35 @@ WP:IdleWorker
 END
 
 WP:DescIdleWorker
-"Select the next idle construction vehicle. Keep every builder working."
+"Selects the next idle construction vehicle. Hotkey: I."
 END
 
 WP:DifficultyLabel
-"O P P O S I T I O N"
+"D I F F I C U L T Y"
 END
 
 WP:DiffEasy
-"RECRUIT"
+"EASY"
 END
 
 WP:DiffEasyDesc
-"Learn the battlefield. Later raids, smaller threats, no advanced air or assault waves."
+"The enemy attacks late and in small numbers, and never sends armored assaults or aircraft."
 END
 
 WP:DiffNormal
-"STANDARD"
+"NORMAL"
 END
 
 WP:DiffNormalDesc
-"The full escalation: raiders, packs, armored assaults, then air."
+"The enemy raids early, then sends armored assaults and aircraft, and retaliates when you destroy its structures."
 END
 
 WP:DiffHard
-"BRUTAL"
+"HARD"
 END
 
 WP:DiffHardDesc
-"Early pressure, fast escalation. Scout, protect your income, and replace losses."
+"The enemy attacks early and escalates fast, raids your supply line and retaliates hard. Scout and defend your income."
 END
 
 
@@ -952,23 +952,23 @@ WP:MissionTypeSkirmish
 END
 
 WP:MissionTypeOperation
-"OPERATIONS"
+"CAMPAIGN"
 END
 
 WP:MissionTypeTraining
-"FIELD TRAINING"
+"TUTORIAL"
 END
 
 WP:MissionTypeChallenge
-"COMMANDER TRIALS"
+"CHALLENGES"
 END
 
 WP:MeridianBrief
-"Precision armor. Strong defenses. Protect your power grid."
+"Expensive, accurate units and strong static defenses. Every structure needs power, so protect your Power Arrays."
 END
 
 WP:JackalBrief
-"Mobile raiders. Cheap infrastructure. No power grid. Strike the supply line."
+"Cheap, fast units and cheap structures that need no power. Wins by raiding supply lines and by numbers."
 END
 
 WP:HQObjective
@@ -992,7 +992,7 @@ WP:ScoreChoose
 END
 
 WP:ControlsHint
-"Select: left click / Order: right click / Groups: Ctrl + 1-9 / Pause: Esc"
+"Select: left click  /  Order: right click  /  Attack move: A  /  Guard: G  /  Queue orders: Shift  /  Groups: Ctrl + 1-9  /  Pause: Esc"
 END
 
 WP:SelectionHint
@@ -1068,7 +1068,7 @@ WP:MapTraining
 END
 
 WP:MapTrainingDesc
-"Learn the Combine opening: build an economy, train a mixed force, scout the approach, then destroy the hostile headquarters. Protect your own command center. Guidance follows your progress."
+"Learn the basics: train a builder, set up supplies and power, build an army, scout, then destroy the enemy headquarters. Guidance follows your progress."
 END
 
 WP:Objective_training_0
@@ -1176,19 +1176,19 @@ WP:Objective_challenge-jackal_0
 END
 
 WP:PrecisionStrike
-"Precision Strike"
+"P&recision Strike"
 END
 
 WP:DescPrecisionStrike
-"Mark a target for a powerful strike after three seconds. Effective against packed armor and structures. Recharges in 150 seconds. Select explored ground."
+"Calls a heavy strike on the target three seconds after you mark it. Best against grouped vehicles and structures. Recharges in 150 seconds. The target must be on explored ground."
 END
 
 WP:TunnelAmbush
-"Tunnel Ambush"
+"&Tunnel Ambush"
 END
 
 WP:DescTunnelAmbush
-"Bring three Scrappers and two Stings out of concealment at the target. Requires clear, explored ground. Recharges in 120 seconds."
+"Brings three Scrappers and two Stings out of a tunnel at the target. Recharges in 120 seconds. The target must be clear, explored ground."
 END
 
 WP:Porter
@@ -1204,19 +1204,19 @@ WP:SupplyCache
 END
 
 WP:BuildPorter
-"Train Porter"
+"Build P&orter"
 END
 
 WP:BuildScavenger
-"Train Scavenger"
+"Build S&cavenger"
 END
 
 WP:DescPorter
-"Supply transport. Automatically carries four crates ($200) from caches to an Exchange. Protect the route; build hubs close to supplies."
+"Supply hauler. Carries four crates ($200) from a supply cache to an Exchange, on its own. Unarmed; protect its route."
 END
 
 WP:DescScavenger
-"Fast salvage truck. Carries two crates ($100) from caches to a Racket. Cheap and fragile; protect the route."
+"Supply hauler. Carries two crates ($100) from a supply cache to a Racket, on its own. Cheap and unarmed; protect its route."
 END
 
 GUI:SupplyRemaining
@@ -1260,7 +1260,7 @@ Version:ProductVersion
 END
 
 Version:ProductAuthor
-"War Powers project"
+"Abhishek Pradhan"
 END
 
 Version:BuildUser

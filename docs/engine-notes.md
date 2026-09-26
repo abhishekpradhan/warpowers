@@ -131,6 +131,28 @@ values.
 | `MapPlacedHarvestersAutoGather` | `No` | `Yes` | Map-placed haulers enter their harvesting state at match start; restored saves keep their orders |
 | `CommandButtonAvailabilityCues` | `No` | `Yes` | Padlock badge and brightened portraits on command buttons (D024) |
 | `MusicRotation` | empty | `Track_WP_01` … `Track_WP_06` | Ordered background-music rotation of `Music.ini` events, played by `GameEngine::update`; an empty list leaves the stock music handling alone |
+| `GuardCommandButton` | empty | `Command_WPGuard` | Command button the `GUARD` meta command (CommandMap) presses, so a key enters the same targeting flow as a click |
+| `PreferSelectionQueuesWaypoints` | `No` | `Yes` | `BEGIN/END_PREFER_SELECTION` (Shift) also enter and leave waypoint mode, because the meta matcher fires one command per modifier change |
+
+Options.ini keys this fork reads (written by the browser shell from Settings):
+`LockCameraRotation` (middle-drag and the rotate keys are ignored; a middle
+click still resets), `CameraKeysWASD` (W/A/S/D pan like the arrows and go no
+further down the translator chain), `WheelZoomFactor` (percent of the stock
+10-unit wheel step). `OptionPreferences` has a getter for each and the
+`LookAtTranslator` reads them once at creation.
+
+Input facts that cost a day: the engine edge-scrolls only with a captured
+cursor (`canScrollAtScreenEdge`), which a page never has, so the shell drives
+edge scrolling with synthetic arrow keys; `MSG_RAW_MOUSE_POSITION` carries
+the position from before the frame's events, so click-versus-drag decisions
+belong on the `_DRAG` messages; the meta translator (priority 20) runs before
+the hotkey translator (25), so a CommandMap letter shadows a `&` hotkey on
+the same letter, and `generateMetaMap` defaults (`F` fast-forward, `O` step
+frame, `M` observer) must be parked explicitly in `CommandMap.ini`; `&`
+hotkeys fire on key-up with no modifier, only while the button is on the
+bar; `SDL3Keyboard` maps letters, digits, F-keys, arrows and editing keys
+only, so punctuation and keypad cases were added; trackpad wheel deltas are
+fractions of a notch and were truncated to zero per event.
 
 ## Format contracts
 

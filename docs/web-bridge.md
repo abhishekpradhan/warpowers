@@ -73,7 +73,17 @@ Always: `CNC_GENERALS_ZH_PATH=/game`, `CNC_GENERALS_PATH=/game-base`,
 master). Options that need a restart are written to
 `/home/web_user/.local/share/GeneralsX/GeneralsZH/Options.ini` by
 `renderOptions()` (resolution from `QUALITY_PRESETS`, LOD, shadows,
-`UseAlternateMouse`, `ScrollFactor`, debug font sizes).
+`UseAlternateMouse`, `ScrollFactor`, `ScreenEdgeScrollEnabledInWindowedApp = no`,
+`LockCameraRotation`, `CameraKeysWASD`, `WheelZoomFactor`, debug font sizes).
+
+The shell rewrites `Data/INI/CommandMap.ini` before staging it: the `Key` of
+every command in `BINDINGS` (`core.js`) takes the player's letter, and the
+WASD camera mode moves the commands whose default letters the camera now
+owns. Screen-edge scrolling is the page's: `handleEdgePointer` in `app.js`
+holds synthetic arrow-key events on the canvas while the pointer sits in the
+edge band of the canvas or beyond it on the frame, and releases them for a
+HUD control, an open dialog, a hidden tab or lost focus. A `beforeunload`
+prompt guards a battle in progress.
 
 Only with `?debug=1`: `IG_TRACE=1` (and `window.IG_TRACE = 1` for the
 `EM_ASM` traces) plus the variables below. The production `wasm` preset,

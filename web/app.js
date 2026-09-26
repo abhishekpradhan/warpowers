@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import {
-  SETTINGS_KEY, PROGRESS_KEY, BINDINGS, BINDING_KEYS, QUALITY_PRESETS, SETTING_RANGES,
+  SETTINGS_KEY, PROGRESS_KEY, BINDINGS, BINDING_KEYS, CAMERA_KEY_MODES, QUALITY_PRESETS, SETTING_RANGES,
   sanitizeSettings, readSettings, applyBindings, renderOptions,
   emptyProgress, sanitizeProgress, recordResult, missionRecord, formatTime, mapLeaf,
   serializeOperationRecord, restoreOperationRecord, OPERATION_RECORD_MAX_BYTES, OPERATION_RECORD_MAX_LABEL,
@@ -48,15 +48,22 @@ const DEBUG_LOG_LINES = 25;
 const REPORT_LINES = 80;
 const DIAGNOSTIC_LOG_LINES = 35;
 const RECORD_URL_TTL_MS = 30000;
-const RESTART_KEYS = ['quality', 'rightClickOrders', 'cameraSpeed', 'bindings'];
+const RESTART_KEYS = ['quality', 'rightClickOrders', 'cameraSpeed', 'cameraKeys', 'cameraRotation', 'zoomSpeed', 'bindings'];
+/** Page-driven edge scrolling: the band inside the canvas edge, in CSS pixels, that counts as "at the edge". */
+const EDGE_SCROLL_BAND_PX = 12;
+const EDGE_SCROLL_KEYS = Object.freeze({
+  ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40,
+});
+const CATEGORY_LABELS = { training: 'TUTORIAL', operation: 'CAMPAIGN', challenge: 'CHALLENGE', skirmish: 'SKIRMISH' };
+const DIFFICULTY_LABELS = ['Easy', 'Normal', 'Hard'];
 const MAP_TITLES = {
   WPTest: 'The Flats', WPRidge: 'Ridge Divide', WPScrap: 'Scrapyard', WPBasin: 'The Basin', WPRange: 'Trench Range',
 };
 const DEFAULT_OBJECTIVE = 'Destroy the enemy headquarters. Protect your own.';
-const DEFAULT_CAMPAIGN_TEXT = 'Training, operations and commander trials. Your record stays on this device.';
+const DEFAULT_CAMPAIGN_TEXT = 'The tutorial, the four campaign missions and two challenges. Your record stays on this device.';
 const RESTART_NOTES = {
   idle: 'Audio and overlay settings apply immediately. Display and control changes apply on the next game launch.',
-  pending: 'Display, camera and key changes take effect when the game restarts. '
+  pending: 'Display, camera-key, zoom, rotation and key changes take effect when the game restarts. '
     + 'The current battle continues with its original controls.',
   armed: 'Restarting ends the current battle. Save a checkpoint first, '
     + 'or choose Restart now to discard unsaved progress.',
@@ -477,14 +484,14 @@ function requestRestart() {
   }
   updateRestartNote(true);
 }
-function rangeSetting(key, label) {
+function rangeSetting(key, label, unit = '%') {
   const [min, max] = SETTING_RANGES[key];
   appendHTML(`<div class="settingRow"><label for="setting-${key}">${escapeHTML(label)}</label><div class="rangeWrap">`
     + `<input id="setting-${key}" type="range" min="${min}" max="${max}" value="${settings[key]}">`
-    + `<output id="value-${key}" for="setting-${key}">${settings[key]}%</output></div></div>`);
+    + `<output id="value-${key}" for="setting-${key}">${settings[key]}${unit}</output></div></div>`);
   $(`setting-${key}`).addEventListener('input', event => {
     settings[key] = Number(event.target.value);
-    $(`value-${key}`).textContent = `${settings[key]}%`;
+    $(`value-${key}`).textContent = `${settings[key]}${unit}`;
     saveSettings();
     updateRestartNote();
   });
@@ -499,6 +506,19 @@ function checkboxSetting(key, label) {
     updateRestartNote();
     updateGuide();
     if (key === 'pauseWhenHidden') setPause('hidden', hiddenPauseWanted());
+  });
+}
+function selectSetting(key, label, options) {
+  const markup = Object.entries(options).map(([id, text]) => `<option value="${id}">${escapeHTML(text)}</option>`).join('');
+  appendHTML(`<div class="settingRow"><label for="setting-${key}">${escapeHTML(label)}</label>`
+    + `<select id="setting-${key}">${markup}</select></div>`);
+  $(`setting-${key}`).value = settings[key];
+  $(`setting-${key}`).addEventListener('change', event => {
+    settings[key] = event.target.value;
+    saveSettings();
+    updateRestartNote();
+    // The camera-key mode changes which letters the commands may use; redraw the key rows.
+    if (key === 'cameraKeys') showSettings();
   });
 }
 function qualityOption([id, preset]) {
@@ -526,6 +546,11 @@ function bindingSetting(command, label) {
     if (conflict) {
       input.value = settings.bindings[command];
       toast('That key already has an assignment. Choose another key.');
+      return;
+    }
+    if (settings.cameraKeys === 'wasd' && 'WASD'.includes(input.value)) {
+      input.value = settings.bindings[command];
+      toast('W, A, S and D pan the camera while that option is on. Choose another key.');
       return;
     }
     settings.bindings[command] = input.value;
@@ -649,12 +674,19 @@ function showSettings() {
   qualitySetting();
   rangeSetting('uiScale', 'Overlay text size');
   rangeSetting('cameraSpeed', 'Camera scroll speed');
+  selectSetting('cameraKeys', 'Camera keys', CAMERA_KEY_MODES);
+  checkboxSetting('edgeScroll', 'Scroll when the pointer touches the edge of the battlefield');
+  rangeSetting('zoomSpeed', 'Mouse-wheel zoom speed', '×');
+  checkboxSetting('cameraRotation', 'Allow camera rotation (middle-button drag, comma and period)');
   checkboxSetting('rightClickOrders', 'Right-click to issue orders');
   checkboxSetting('highContrast', 'High-contrast overlays');
   checkboxSetting('reducedMotion', 'Reduce interface motion');
   checkboxSetting('pauseWhenHidden', 'Pause when this tab is hidden');
   checkboxSetting('guide', 'Open field guidance automatically');
   section('Keyboard');
+  appendHTML('<p class="settingsNote">Build and train orders have their own letter, shown highlighted in each '
+    + 'order\'s tooltip while the builder or factory is selected. Shift queues movement orders and adds units '
+    + 'to the selection; Ctrl + F5 to F8 save camera positions and F5 to F8 recall them.</p>');
   for (const [command, [label]] of Object.entries(BINDINGS)) bindingSetting(command, label);
   appendTemplate('settingsTailTemplate');
   updateRestartNote();
@@ -672,14 +704,20 @@ function showSettings() {
 function controlRows() {
   const keys = bootSettings.bindings;
   const rightClick = bootSettings.rightClickOrders;
+  const order = rightClick ? 'Right click' : 'Left click';
+  const panKeys = bootSettings.cameraKeys === 'wasd' ? 'W A S D' : 'Arrow keys';
   return [
     ['Select unit or building', 'Left click'],
     ['Select a group', 'Drag a selection box'],
+    ['Add to or remove from the selection', 'Shift + left click'],
     ['Move, attack or set a rally point', rightClick ? 'Right click' : 'Left click on the destination'],
+    ['Queue orders (waypoints)', `Shift + ${order.toLowerCase()}`],
+    ['Attack while advancing', `${keys.TOGGLE_ATTACKMOVE}, then click the destination (or the Attack Move button)`],
+    ['Guard a position', `${keys.GUARD}, then click the position (or the Guard button)`],
+    ['Build or train', 'Highlighted letter in the order\'s tooltip while the builder or factory is selected'],
+    ['Cancel construction', 'Select the site, then C or its Cancel button'],
     ['Cancel an order or build placement', 'Right click'],
     ['Deselect', rightClick ? 'Left click open ground' : 'Right click'],
-    ['Attack while advancing', 'Attack Move button, then choose a destination'],
-    ['Guard a position', 'Guard button, then choose a position'],
     ['Stop', keys.STOP],
     ['Scatter', keys.SCATTER],
     ['Select army', keys.SELECT_ALL],
@@ -689,9 +727,11 @@ function controlRows() {
     ['Create / recall group', 'Ctrl + 1–9 / 1–9'],
     ['Add group to selection / view group', 'Shift + 1–9 / Alt + 1–9'],
     ['View last radar alert', 'Space'],
-    ['Rotate camera', ', / .'],
-    ['Zoom camera', 'Wheel / Page Up / Page Down'],
-    ['Reset camera', 'Home'],
+    ['Pan camera', `${panKeys}, pointer at the edge, or hold the right button and drag`],
+    ['Save / recall a camera position', 'Ctrl + F5–F8 / F5–F8'],
+    ['Zoom camera', 'Mouse wheel / Page Up / Page Down'],
+    ['Reset camera', 'Home, or a middle click'],
+    ['Rotate camera (when allowed in Settings)', 'Middle-button drag, or , and .'],
     ['Pause / battle menu', `${keys.TOGGLE_PAUSE} / Escape`],
   ];
 }
@@ -734,12 +774,12 @@ function reviewMission(index) {
   closePanel();
   const show = engineExport('_wpShowMission');
   if (show) show(index);
-  else toast('Choose this operation on the Deployment screen.');
+  else toast('Choose this mission on the Deployment screen.');
 }
 function showJournal() {
   state.progress = mergeLatestProgress();
   updateCompletionCount();
-  openPanel('journal', 'Operations', 'THE MERIDIAN STRIP');
+  openPanel('journal', 'Campaign', 'THE MERIDIAN STRIP · SINGLE PLAYER');
   const intro = state.operations.campaign?.description || DEFAULT_CAMPAIGN_TEXT;
   appendHTML(`<p class="manualIntro">${escapeHTML(intro)}</p>`);
   appendTemplate('recordToolsTemplate');
@@ -748,7 +788,7 @@ function showJournal() {
   $('recordFile').addEventListener('change', chooseRecordFile);
   for (const [index, mission] of state.operations.missions.entries()) appendHTML(missionEntry(index, mission));
   if (state.game.inGame) {
-    appendHTML('<p class="settingsNote">Return to the main menu before choosing another operation.</p>');
+    appendHTML('<p class="settingsNote">Return to the main menu before choosing another mission.</p>');
   }
   for (const button of $('panelBody').querySelectorAll('[data-mission]')) {
     button.addEventListener('click', () => reviewMission(Number(button.dataset.mission)));
@@ -761,9 +801,9 @@ function showBriefing() {
     showHelp();
     return;
   }
-  const eyebrow = mission.faction === 'jackal' ? 'JACKAL FRONT · OPERATIONS' : 'MERIDIAN COMBINE · OPERATIONS';
+  const eyebrow = mission.faction === 'jackal' ? 'JACKAL FRONT · CAMPAIGN' : 'MERIDIAN COMBINE · CAMPAIGN';
   openPanel('briefing', mission.title, eyebrow);
-  appendHTML(`<p class="operationTag">${escapeHTML(mission.duration)} · ${escapeHTML(mission.category)}</p>`
+  appendHTML(`<p class="operationTag">${escapeHTML(mission.duration)} · ${CATEGORY_LABELS[mission.category] || escapeHTML(mission.category)}</p>`
     + `<p class="briefingLead">${escapeHTML(mission.briefing)}</p>`);
   section('Objectives');
   const objectives = mission.objectives
@@ -780,16 +820,21 @@ function showDebrief() {
   if (!result) return;
   const mission = findMission(result);
   if (!mission) return;
-  openPanel('debrief', mission.title, result.won ? 'OPERATION COMPLETE' : 'OPERATION FAILED');
+  openPanel('debrief', mission.title, result.won ? 'MISSION COMPLETE' : 'MISSION FAILED');
   const stats = result.stats || {};
+  const difficulty = DIFFICULTY_LABELS[Number(result.difficulty)] || 'Normal';
   appendHTML(`<p class="briefingLead">${escapeHTML(result.won ? mission.debriefWin : mission.debriefLoss)}</p>`);
   appendHTML(`<div class="resultStats">${resultStat(formatTime(stats.durationSeconds), 'BATTLE TIME')}`
     + `${resultStat(Number(stats.unitsBuilt) || 0, 'UNITS FIELDED')}`
-    + `${resultStat(Number(stats.unitsLost) || 0, 'UNITS LOST')}</div>`);
+    + `${resultStat(Number(stats.unitsLost) || 0, 'UNITS LOST')}`
+    + `${resultStat(escapeHTML(difficulty), 'DIFFICULTY')}</div>`);
   const next = state.operations.missions.find(entry => entry.id === mission.nextMission);
   if (result.won && next) {
-    appendHTML(`<p class="muted">Next operation: ${escapeHTML(next.title)}. `
-      + 'Select it from Operations when you return to the menu.</p>');
+    appendHTML(`<p class="muted">Next mission: ${escapeHTML(next.title)}. `
+      + 'Choose it from Campaign when you return to the menu.</p>');
+  }
+  if (result.won && Number(result.difficulty) < 2) {
+    appendHTML('<p class="muted">Too easy? The Difficulty row on the Deployment screen goes up to Hard.</p>');
   }
   appendHTML('<div class="actions"><button id="returnScore" class="primary">Continue to battle report</button></div>');
   $('returnScore').addEventListener('click', closePanel);
@@ -876,7 +921,8 @@ function beginBattle(leaf) {
   state.guideRenderKey = '';
   state.lastResultKey = '';
   $('missionTitle').textContent = state.currentMission?.title || mapTitle(leaf);
-  $('missionType').textContent = (state.currentMission?.category || 'skirmish').toUpperCase();
+  const category = state.currentMission?.category || 'skirmish';
+  $('missionType').textContent = CATEGORY_LABELS[category] || category.toUpperCase();
   $('briefingLabel').textContent = state.currentMission ? 'Mission briefing' : 'Field manual';
   // A restored checkpoint returns straight to the battle; a diagnostic run must not be paused by a dialog.
   if (state.currentMission && !diagnostics.active && !restored) {
@@ -1205,7 +1251,8 @@ async function stageFiles(manifest) {
       const downloaded = await fetchBytes(file.u, { immutable: true });
       let bytes = await verifyAsset(downloaded, { size: file.s, sha256: file.h, label: file.p });
       if (file.p === COMMAND_MAP) {
-        bytes = new TextEncoder().encode(applyBindings(new TextDecoder().decode(bytes), bootSettings.bindings));
+        bytes = new TextEncoder().encode(
+          applyBindings(new TextDecoder().decode(bytes), bootSettings.bindings, bootSettings.cameraKeys));
       }
       const path = `${DATA_ROOT}/${file.p}`;
       fs.mkdirTree(path.slice(0, path.lastIndexOf('/')));
@@ -1391,6 +1438,86 @@ function startBoot() {
   watchdog.timer = setInterval(watchdogTick, WATCHDOG_TICK_MS);
   bootGame().catch(error => fail(error.message, error.code || 'WP-START'));
 }
+
+// ============================================================================
+// Edge scrolling and navigation guards
+// ----------------------------------------------------------------------------
+// The engine scrolls at the screen edge only when it owns the cursor, which a
+// page never does, and the canvas is letterboxed inside the window. So the
+// page watches the pointer itself and holds the engine's arrow keys down while
+// the pointer rests in the edge band of the canvas or beyond it, on the black
+// frame around the battlefield. Pointer over a panel, a HUD control or the
+// dialog, a hidden tab, a lost window focus or the end of the battle release
+// every key.
+// ============================================================================
+const edgeScroll = { held: new Set() };
+function edgeKeyEvent(type, code) {
+  const keyCode = EDGE_SCROLL_KEYS[code];
+  const event = new KeyboardEvent(type, { code, key: code, keyCode, which: keyCode, bubbles: true, cancelable: true });
+  // SDL reads keyCode from the event; the constructor ignores it in some browsers.
+  Object.defineProperty(event, 'keyCode', { value: keyCode });
+  Object.defineProperty(event, 'which', { value: keyCode });
+  canvas.dispatchEvent(event);
+}
+function setEdgeKeys(next) {
+  for (const code of edgeScroll.held) {
+    if (!next.has(code)) {
+      edgeScroll.held.delete(code);
+      edgeKeyEvent('keyup', code);
+    }
+  }
+  for (const code of next) {
+    if (!edgeScroll.held.has(code)) {
+      edgeScroll.held.add(code);
+      edgeKeyEvent('keydown', code);
+    }
+  }
+}
+const releaseEdgeKeys = () => setEdgeKeys(new Set());
+function edgeScrollActive() {
+  return settings.edgeScroll && state.runtimeReady && !state.failed && state.game.inGame && !panel.open
+    && !document.hidden && document.hasFocus();
+}
+/** Which arrow keys the pointer position asks for: inside the band along a canvas edge, or past that edge. */
+function edgeDirections(x, y) {
+  const rect = canvas.getBoundingClientRect();
+  const next = new Set();
+  if (x <= rect.left + EDGE_SCROLL_BAND_PX) next.add('ArrowLeft');
+  else if (x >= rect.right - EDGE_SCROLL_BAND_PX) next.add('ArrowRight');
+  if (y <= rect.top + EDGE_SCROLL_BAND_PX) next.add('ArrowUp');
+  else if (y >= rect.bottom - EDGE_SCROLL_BAND_PX) next.add('ArrowDown');
+  return next;
+}
+function handleEdgePointer(event) {
+  if (!edgeScrollActive()) {
+    releaseEdgeKeys();
+    return;
+  }
+  const target = event.target;
+  // Only the battlefield and the frame around it count; a HUD control or panel under the pointer stops scrolling.
+  const stage = $('stage');
+  if (target !== canvas && target !== stage && target !== $('frame')) {
+    releaseEdgeKeys();
+    return;
+  }
+  setEdgeKeys(edgeDirections(event.clientX, event.clientY));
+}
+document.addEventListener('pointermove', handleEdgePointer);
+document.addEventListener('pointerdown', handleEdgePointer);
+document.addEventListener('mouseout', event => {
+  if (!event.relatedTarget) releaseEdgeKeys();
+});
+window.addEventListener('blur', releaseEdgeKeys);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) releaseEdgeKeys();
+});
+// A right-button drag on a trackpad is also a two-finger swipe, which browsers turn into history navigation;
+// overscroll-behavior in styles.css stops the swipe and this prompt catches the rest (Back, a closed tab).
+window.addEventListener('beforeunload', event => {
+  if (!state.game.inGame || state.failed || diagnostics.active) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 
 // ============================================================================
 // Listeners (registered before the engine's SDL handlers) and start

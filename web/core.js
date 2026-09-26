@@ -2,16 +2,25 @@
 /** Browser-independent preferences and progress rules. No game state is simulated here. */
 export const SETTINGS_KEY = 'wpSettings.v2';
 export const PROGRESS_KEY = 'wpProgress.v1';
+/** Remappable CommandMap commands: [label, default key, default key while WASD pans the camera]. */
 export const BINDINGS = Object.freeze({
-  STOP: ['Stop', 'S'],
-  SCATTER: ['Scatter', 'X'],
-  SELECT_MATCHING_UNITS: ['Select matching units', 'E'],
-  SELECT_ALL: ['Select army', 'Q'],
-  SELECT_NEXT_IDLE_WORKER: ['Next idle builder', 'I'],
-  VIEW_COMMAND_CENTER: ['View headquarters', 'H'],
-  TOGGLE_PAUSE: ['Pause battle', 'P'],
+  TOGGLE_ATTACKMOVE: ['Attack move', 'A', 'F'],
+  GUARD: ['Guard', 'G', 'G'],
+  STOP: ['Stop', 'S', 'H'],
+  SCATTER: ['Scatter', 'X', 'X'],
+  SELECT_MATCHING_UNITS: ['Select matching units', 'E', 'E'],
+  SELECT_ALL: ['Select army', 'Q', 'Q'],
+  SELECT_NEXT_IDLE_WORKER: ['Next idle builder', 'I', 'I'],
+  VIEW_COMMAND_CENTER: ['View headquarters', 'H', 'J'],
+  TOGGLE_PAUSE: ['Pause battle', 'P', 'P'],
 });
-export const BINDING_KEYS = Object.freeze('B E H I J K L M N O P Q R S T U V X Y Z'.split(' '));
+export const BINDING_KEYS = Object.freeze('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
+export const CAMERA_KEY_MODES = Object.freeze({
+  arrows: 'Arrow keys',
+  wasd: 'W A S D (moves Attack move to F, Stop to H, View headquarters to J)',
+});
+/** Letters the engine consumes as camera keys while the WASD option is on. */
+const WASD_KEYS = Object.freeze(['W', 'A', 'S', 'D']);
 /** Rendering presets. The canvas size, Options.ini resolution and the Settings menu all read this table. */
 export const QUALITY_PRESETS = Object.freeze({
   performance: Object.freeze({ label: 'Performance', width: 1280, height: 720 }),
@@ -25,9 +34,11 @@ export const SETTING_RANGES = Object.freeze({
   effects: [0, 100],
   voice: [0, 100],
   cameraSpeed: [0, 100],
+  zoomSpeed: [1, 8],
   uiScale: [85, 125],
 });
-const BOOLEAN_SETTINGS = ['rightClickOrders', 'reducedMotion', 'highContrast', 'guide', 'pauseWhenHidden'];
+const BOOLEAN_SETTINGS = ['rightClickOrders', 'edgeScroll', 'cameraRotation', 'reducedMotion', 'highContrast', 'guide',
+  'pauseWhenHidden'];
 export const DEFAULT_SETTINGS = Object.freeze({
   version: 2,
   master: 80,
@@ -37,6 +48,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   quality: 'balanced',
   uiScale: 100,
   cameraSpeed: 50,
+  cameraKeys: 'arrows',
+  edgeScroll: true,
+  cameraRotation: false,
+  zoomSpeed: 3,
   rightClickOrders: true,
   reducedMotion: false,
   highContrast: false,
@@ -49,18 +64,29 @@ const bounded = (value, min, max, fallback) => (typeof value === 'number' && Num
   ? Math.min(max, Math.max(min, Math.round(value)))
   : fallback);
 
-/** Keep every valid, unique custom key; only invalid or duplicated entries fall back to a free default. */
-function sanitizeBindings(custom) {
+/** The default key of a command for a camera-key mode. */
+export function defaultBinding(command, cameraKeys = 'arrows') {
+  const entry = BINDINGS[command];
+  return cameraKeys === 'wasd' ? entry[2] : entry[1];
+}
+
+/** Keep every valid, unique custom key; only invalid, reserved or duplicated entries fall back to a free default.
+ *  A stored key that equals the arrow-mode default is not a customization, so switching the camera keys moves
+ *  the affected commands to their WASD defaults instead of leaving them on letters the camera now owns. */
+function sanitizeBindings(custom, cameraKeys = 'arrows') {
+  const reserved = new Set(cameraKeys === 'wasd' ? WASD_KEYS : []);
   const chosen = {};
-  const taken = new Set();
+  const taken = new Set(reserved);
   for (const command of Object.keys(BINDINGS)) {
     const key = custom[command];
     if (!BINDING_KEYS.includes(key) || taken.has(key)) continue;
+    if (cameraKeys === 'wasd' && key === BINDINGS[command][1] && key !== BINDINGS[command][2]) continue;
     chosen[command] = key;
     taken.add(key);
   }
-  for (const [command, [, fallback]] of Object.entries(BINDINGS)) {
+  for (const command of Object.keys(BINDINGS)) {
     if (Object.hasOwn(chosen, command)) continue;
+    const fallback = defaultBinding(command, cameraKeys);
     const key = taken.has(fallback) ? BINDING_KEYS.find(candidate => !taken.has(candidate)) : fallback;
     chosen[command] = key;
     taken.add(key);
@@ -73,10 +99,13 @@ export function sanitizeSettings(value) {
   const out = { ...DEFAULT_SETTINGS, bindings: { ...DEFAULT_SETTINGS.bindings } };
   for (const [key, [min, max]] of Object.entries(SETTING_RANGES)) out[key] = bounded(data[key], min, max, out[key]);
   if (typeof data.quality === 'string' && Object.hasOwn(QUALITY_PRESETS, data.quality)) out.quality = data.quality;
+  if (typeof data.cameraKeys === 'string' && Object.hasOwn(CAMERA_KEY_MODES, data.cameraKeys)) {
+    out.cameraKeys = data.cameraKeys;
+  }
   for (const key of BOOLEAN_SETTINGS) {
     if (typeof data[key] === 'boolean') out[key] = data[key];
   }
-  if (record(data.bindings)) out.bindings = sanitizeBindings(data.bindings);
+  out.bindings = sanitizeBindings(record(data.bindings) ? data.bindings : {}, out.cameraKeys);
   return out;
 }
 
@@ -91,14 +120,17 @@ export function readSettings(storage, reducedMotion = false) {
   }
 }
 
-export function applyBindings(ini, bindings) {
-  const validated = sanitizeSettings({ bindings }).bindings;
+/** Rewrite the Key of every remappable CommandMap entry; the engine reads the result before it starts. */
+export function applyBindings(ini, bindings, cameraKeys = 'arrows') {
+  const validated = sanitizeSettings({ bindings, cameraKeys }).bindings;
   return ini.replace(/(CommandMap\s+(\w+)[^\n]*\n)([\s\S]*?)(^End\s*$)/gm, (block, opening, name, body, end) => {
     if (!Object.hasOwn(validated, name)) return block;
     return opening + body.replace(/(\bKey\s*=\s*)KEY_\w+/, `$1KEY_${validated[name]}`) + end;
   });
 }
 
+/** Options.ini for the engine. Screen-edge scrolling stays off here: the page drives it with the
+ *  arrow keys, which also works while the pointer rests in the letterbox beside the canvas. */
 export function renderOptions(settings, debug = false) {
   const value = sanitizeSettings(settings);
   const preset = QUALITY_PRESETS[value.quality];
@@ -111,6 +143,10 @@ export function renderOptions(settings, debug = false) {
     `UseShadowDecals = ${performance ? 'no' : 'yes'}`,
     `UseAlternateMouse = ${value.rightClickOrders ? 'yes' : 'no'}`,
     `ScrollFactor = ${20 + value.cameraSpeed}`,
+    'ScreenEdgeScrollEnabledInWindowedApp = no',
+    `LockCameraRotation = ${value.cameraRotation ? 'no' : 'yes'}`,
+    `CameraKeysWASD = ${value.cameraKeys === 'wasd' ? 'yes' : 'no'}`,
+    `WheelZoomFactor = ${value.zoomSpeed * 100}`,
     `RenderFpsFontSize = ${debugFontSize}`,
     `SystemTimeFontSize = ${debugFontSize}`,
     `GameTimeFontSize = ${debugFontSize}`,

@@ -17,6 +17,8 @@
   color: var(--ink);
 }
 * { box-sizing: border-box; }
+/* No history swipe: a right-button drag on a trackpad is also a two-finger swipe. */
+html, body { overscroll-behavior: none; }
 body { margin: 0; overflow: hidden; }
 button, input, select { font: inherit; }
 button, a, input, select { touch-action: manipulation; }

@@ -12,7 +12,7 @@ A free real-time strategy game that runs in a desktop browser. Nothing to instal
 
 ## Play now
 
-**<https://warpowers.vercel.app>** — open it in a current desktop browser with WebGL2 (Chrome, Edge, Firefox or Safari), with a keyboard and mouse. It boots in a few seconds on a normal connection. Choose **Operations → Field Orientation** for the guided first battle.
+**<https://warpowers.vercel.app>** — open it in a current desktop browser with WebGL2 (Chrome, Edge, Firefox or Safari), with a keyboard and mouse. It boots in a few seconds on a normal connection. It is a single-player game: choose **Tutorial** on the Deployment screen for the guided first battle, then **Campaign** or **Skirmish** against the computer at the difficulty of your choice.
 
 Release [v0.1.0](https://github.com/abhishekpradhan/warpowers/releases/tag/v0.1.0) (2026-09-09) is the first public build. The release page carries the web bundle; the [changelog](CHANGELOG.md) lists what is in it.
 
@@ -117,4 +117,4 @@ Retail EA assets, extracted game data or anything derived from them never enter 
 
 Code in this repository is [MIT](LICENSE). Project-authored game content — models, textures, audio, maps, layouts, strings and INI data — is [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); imported files keep their own licenses, recorded per file in [ASSETS.md](ASSETS.md) and credited in [CREDITS.md](CREDITS.md). The engine fork in `engine/` is GPL-3.0 with EA's additional terms, so the compiled browser game ships under the GPL together with its corresponding source; [LICENSING.md](LICENSING.md) maps the boundaries and obligations.
 
-War Powers is not affiliated with or endorsed by Electronic Arts. No EA assets or game data are included, and EA names appear only to identify the engine's source lineage.
+War Powers is created and maintained by [Abhishek Pradhan](https://github.com/abhishekpradhan). It is not affiliated with or endorsed by Electronic Arts. No EA assets or game data are included, and EA names appear only to identify the engine's source lineage.

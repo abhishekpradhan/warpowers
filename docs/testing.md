@@ -137,6 +137,14 @@ in [perf.md](perf.md). Run it separately from other game tabs.
 - A hidden tab suspends the engine; front the tab, deliver one input event,
   wait a beat, then screenshot before concluding anything about a "frozen"
   game.
+- An automated browser pane may throttle `requestAnimationFrame` to a couple
+  of frames a second. Advance the engine deterministically with
+  `for (let i = 0; i < n; i++) MainLoop.func()` from the console, and wait
+  about a second after pumping before a screenshot: the canvas presents on the
+  next paint, so a screenshot taken right after a pump shows the previous
+  frame. Judge state from `Module.onGameState` payloads (wrap the callback)
+  rather than from a single screenshot. Synthetic pointer events do not reach
+  SDL; synthetic keyboard events on the canvas do.
 - Avoid `debug=1` in ordinary playtests: the logs are verbose and the boot
   beacon goes to the local server's access log.
 - Copy the build identifier from Settings → Copy diagnostics into every

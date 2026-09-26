@@ -54,7 +54,7 @@ WINDOW
   NAME = "ControlBar.wnd:UnderConstructionWindow";
   STATUS = ENABLED+IMAGE+NOFOCUS;
   STYLE = USER;
-  SYSTEMCALLBACK = "[None]";
+  SYSTEMCALLBACK = "PassSelectedButtonsToParentSystem";
   INPUTCALLBACK = "[None]";
   TOOLTIPCALLBACK = "[None]";
   DRAWCALLBACK = "[None]";

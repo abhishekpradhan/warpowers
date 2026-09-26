@@ -36,7 +36,7 @@
     <div id="frame">
       <canvas id="canvas" width="1600" height="900" tabindex="0" aria-label="Strategy game. Open Field Manual for keyboard and mouse controls."></canvas>
       <nav id="utilityBar" aria-label="Game tools" hidden>
-        <button id="journalButton" title="Operation record">Operations <span id="completionCount" class="counter"></span></button>
+        <button id="journalButton" title="Campaign missions and your record">Campaign <span id="completionCount" class="counter"></span></button>
         <button id="helpButton" title="Controls and field manual">Field manual</button>
         <button id="settingsButton" title="Audio, controls and display settings">Settings</button>
         <span class="utilityDivider"></span>
@@ -65,10 +65,10 @@
         <div class="bootContent">
           <p class="eyebrow">THE MERIDIAN STRIP · COMMAND NETWORK</p>
           <div class="wordmark">WAR <span>POWERS</span></div>
-          <p class="bootTagline">Build your foothold. Choose your fight.</p>
+          <p class="bootTagline">Single-player real-time strategy. Tutorial, campaign and skirmish against the AI.</p>
           <div id="bootProgress" class="bootProgress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="bootFill"></div></div>
           <div class="bootStatus"><span id="bootPhase" role="status" aria-live="polite">Connecting to command…</span><span id="bootPercent" aria-hidden="true">0%</span></div>
-          <p id="bootHint">No install. No account. The battlefield is yours.</p>
+          <p id="bootHint">No install, no account, nothing to sign up for. Keyboard and mouse recommended.</p>
           <section id="deviceNotice" class="deviceCard" role="status" aria-labelledby="deviceTitle" hidden>
             <p class="eyebrow deviceEyebrow">Desktop required</p>
             <h2 id="deviceTitle">Built for the big screen.</h2>
@@ -99,7 +99,7 @@
 
   <!-- Static panel markup. app.js clones these into the dialog and fills in the dynamic parts. -->
   <template id="manualTemplate">
-    <p class="manualIntro">Build a working economy, scout before committing your army, and protect your headquarters. In skirmish, destroying the enemy headquarters wins the battle. Operations display their own objectives.</p>
+    <p class="manualIntro">War Powers is single-player: every battle is against the computer. Build a working economy, scout before committing your army, and protect your headquarters. In skirmish, destroying the enemy headquarters wins the battle. Campaign missions display their own objectives.</p>
     <h3 class="sectionLabel">Command</h3>
     <dl id="controlList" class="controlList"></dl>
     <div class="manualColumns">
@@ -119,10 +119,10 @@
     <h3 class="sectionLabel">Faction powers</h3>
     <p class="muted">A Directorate unlocks Meridian’s Precision Strike: a visible targeting beacon followed by a concentrated blast. A Jackal Den unlocks Tunnel Ambush: a mixed infantry squad at a scouted target. Select the completed structure, choose its power and target revealed ground. Each power must recharge before it can be used again.</p>
     <h3 class="sectionLabel">Production &amp; survival</h3>
-    <p class="muted">Select a production building to view its units. A padlock marks unavailable orders; hover a portrait for cost, role and prerequisites. Queue units by clicking their available portraits; click a queued item to cancel it. Select a builder to place structures on revealed ground. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>
+    <p class="muted">Headquarters train the builder and infantry; vehicles come from a Vehicle Plant or Chop Shop and aircraft from a Launch Pad or Roost. A padlock marks unavailable orders; hover a portrait for cost, role, prerequisites and its hotkey letter. Queue units by clicking their portraits or pressing the letter; click a queued item to cancel it. Select a builder to place structures on revealed ground; select a site under construction to cancel it for a full refund. Keep your income defended, watch the power meter, and leave a reserve at headquarters.</p>
   </template>
   <template id="recordToolsTemplate">
-    <p class="muted">Every mission is available from the start. Follow the order below for the story, or start anywhere. Skirmish lets you choose either side.</p>
+    <p class="muted">Every mission is available from the start; start with the tutorial if this is your first battle, then follow the order below for the story. Skirmish, on the Deployment screen, lets you choose either side, any battlefield and the difficulty.</p>
     <div class="recordTools">
       <div class="actions"><button id="downloadRecord">Download record</button><button id="restoreRecord">Restore record</button><input id="recordFile" type="file" accept=".json,application/json" aria-label="Operation record backup" hidden></div>
       <p class="settingsNote">Completions and best times stay in this browser and may be cleared. Keep a backup to restore them or move browsers. Battle checkpoints are separate.</p>
@@ -228,7 +228,7 @@
           document.getElementById('bootProgress').hidden = false;
           document.getElementById('bootPercent').hidden = false;
           document.getElementById('bootPhase').textContent = 'Connecting to command…';
-          document.getElementById('bootHint').textContent = 'No install. No account. The battlefield is yours.';
+          document.getElementById('bootHint').textContent = 'No install, no account, nothing to sign up for. Keyboard and mouse recommended.';
           if (typeof Event === 'function') window.dispatchEvent(new Event('wp-continue'));
           else if (window.wpContinue) window.wpContinue();
         };

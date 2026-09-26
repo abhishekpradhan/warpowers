@@ -391,3 +391,43 @@ Consequences: every Git URL already points at the personal account, so the
 first release; the launch sequence is tag, make the three repositories public,
 publish the GitHub release that the credits page links to as corresponding
 source, then deploy the release stage to production.
+
+## D027 — Controls answer the playtest feedback, not the retail defaults (2026-09-26)
+
+The first outside players (nine sets of notes) agreed on the controls: no
+keyboard attack-move, no build hotkeys, no queued orders, no edge scrolling
+in the browser, slow zoom, a camera that rotates by surprise, right-clicks
+dropped as camera pans, and a right-drag on a trackpad that navigated the
+browser back. Decisions:
+
+- **Keyboard orders and build hotkeys are data.** Attack-move binds to the
+  toggle the control-bar button already posts (`TOGGLE_ATTACKMOVE`, added to
+  the meta name table); guard is a new meta command that presses the button
+  named by GameData `GuardCommandButton`. Build hotkeys are the engine's `&`
+  labels, one letter per command set, avoiding the CommandMap letters (S X E
+  Q I H P A G) and W/A/S/D. The letter shows in the tooltip title
+  (`HOTKEY_TEXT`, white on gold).
+- **Edge scrolling belongs to the page.** The engine edge-scrolls only with a
+  captured cursor and inside a 3-pixel band, and the canvas is letterboxed;
+  the page watches the pointer over the whole window and holds the engine's
+  arrow keys instead. The engine side gained a cursor-inside gate and a stop
+  when capture ends, for windowed native builds.
+- **Shift queues and selects.** The engine fires one meta per modifier
+  change, so `PreferSelectionQueuesWaypoints` lets the prefer-selection
+  modifier also enter waypoint mode. In waypoint mode a right-click on an
+  enemy queues a move, not an attack; accepted for now.
+- **Camera defaults favour newcomers**: rotation locked (a setting unlocks
+  it), wheel zoom at three times the stock step (a setting), arrow keys
+  always, WASD as an opt-in that moves the displaced commands.
+- **Right-click stays a click.** Panning starts after the pointer leaves the
+  click tolerance, decided on drag messages (the position message lags a
+  frame and would fling the camera after a fast move).
+- **Headquarters train builders and infantry only.** Tanks moved to the
+  factories; "why does the HQ build attack units" was the question, and the
+  HQ-as-barracks idea stays (no barracks model exists).
+- **Copy is information, not slogans.** Every description states role,
+  strengths, weaknesses and requirement; mode labels are Tutorial, Skirmish,
+  Campaign, Challenges; difficulty is Easy, Normal, Hard.
+- **Declined:** a side command bar (the bottom bar is the idiom), and unit
+  silhouette work in this batch (art pipeline change; recorded in the
+  roadmap).
